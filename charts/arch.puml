@@ -1,0 +1,94 @@
+@startuml
+skinparam actorStyle awesome
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+top to bottom direction
+
+actor User
+actor Bot
+actor "API Bot" as ApiBot
+actor "Integration\n(Service-to-Service)" as Integration
+
+' =========================
+' EDGE LAYER
+' =========================
+package "Edge Layer" {
+  component "L7 DDoS Protection\n(Cloudflare, etc)" as CDN
+}
+
+' =========================
+' FRAMEWORK CORE
+' =========================
+package "PoUW Framework Core" {
+  component "Request Gateway" as Gateway
+  component "Policy Engine\n(Rules / Thresholds)" as Policy
+  component "Rate & Reputation Engine" as Reputation
+  component "Challenge Orchestrator" as Orchestrator
+}
+
+' =========================
+' POUW ABSTRACTION LAYER
+' =========================
+package "PoUW Abstraction Layer" {
+  component "PoUW Task Interface" as TaskIF
+  component "Difficulty Controller" as Difficulty
+  component "Validation Interface" as ValidationIF
+}
+
+' =========================
+' POUW MODULES
+' =========================
+package "PoUW Modules" {
+  component "CPU Mining Module" as CPUMining
+  component "AI Inference Module" as AIInference
+  component "GPU / WebGPU Module" as GPUModule
+}
+
+' =========================
+' EXTERNAL VERIFIERS
+' =========================
+package "External / Auxiliary Systems" {
+  component "Mining Pool\n/ Share Verifier" as MiningPool
+  component "AI Models\n+ Hidden Test Sets" as ModelStore
+}
+
+' ======= FLOWS =======
+
+' --- Web traffic path ---
+User --> CDN
+Bot --> CDN
+User --> Gateway
+Bot --> Gateway
+CDN -left-> Gateway
+
+' --- API traffic path ---
+ApiBot --> Gateway
+Integration --> Gateway
+
+' --- Framework internal ---
+Gateway -> Policy
+Policy --> Reputation
+Policy --> Orchestrator
+
+Orchestrator --> TaskIF
+TaskIF -> Difficulty
+
+' --- PoUW execution ---
+TaskIF -down-> CPUMining
+TaskIF -down-> AIInference
+TaskIF -down-> GPUModule
+
+ValidationIF -down-> MiningPool
+ValidationIF -down-> ModelStore
+
+' --- Validation ---
+CPUMining -up-> ValidationIF
+AIInference -up-> ValidationIF
+GPUModule -up-> ValidationIF
+
+' --- Feedback loop ---
+ValidationIF --> Reputation
+Reputation --> Gateway
+@enduml
+
