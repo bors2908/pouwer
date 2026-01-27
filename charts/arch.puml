@@ -50,7 +50,7 @@ package "PoUW Modules" {
 ' =========================
 package "External / Auxiliary Systems" {
   component "Mining Pool\n/ Share Verifier" as MiningPool
-  component "AI Models\n+ Hidden Test Sets" as ModelStore
+  component "AI Models" as ModelStore
 }
 
 ' ======= FLOWS =======
