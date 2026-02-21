@@ -40,7 +40,7 @@ bin/
 ### VS Code ###
 .vscode/
 
-.env
-config/
-logs/
+.kotlin
+
 secrets/
+/k8s/**/secrets

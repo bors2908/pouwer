@@ -1,0 +1,2316 @@
+openapi: 3.1.0
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- description: Gateway Local
+  url: localhost:8080/
+- description: Gateway K8s
+  url: "${GATEWAY_HOST}"
+- description: Remote Gateway K8s
+  url: http://192.168.1.2:8081
+tags:
+- description: Operations with car entities
+  name: Car
+- description: Operations with image entities
+  name: Image
+- description: Operations with user entities
+  name: User
+- description: Operations with staged change entities
+  name: Staged Change
+- description: Operations with event entities
+  name: Event
+paths:
+  /api/v1/cars:
+    get:
+      description: Retrieves a list of all available cars
+      operationId: getAllCars
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CarDTO"
+          description: List of cars retrieved successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Get all cars
+      tags:
+      - Car
+    post:
+      description: Creates a new car entity
+      operationId: createCar
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CarCreateDTO"
+        required: true
+      responses:
+        "201":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CarDTO"
+          description: Car created successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Create a new car
+      tags:
+      - Car
+  /api/v1/cars/{id}:
+    delete:
+      description: Deletes a car by its identifier
+      operationId: deleteCar
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StagedDeleteDTO"
+          description: Car deleted successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Delete car
+      tags:
+      - Car
+    get:
+      description: Retrieves a single car by its identifier
+      operationId: getCarById
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CarDTO"
+          description: Car found and returned
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Get car by ID
+      tags:
+      - Car
+    put:
+      description: Updates an existing car entity
+      operationId: updateCar
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CarUpdateDTO"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CarDTO"
+          description: Car updated successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Update car
+      tags:
+      - Car
+  /api/v1/cars/{stagedChangeId}/approve:
+    put:
+      description: Approves a staged change for a car
+      operationId: approveCar
+      parameters:
+      - in: path
+        name: stagedChangeId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StagedChangeDTO"
+          description: Change approved successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Approve car change
+      tags:
+      - Car
+  /api/v1/cars/{stagedChangeId}/reject:
+    put:
+      description: Rejects a staged change for a car
+      operationId: rejectCar
+      parameters:
+      - in: path
+        name: stagedChangeId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StagedChangeDTO"
+          description: Change rejected successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Reject car change
+      tags:
+      - Car
+  /api/v1/events:
+    get:
+      description: Retrieves a list of all events
+      operationId: getAllEvents
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/EventDTO"
+          description: List of events retrieved successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Get all events
+      tags:
+      - Event
+    post:
+      description: Creates a new event
+      operationId: createEvent
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventCreateDTO"
+        required: true
+      responses:
+        "201":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/EventDTO"
+          description: Event created successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Create a new event
+      tags:
+      - Event
+  /api/v1/events/{id}:
+    delete:
+      description: Deletes an event by ID
+      operationId: deleteEvent
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/DeleteDTO"
+          description: Event deleted successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Delete event
+      tags:
+      - Event
+    get:
+      description: Retrieves a single event by its identifier
+      operationId: getEventById
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/EventDTO"
+          description: Event found and returned
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Get event by ID
+      tags:
+      - Event
+    put:
+      description: Updates an existing event's information
+      operationId: updateEvent
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventUpdateDTO"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/EventDTO"
+          description: Event updated successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Update event
+      tags:
+      - Event
+  /api/v1/images:
+    get:
+      description: Retrieves a list of all available images
+      operationId: getAllImages
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ImageDTO"
+          description: List of images retrieved successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Get all images
+      tags:
+      - Image
+    post:
+      description: Uploads and creates a new image entity
+      operationId: createImage
+      parameters:
+      - in: query
+        name: storageType
+        required: true
+        schema:
+          type: string
+          enum:
+          - S3
+          - AUTOWP
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+              - file
+      responses:
+        "201":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ImageDTO"
+          description: Image created successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Create a new image
+      tags:
+      - Image
+  /api/v1/images/approve/{stagedChangeId}:
+    put:
+      description: Approves a staged change for an image
+      operationId: approveImage
+      parameters:
+      - in: path
+        name: stagedChangeId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StagedChangeDTO"
+          description: Change approved successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Approve image change
+      tags:
+      - Image
+  /api/v1/images/reject/{stagedChangeId}:
+    put:
+      description: Rejects a staged change for an image
+      operationId: rejectImage
+      parameters:
+      - in: path
+        name: stagedChangeId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StagedChangeDTO"
+          description: Change rejected successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Reject image change
+      tags:
+      - Image
+  /api/v1/images/{id}:
+    delete:
+      description: Deletes an image by its identifier
+      operationId: deleteImage
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StagedDeleteDTO"
+          description: Image deleted successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Delete image
+      tags:
+      - Image
+    get:
+      description: Retrieves a single image by its identifier
+      operationId: getImageById
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ImageDTO"
+          description: Image found and returned
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Get image by ID
+      tags:
+      - Image
+    put:
+      description: Updates an existing image entity
+      operationId: updateImage
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: storageType
+        required: true
+        schema:
+          type: string
+          enum:
+          - S3
+          - AUTOWP
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ImageDTO"
+          description: Image updated successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Update image
+      tags:
+      - Image
+  /api/v1/images/{id}/download:
+    get:
+      description: Downloads a single image by its identifier
+      operationId: downloadImageById
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            application/octet-stream: {}
+            image/jpeg: {}
+            image/png: {}
+            image/webp: {}
+          description: Image file downloaded successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Download image by ID
+      tags:
+      - Image
+  /api/v1/staged-changes:
+    get:
+      description: Retrieves a list of all staged changes
+      operationId: getAllStagedChanges
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StagedChangeDTO"
+          description: List of staged changes retrieved successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Get all staged changes
+      tags:
+      - Staged Change
+    post:
+      description: Creates a new staged change entity
+      operationId: createStagedChange
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StagedChangeCreateDTO"
+        required: true
+      responses:
+        "201":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StagedChangeDTO"
+          description: Staged change created successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Create a new staged change
+      tags:
+      - Staged Change
+  /api/v1/staged-changes/{id}:
+    delete:
+      description: Deletes a staged change by its identifier
+      operationId: deleteStagedChange
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/DeleteDTO"
+          description: Staged change deleted successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Delete staged change
+      tags:
+      - Staged Change
+    get:
+      description: Retrieves a single staged change by its identifier
+      operationId: getStagedChangeById
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StagedChangeDTO"
+          description: Staged change found and returned
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Get staged change by ID
+      tags:
+      - Staged Change
+    put:
+      description: Updates an existing staged change entity
+      operationId: updateStagedChange
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StagedChangeUpdateDTO"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/StagedChangeDTO"
+          description: Staged change updated successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Update staged change
+      tags:
+      - Staged Change
+  /api/v1/users:
+    get:
+      description: Retrieves a list of all users
+      operationId: getAllUsers
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+          description: List of users retrieved successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Get all users
+      tags:
+      - User
+    post:
+      description: Registers a new user account
+      operationId: createUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreateDTO"
+        required: true
+      responses:
+        "201":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+          description: User created successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Create a new user
+      tags:
+      - User
+  /api/v1/users/me:
+    get:
+      description: Retrieves information about the currently authenticated user
+      operationId: getCurrentUser
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+          description: Current user information retrieved
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Get current user
+      tags:
+      - User
+  /api/v1/users/username/{username}:
+    get:
+      description: Retrieves a single user by their username
+      operationId: getUserByUsername
+      parameters:
+      - in: path
+        name: username
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+          description: User found and returned
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Get user by username
+      tags:
+      - User
+  /api/v1/users/{id}:
+    delete:
+      description: Deletes a user account by ID
+      operationId: deleteUser
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/DeleteDTO"
+          description: User deleted successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Delete user
+      tags:
+      - User
+    get:
+      description: Retrieves a single user by their identifier
+      operationId: getUserById
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+          description: User found and returned
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Get user by ID
+      tags:
+      - User
+    put:
+      description: Updates an existing user's information
+      operationId: updateUser
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateDTO"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+          description: User updated successfully
+        "400":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BadRequestErrorResponse"
+          description: Bad Request - Invalid argument
+        "403":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+          description: Forbidden - Access Denied
+        "404":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotFoundErrorResponse"
+          description: Not Found - Data not found
+        "409":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictErrorResponse"
+          description: Conflict - Data conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/InternalServerErrorResponse"
+          description: Internal Server Error - Unknown error occurred
+      summary: Update user
+      tags:
+      - User
+components:
+  schemas:
+    BadRequestErrorResponse:
+      type: object
+      description: Bad Request Error Response
+      properties:
+        code:
+          type: string
+          description: HTTP status code of the error
+          example: 400
+        message:
+          type: string
+          description: Description of the error
+          example: Invalid input provided
+      required:
+      - code
+    CarCreateDTO:
+      type: object
+      description: Car creation data transfer object
+      properties:
+        description:
+          type: string
+          description: Description of the car
+        make:
+          type: string
+          description: Manufacturer of the car
+          example: Toyota
+        model:
+          type: string
+          description: Model of the car
+          example: Camry
+        technicalInfo:
+          type: string
+          description: Technical specifications of the car
+        year:
+          type: integer
+          format: int32
+          description: Year of manufacture
+          example: 2022
+      required:
+      - make
+      - model
+      - year
+    CarDTO:
+      type: object
+      description: Car data transfer object
+      properties:
+        _links:
+          $ref: "#/components/schemas/Links"
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the car was created
+          example: 2023-01-01T00:00:00Z
+        description:
+          type: string
+          description: Description of the car
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier of the car
+          example: 1
+        make:
+          type: string
+          description: Manufacturer of the car
+          example: Toyota
+        model:
+          type: string
+          description: Model of the car
+          example: Camry
+        serviceState:
+          type: string
+          description: Service state of the car
+          enum:
+          - UNKNOWN
+          - PREPARED
+          - STAGED
+          - CREATED
+          - UPDATED
+          - DELETED
+        stagedChangeId:
+          type: integer
+          format: int64
+          description: ID of the staged change if exists
+        technicalInfo:
+          type: string
+          description: Technical specifications of the car
+        year:
+          type: integer
+          format: int32
+          description: Year of manufacture
+          example: 2022
+      required:
+      - id
+      - make
+      - model
+      - serviceState
+      - year
+    CarUpdateDTO:
+      type: object
+      description: Car update data transfer object
+      properties:
+        description:
+          type: string
+          description: Description of the car
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier of the car to update
+          example: 1
+        make:
+          type: string
+          description: Manufacturer of the car
+          example: Toyota
+        model:
+          type: string
+          description: Model of the car
+          example: Camry
+        technicalInfo:
+          type: string
+          description: Technical specifications of the car
+        year:
+          type: integer
+          format: int32
+          description: Year of manufacture
+          example: 2022
+      required:
+      - id
+    ConflictErrorResponse:
+      type: object
+      description: Conflict Error Response
+      properties:
+        code:
+          type: string
+          description: HTTP status code of the error
+          example: 409
+        message:
+          type: string
+          description: Description of the error
+          example: Data Conflict
+      required:
+      - code
+    DeleteDTO:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+      required:
+      - deleted
+    EventCreateDTO:
+      type: object
+      description: Event creation data transfer object
+      properties:
+        comment:
+          type: string
+          description: Optional comment for the event
+        crudAction:
+          type: string
+          description: CRUD action associated with the event
+          enum:
+          - CREATE
+          - UPDATE
+          - DELETE
+        otherEventType:
+          type: string
+          description: Type of other event if not CRUD-related
+          enum:
+          - LOGIN
+          - LOGOUT
+          - REFRESH_TOKEN
+        stagedStatus:
+          type: string
+          description: Status of the staged change if applicable
+          enum:
+          - PENDING
+          - APPROVED
+          - REJECTED
+        state:
+          type: string
+          description: Service state associated with the event
+          enum:
+          - UNKNOWN
+          - PREPARED
+          - STAGED
+          - CREATED
+          - UPDATED
+          - DELETED
+        subject:
+          type: string
+          description: Subject of the event (entity type)
+          example: car
+        subjectId:
+          type: integer
+          format: int64
+          description: ID of the subject entity
+          example: 42
+      required:
+      - subject
+      - subjectId
+    EventDTO:
+      type: object
+      description: Event data transfer object
+      properties:
+        _links:
+          $ref: "#/components/schemas/Links"
+        comment:
+          type: string
+          description: Optional comment for the event
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the event was created
+          example: 2023-01-01T00:00:00Z
+        crudAction:
+          type: string
+          description: CRUD action associated with the event
+          enum:
+          - CREATE
+          - UPDATE
+          - DELETE
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier of the event
+          example: 1
+        otherEventType:
+          type: string
+          description: Type of other event if not CRUD-related
+          enum:
+          - LOGIN
+          - LOGOUT
+          - REFRESH_TOKEN
+        serviceState:
+          type: string
+          description: Service state of the event
+          enum:
+          - UNKNOWN
+          - PREPARED
+          - STAGED
+          - CREATED
+          - UPDATED
+          - DELETED
+        stagedStatus:
+          type: string
+          description: Status of the staged change if applicable
+          enum:
+          - PENDING
+          - APPROVED
+          - REJECTED
+        state:
+          type: string
+          description: Service state associated with the event
+          enum:
+          - UNKNOWN
+          - PREPARED
+          - STAGED
+          - CREATED
+          - UPDATED
+          - DELETED
+        subject:
+          type: string
+          description: Subject of the event (entity type)
+          example: car
+        subjectId:
+          type: integer
+          format: int64
+          description: ID of the subject entity
+          example: 42
+      required:
+      - id
+      - serviceState
+      - subject
+      - subjectId
+    EventUpdateDTO:
+      type: object
+      description: Event update data transfer object
+      properties:
+        comment:
+          type: string
+          description: Optional comment for the event
+        crudAction:
+          type: string
+          description: CRUD action associated with the event
+          enum:
+          - CREATE
+          - UPDATE
+          - DELETE
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier of the event to update
+          example: 1
+        otherEventType:
+          type: string
+          description: Type of other event if not CRUD-related
+          enum:
+          - LOGIN
+          - LOGOUT
+          - REFRESH_TOKEN
+        stagedStatus:
+          type: string
+          description: Status of the staged change if applicable
+          enum:
+          - PENDING
+          - APPROVED
+          - REJECTED
+        state:
+          type: string
+          description: Service state associated with the event
+          enum:
+          - UNKNOWN
+          - PREPARED
+          - STAGED
+          - CREATED
+          - UPDATED
+          - DELETED
+        subject:
+          type: string
+          description: Subject of the event (entity type)
+          example: car
+        subjectId:
+          type: integer
+          format: int64
+          description: ID of the subject entity
+          example: 42
+      required:
+      - id
+    ForbiddenErrorResponse:
+      type: object
+      description: Error response object
+      properties:
+        code:
+          type: string
+          description: HTTP status code of the error
+          example: 403
+        message:
+          type: string
+          description: Description of the error
+          example: Forbidden
+      required:
+      - code
+    ImageDTO:
+      type: object
+      description: Image data transfer object
+      properties:
+        _links:
+          $ref: "#/components/schemas/Links"
+        contentType:
+          type: string
+          description: MIME type of the image
+          example: image/jpeg
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the image was created
+          example: 2023-01-01T00:00:00Z
+        filePath:
+          type: string
+          description: Path to the image file
+          example: /images/profile.jpg
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier of the image
+          example: 1
+        length:
+          type: integer
+          format: int64
+          description: Size of the image file in bytes
+          example: 102400
+        originalFilename:
+          type: string
+          description: Original Filename
+          example: profile.jpg
+        serviceState:
+          type: string
+          description: Service state of the image
+          enum:
+          - UNKNOWN
+          - PREPARED
+          - STAGED
+          - CREATED
+          - UPDATED
+          - DELETED
+        stagedChangeId:
+          type: integer
+          format: int64
+          description: ID of the staged change if exists
+          example: 123
+        storageType:
+          type: string
+          description: Storage type for the image
+          enum:
+          - S3
+          - AUTOWP
+      required:
+      - contentType
+      - filePath
+      - id
+      - length
+      - originalFilename
+      - serviceState
+      - storageType
+    InternalServerErrorResponse:
+      type: object
+      description: Internal Server Error Response
+      properties:
+        code:
+          type: string
+          description: HTTP status code of the error
+          example: 500
+        message:
+          type: string
+          description: Description of the error
+          example: Internal Server Error
+      required:
+      - code
+    Link:
+      type: object
+      properties:
+        deprecation:
+          type: string
+        href:
+          type: string
+        hreflang:
+          type: string
+        name:
+          type: string
+        profile:
+          type: string
+        templated:
+          type: boolean
+        title:
+          type: string
+        type:
+          type: string
+    Links:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/Link"
+    NotFoundErrorResponse:
+      type: object
+      description: Not Found Error Response
+      properties:
+        code:
+          type: string
+          description: HTTP status code of the error
+          example: 404
+        message:
+          type: string
+          description: Description of the error
+          example: Not Found
+      required:
+      - code
+    StagedChangeCreateDTO:
+      type: object
+      description: Staged change creation data transfer object
+      properties:
+        action:
+          type: string
+          description: Action type for the change
+          enum:
+          - CREATE
+          - UPDATE
+          - DELETE
+        changes:
+          type: object
+          additionalProperties: {}
+          description: Map of fields to change and their new values
+        createdById:
+          type: integer
+          format: int64
+          description: ID of the user creating the change
+          example: 5
+        entityId:
+          type: integer
+          format: int64
+          description: ID of the entity being changed
+          example: 123
+        entityType:
+          type: string
+          description: Type of the entity being changed
+          enum:
+          - CAR
+          - IMAGE
+        status:
+          type: string
+          description: Initial status for the change
+          enum:
+          - PENDING
+          - APPROVED
+          - REJECTED
+      required:
+      - action
+      - createdById
+      - entityType
+      - status
+    StagedChangeDTO:
+      type: object
+      description: Staged change data transfer object
+      properties:
+        _links:
+          $ref: "#/components/schemas/Links"
+        action:
+          type: string
+          description: Action type of the change
+          enum:
+          - CREATE
+          - UPDATE
+          - DELETE
+        approvedById:
+          type: integer
+          format: int64
+          description: ID of the user who approved the change
+          example: 6
+        changes:
+          type: object
+          additionalProperties: {}
+          description: Map of changed fields and their new values
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the change was created
+          example: 2023-01-01T00:00:00Z
+        createdById:
+          type: integer
+          format: int64
+          description: ID of the user who created the change
+          example: 5
+        entityId:
+          type: integer
+          format: int64
+          description: ID of the affected entity
+          example: 123
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier of the staged change
+          example: 1
+        serviceState:
+          type: string
+          description: Service state of the staged change
+          enum:
+          - UNKNOWN
+          - PREPARED
+          - STAGED
+          - CREATED
+          - UPDATED
+          - DELETED
+        status:
+          type: string
+          description: Current status of the change
+          enum:
+          - PENDING
+          - APPROVED
+          - REJECTED
+        type:
+          type: string
+          description: Type of the entity being changed
+          enum:
+          - CAR
+          - IMAGE
+      required:
+      - action
+      - createdById
+      - id
+      - serviceState
+      - status
+      - type
+    StagedChangeUpdateDTO:
+      type: object
+      description: Staged change update data transfer object
+      properties:
+        changes:
+          type: object
+          additionalProperties: {}
+          description: Updated map of fields to change
+        entityId:
+          type: integer
+          format: int64
+          description: ID of the entity being changed
+        id:
+          type: integer
+          format: int64
+          description: ID of the staged change to update
+          example: 1
+        status:
+          type: string
+          description: New status for the change
+          enum:
+          - PENDING
+          - APPROVED
+          - REJECTED
+      required:
+      - id
+    StagedDeleteDTO:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+        stagedChangeId:
+          type: integer
+          format: int64
+      required:
+      - deleted
+    UserCreateDTO:
+      type: object
+      properties:
+        role:
+          type: string
+          enum:
+          - USER
+          - MODERATOR
+          - ADMIN
+        username:
+          type: string
+      required:
+      - role
+      - username
+    UserDTO:
+      type: object
+      properties:
+        _links:
+          $ref: "#/components/schemas/Links"
+        createdAt:
+          type: string
+          format: date-time
+        id:
+          type: integer
+          format: int64
+        role:
+          type: string
+          enum:
+          - USER
+          - MODERATOR
+          - ADMIN
+        serviceState:
+          type: string
+          enum:
+          - UNKNOWN
+          - PREPARED
+          - STAGED
+          - CREATED
+          - UPDATED
+          - DELETED
+        username:
+          type: string
+      required:
+      - id
+      - role
+      - serviceState
+      - username
+    UserUpdateDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        role:
+          type: string
+          enum:
+          - USER
+          - MODERATOR
+          - ADMIN
+        username:
+          type: string
+      required:
+      - id
