@@ -18,7 +18,7 @@ class AuthFilter : OncePerRequestFilter() {
         val username = request.getHeader("X-Username")
 
         if (userId != null && username != null) {
-            val authentication = UsernamePasswordAuthenticationToken(username, null, null)
+            val authentication = UsernamePasswordAuthenticationToken(username, null, emptyList())
 
             SecurityContextHolder.getContext().authentication = authentication
         }

@@ -8,12 +8,8 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Bean
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories
-import ru.itmo.enterprise.event.sender.EventSender
-import ru.itmo.enterprise.user.UserClient
 
 @SpringBootApplication
-@EnableJpaRepositories
 open class Application {
     //Force server to allow Swagger to correctly work on aggregated view
     @Bean
@@ -33,16 +29,6 @@ open class Application {
                         .url("http://192.168.1.2:8081")
                 )
             )
-    }
-
-    @Bean
-    open fun userClientMock(): UserClient {
-        return mockComponent()
-    }
-
-    @Bean
-    open fun eventSenderMock(): EventSender {
-        return mockComponent()
     }
 
     private inline fun <reified T> mockComponent(): T {

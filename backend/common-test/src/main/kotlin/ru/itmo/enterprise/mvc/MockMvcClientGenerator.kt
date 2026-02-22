@@ -2,16 +2,31 @@ package ru.itmo.enterprise.mvc
 
 import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.http.*
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.stereotype.Component
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.util.CollectionUtils
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.multipart.MultipartFile
 import ru.itmo.enterprise.common.controller.BaseController
 import ru.itmo.enterprise.common.exception.DataConflictException
@@ -167,7 +182,7 @@ class MockMvcClientGenerator(
                         param.type == MultipartFile::class.java
             }
 
-            val request = if (isMultipart) {
+            val requestBuilder: Any = if (isMultipart) {
                 when (method) {
                     HttpMethod.POST -> multipart(resolvedPath)
                     HttpMethod.PUT -> multipart(HttpMethod.PUT, resolvedPath)
@@ -182,6 +197,8 @@ class MockMvcClientGenerator(
                     else -> get(resolvedPath)
                 }
             }
+
+            val request = requestBuilder as MockHttpServletRequestBuilder
 
             javaMethod.parameters.forEachIndexed { index, param ->
                 when {

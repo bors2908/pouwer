@@ -24,6 +24,7 @@ dependencyManagement {
 dependencies {
     api(project(":common"))
     api("org.springframework.boot:spring-boot-starter-test")
+    api("org.springframework.boot:spring-boot-starter-webmvc-test")
     api("org.springframework.security:spring-security-test")
     api("org.mockito.kotlin:mockito-kotlin:6.2.3")
 

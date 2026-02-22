@@ -3,6 +3,8 @@ rootProject.name = "backend"
 include("common")
 include("model")
 
+include("challenge")
+
 include("openapi")
 
 include("common-test")

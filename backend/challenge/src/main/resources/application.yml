@@ -1,0 +1,13 @@
+server:
+  port: 8081
+
+spring:
+  config:
+    import: "classpath:application-common.yml"
+  application:
+    name: challenge
+
+pow:
+  difficultyBits: 20
+  ttlSeconds: 60
+  hmacSecret: "dGhpcy1pcy1hLXZlcnktc2VjcmV0LWtleS1mb3ItaG1hYy1zaGEyNTY=" # base64 for "this-is-a-very-secret-key-for-hmac-sha256"
