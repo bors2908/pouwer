@@ -1,0 +1,9 @@
+services:
+  bitcoind:
+    build: .
+    container_name: bitcoin-regtest
+    ports:
+      - "18443:18443"
+    volumes:
+      - ./bitcoin-data:/home/bitcoin/.bitcoin
+    restart: unless-stopped
