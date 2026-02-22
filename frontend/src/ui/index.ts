@@ -89,20 +89,18 @@ class ChallengeUI {
         hashesPerSec: Math.floor((result.attempts * 1000) / result.durationMs),
       });
 
-      let validateRes;
-      if (this.challenge.jobId) {
-        validateRes = await this.network.postValidateCrypto({
-          jobId: this.challenge.jobId,
-          nonce: result.nonce,
-          hashHex: result.hashHex,
-        });
-      } else {
-        validateRes = await this.network.postValidate({
-          nonce: this.challenge.nonce,
-          solution: result.solution,
-          hash: result.hashHex,
-        });
-      }
+      const validateRes = await this.network.postValidate({
+        jobId: this.challenge.jobId,
+        jobType: this.challenge.jobType,
+        payload: (result as any).payload || {
+           dataHex: this.challenge.payload.dataHex,
+           nonce: Number(result.solution),
+           hashHex: result.hashHex,
+           durationMs: result.durationMs,
+           attempts: result.attempts
+        },
+        leaseHmac: this.challenge.leaseHmac
+      });
 
       if (validateRes.ok) {
         this.updateStatus("Success!");

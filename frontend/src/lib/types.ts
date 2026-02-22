@@ -1,22 +1,59 @@
 export type HexString = string; // "ab12..."
 
-export interface Challenge {
-  nonce: string;           // server-provided opaque nonce (base64 or urlsafe)
-  difficulty: number;      // leading-zero bits (integer)
-  expiresAt?: number;      // optional epoch ms (for display only)
-
-  // PoUW / Crypto extension
-  jobId?: string;
-  headerPrefixHex?: string;
-  targetHex?: string;
-  nonceStart?: number;
-  nonceEnd?: number;
+export enum JobType {
+  POW_TEST_SHA256 = "POW_TEST_SHA256",
+  BITCOIN_RPC_SHA256 = "BITCOIN_RPC_SHA256",
 }
 
+export interface NonceRange {
+  start: number;
+  end: number;
+}
+
+export interface Sha256PowTaskPayload {
+  dataHex: string;
+  nonceOffset: number;
+  nonceIsLE: boolean;
+  targetHex: string;
+  nonceRange: NonceRange;
+}
+
+export type TaskPayload = Sha256PowTaskPayload;
+
+export interface Task {
+  jobId: string;
+  jobType: JobType;
+  expiresAt: number;
+  payload: TaskPayload;
+  leaseHmac?: string;
+}
+
+export interface Sha256PowResultPayload {
+  dataHex: string;
+  nonce: number;
+  hashHex: string;
+  durationMs?: number;
+  attempts?: number;
+}
+
+export type ResultPayload = Sha256PowResultPayload;
+
+export interface ResultMessage {
+  jobId: string;
+  jobType: JobType;
+  payload: ResultPayload;
+  meta?: Record<string, string>;
+  leaseHmac?: string;
+}
+
+// Deprecated in favor of Task
+export type Challenge = Task;
+
 export interface SolveRequest {
-  nonce: string;
-  solution: string; // e.g. decimal or hex counter chosen by solver
-  hash: HexString;  // hex-encoded sha256(nonce + solution)
+  jobId: string;
+  jobType: JobType;
+  payload: ResultPayload;
+  leaseHmac?: string;
 }
 
 export type ValidateResponse = { ok: true } | { ok: false; reason?: string };

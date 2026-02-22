@@ -1,4 +1,4 @@
-import { Challenge, SolveRequest, ValidateResponse } from "./types";
+import { Challenge, ResultMessage, SolveRequest, ValidateResponse } from "./types";
 
 export class NetworkClient {
   baseUrl: string;
@@ -13,9 +13,7 @@ export class NetworkClient {
     const workerId = Math.floor(Math.random() * 100);
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), this.timeoutMs);
-    const url = type === "crypto" 
-      ? `${this.baseUrl}/challenge-crypto?worker=${workerId}`
-      : `${this.baseUrl}/challenge`;
+    const url = `${this.baseUrl}/challenge?workerId=${workerId}`;
 
     try {
       const response = await fetch(url, {
@@ -35,40 +33,7 @@ export class NetworkClient {
     }
   }
 
-  async postValidateCrypto(req: any): Promise<ValidateResponse> {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), this.timeoutMs);
-
-    try {
-      const response = await fetch(`${this.baseUrl}/validate-crypto`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(req),
-        signal: controller.signal,
-      });
-
-      clearTimeout(id);
-
-      if (response.ok) {
-        const result = await response.json();
-        if (result.status === "ok") {
-          return { ok: true };
-        } else {
-          return { ok: false, reason: "Validation failed" };
-        }
-      } else {
-        const text = await response.text();
-        return { ok: false, reason: `HTTP ${response.status}: ${text}` };
-      }
-    } catch (e: any) {
-      clearTimeout(id);
-      return { ok: false, reason: e.message || "Network error" };
-    }
-  }
-
-  async postValidate(req: SolveRequest): Promise<ValidateResponse> {
+  async postValidate(req: ResultMessage): Promise<ValidateResponse> {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), this.timeoutMs);
 
@@ -88,7 +53,12 @@ export class NetworkClient {
         return { ok: true };
       } else {
         const text = await response.text();
-        return { ok: false, reason: `HTTP ${response.status}: ${text}` };
+        let reason = text;
+        try {
+          const body = JSON.parse(text);
+          reason = body.reason || body.status || text;
+        } catch {}
+        return { ok: false, reason: `HTTP ${response.status}: ${reason}` };
       }
     } catch (e: any) {
       clearTimeout(id);

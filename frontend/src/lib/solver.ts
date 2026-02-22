@@ -1,39 +1,67 @@
 import { Challenge, ISolver, Progress, SolveResult, WorkerOutMessage } from "./types";
-import { bytesToHex, concatUint8, leadingZeroBits, nowMs, sleep, utf8ToBytes } from "./utils";
+import { bytesToHex, hexToBytes, nowMs, sleep } from "./utils";
 
 export class MainThreadSolver implements ISolver {
   private running = false;
 
   async start(challenge: Challenge, onProgress?: (stats: Progress) => void): Promise<SolveResult> {
     this.running = true;
-    const nonceBytes = utf8ToBytes(challenge.nonce);
-    const difficulty = challenge.difficulty;
+    const nonceBytes = hexToBytes(challenge.payload.dataHex);
+    const targetBI = BigInt("0x" + challenge.payload.targetHex);
     const startTime = nowMs();
     let attempts = 0;
     let lastProgressTime = startTime;
-    let counter = BigInt(Math.floor(Math.random() * 0xffffffff));
+    let nonce = BigInt(challenge.payload.nonceRange.start);
+    const nonceEnd = BigInt(challenge.payload.nonceRange.end);
+    const offset = challenge.payload.nonceOffset;
+    const isLE = challenge.payload.nonceIsLE;
 
-    const batchSize = 100;
+    const batchSize = 10;
+    const buffer = new Uint8Array(Math.max(nonceBytes.length, offset + 4));
+    buffer.set(nonceBytes);
 
-    while (this.running) {
-      for (let i = 0; i < batchSize; i++) {
+    while (this.running && nonce <= nonceEnd) {
+      for (let i = 0; i < batchSize && nonce <= nonceEnd; i++) {
         attempts++;
-        const solution = counter.toString();
-        const data = concatUint8(nonceBytes, utf8ToBytes(solution));
-
-        const hashBuffer = await crypto.subtle.digest("SHA-256", data.buffer as ArrayBuffer);
-        const hashBytes = new Uint8Array(hashBuffer);
-
-        if (leadingZeroBits(hashBytes) >= difficulty) {
-          this.running = false;
-          return {
-            solution,
-            hashHex: bytesToHex(hashBytes),
-            attempts,
-            durationMs: nowMs() - startTime,
-          };
+        const n = Number(nonce & 0xffffffffn);
+        if (isLE) {
+          buffer[offset] = n & 0xff;
+          buffer[offset + 1] = (n >> 8) & 0xff;
+          buffer[offset + 2] = (n >> 16) & 0xff;
+          buffer[offset + 3] = (n >> 24) & 0xff;
+        } else {
+          buffer[offset] = (n >> 24) & 0xff;
+          buffer[offset + 1] = (n >> 16) & 0xff;
+          buffer[offset + 2] = (n >> 8) & 0xff;
+          buffer[offset + 3] = n & 0xff;
         }
-        counter++;
+
+        const hashBuffer1 = await crypto.subtle.digest("SHA-256", buffer.buffer as ArrayBuffer);
+        const hashBuffer2 = await crypto.subtle.digest("SHA-256", hashBuffer1);
+        const hashBytes = new Uint8Array(hashBuffer2);
+        
+        const reversedHash = new Uint8Array(hashBytes).reverse();
+        const hashBI = BigInt("0x" + bytesToHex(reversedHash));
+
+        if (hashBI <= targetBI) {
+          this.running = false;
+          const hashHex = bytesToHex(reversedHash);
+          const durationMs = nowMs() - startTime;
+          return {
+            solution: nonce.toString(),
+            hashHex,
+            attempts,
+            durationMs,
+            payload: {
+              dataHex: challenge.payload.dataHex,
+              nonce: Number(nonce),
+              hashHex,
+              durationMs,
+              attempts,
+            }
+          } as any;
+        }
+        nonce++;
       }
 
       const currentTime = nowMs();
