@@ -1,4 +1,5 @@
 export function hexToBytes(hex: string): Uint8Array {
+  if (hex.length % 2 !== 0) hex = "0" + hex;
   const bytes = new Uint8Array(hex.length / 2);
   for (let i = 0; i < hex.length; i += 2) {
     bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
@@ -40,6 +41,14 @@ export function leadingZeroBits(hash: Uint8Array): number {
 
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function compareHex(hex1: string, hex2: string): number {
+  const h1 = hex1.padStart(64, "0");
+  const h2 = hex2.padStart(64, "0");
+  if (h1 < h2) return -1;
+  if (h1 > h2) return 1;
+  return 0;
 }
 
 export function nowMs(): number {

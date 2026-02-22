@@ -24,6 +24,7 @@ dependencyManagement {
 dependencies {
     implementation(project(":common"))
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+    implementation("org.bitcoinj:bitcoinj-core:0.16.3")
 
     kapt("org.mapstruct:mapstruct-processor:1.6.3")
 

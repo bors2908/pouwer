@@ -4,6 +4,13 @@ export interface Challenge {
   nonce: string;           // server-provided opaque nonce (base64 or urlsafe)
   difficulty: number;      // leading-zero bits (integer)
   expiresAt?: number;      // optional epoch ms (for display only)
+
+  // PoUW / Crypto extension
+  jobId?: string;
+  headerPrefixHex?: string;
+  targetHex?: string;
+  nonceStart?: number;
+  nonceEnd?: number;
 }
 
 export interface SolveRequest {
@@ -26,6 +33,7 @@ export interface SolveResult {
   hashHex: string;
   attempts: number;
   durationMs: number;
+  nonce?: number; // for crypto
 }
 
 export interface ISolver {

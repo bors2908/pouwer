@@ -18,6 +18,7 @@ class ChallengeUI {
     attemptsEl: HTMLElement;
     btnStart: HTMLButtonElement;
     btnCancel: HTMLButtonElement;
+    btnType: HTMLSelectElement;
     resultEl: HTMLElement;
   };
 
@@ -38,6 +39,7 @@ class ChallengeUI {
       attemptsEl: document.getElementById("attempts")!,
       btnStart: document.getElementById("btnStart") as HTMLButtonElement,
       btnCancel: document.getElementById("btnCancel") as HTMLButtonElement,
+      btnType: document.getElementById("challengeType") as HTMLSelectElement,
       resultEl: document.getElementById("result")!,
     };
 
@@ -59,17 +61,20 @@ class ChallengeUI {
   }
 
   private async startSolving() {
+    const type = this.uiElements.btnType.value as "crypto" | "pow";
     this.uiElements.btnStart.disabled = true;
     this.uiElements.btnCancel.disabled = true; // Disabled during fetch
+    this.uiElements.btnType.disabled = true;
     this.uiElements.resultEl.textContent = "";
     this.updateStatus("Fetching challenge...");
 
     try {
-      this.challenge = await this.network.getChallenge();
+      this.challenge = await this.network.getChallenge(type);
 
       if (this.challenge.expiresAt && this.challenge.expiresAt < Date.now()) {
         this.updateStatus("Challenge expired");
         this.uiElements.btnStart.disabled = false;
+        this.uiElements.btnType.disabled = false;
         return;
       }
 
@@ -84,11 +89,20 @@ class ChallengeUI {
         hashesPerSec: Math.floor((result.attempts * 1000) / result.durationMs),
       });
 
-      const validateRes = await this.network.postValidate({
-        nonce: this.challenge.nonce,
-        solution: result.solution,
-        hash: result.hashHex,
-      });
+      let validateRes;
+      if (this.challenge.jobId) {
+        validateRes = await this.network.postValidateCrypto({
+          jobId: this.challenge.jobId,
+          nonce: result.nonce,
+          hashHex: result.hashHex,
+        });
+      } else {
+        validateRes = await this.network.postValidate({
+          nonce: this.challenge.nonce,
+          solution: result.solution,
+          hash: result.hashHex,
+        });
+      }
 
       if (validateRes.ok) {
         this.updateStatus("Success!");
@@ -110,6 +124,7 @@ class ChallengeUI {
     } finally {
       this.uiElements.btnStart.disabled = false;
       this.uiElements.btnCancel.disabled = true;
+      this.uiElements.btnType.disabled = false;
     }
   }
 
@@ -118,6 +133,7 @@ class ChallengeUI {
     this.updateStatus("Ready");
     this.uiElements.btnStart.disabled = false;
     this.uiElements.btnCancel.disabled = true;
+    this.uiElements.btnType.disabled = false;
   }
 }
 
