@@ -21,7 +21,7 @@ export class MainThreadSolver implements ISolver {
         const solution = counter.toString();
         const data = concatUint8(nonceBytes, utf8ToBytes(solution));
 
-        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data.buffer as ArrayBuffer);
         const hashBytes = new Uint8Array(hashBuffer);
 
         if (leadingZeroBits(hashBytes) >= difficulty) {
@@ -64,8 +64,8 @@ export class WebWorkerSolver implements ISolver {
 
   async start(challenge: Challenge, onProgress?: (stats: Progress) => void): Promise<SolveResult> {
     return new Promise((resolve, reject) => {
-      // Assuming solver.worker.js is in the same directory or accessible
-      this.worker = new Worker(new URL("../worker/solver.worker.js", import.meta.url));
+      // Assuming solver.worker.ts is in the same directory or accessible
+      this.worker = new Worker(new URL("../worker/solver.worker.ts", import.meta.url), { type: "module" });
 
       this.worker.onmessage = (e: MessageEvent<WorkerOutMessage>) => {
         const msg = e.data;

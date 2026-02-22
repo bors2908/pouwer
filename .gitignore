@@ -44,3 +44,5 @@ bin/
 
 secrets/
 /k8s/**/secrets
+!**/dist/
+!**/node_modules/

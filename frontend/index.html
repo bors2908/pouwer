@@ -30,13 +30,9 @@
         <div id="result"></div>
     </div>
 
-    <!-- The challenge is injected here by the server -->
-    <script>
-        // Example injection:
-        // window.__CHALLENGE__ = { nonce: "...", difficulty: 20 };
-    </script>
+    <!-- The challenge is no longer injected here, fetched dynamically -->
     
-    <!-- In a real scenario, these would be bundled/transpiled JS files -->
-    <script type="module" src="/index.js"></script>
+    <!-- Vite will handle this in development -->
+    <script type="module" src="/src/ui/index.ts"></script>
 </body>
 </html>

@@ -41,7 +41,7 @@ async function solve(challenge: Challenge) {
       const data = concatUint8(nonceBytes, solutionBytes);
 
       // WebCrypto is async. crypto.subtle.digest is available in workers.
-      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data.buffer as ArrayBuffer);
       const hashBytes = new Uint8Array(hashBuffer);
 
       if (leadingZeroBits(hashBytes) >= difficulty) {

@@ -1,7 +1,8 @@
 package ru.itmo.enterprise.pow
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -15,7 +16,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import ru.itmo.enterprise.pow.model.ValidateRequest
 import java.security.MessageDigest
-import java.util.*
+import java.util.HexFormat
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -33,13 +34,13 @@ class ChallengeIntegrationTest {
         // 1. Get Challenge
         val challengeResult = mockMvc.perform(get("/challenge"))
             .andExpect(status().isOk)
-            .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andReturn()
 
-        val html = challengeResult.response.contentAsString
-        val nonce = extractFromHtml(html, "nonce")
-        val difficultyStr = extractFromHtml(html, "difficulty")
-        val difficulty = difficultyStr?.toInt() ?: 20
+        val json = challengeResult.response.contentAsString
+        val node = objectMapper.readTree(json)
+        val nonce = node.get("nonce").asText()
+        val difficulty = node.get("difficulty").asInt()
 
         assertNotNull(nonce)
         assertTrue(difficulty > 0)

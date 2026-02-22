@@ -9,7 +9,7 @@ declare global {
 }
 
 class ChallengeUI {
-  challenge: Challenge;
+  challenge: Challenge | null = null;
   network: NetworkClient;
   solver: ISolver;
   uiElements: {
@@ -22,11 +22,6 @@ class ChallengeUI {
   };
 
   constructor() {
-    this.challenge = window.__CHALLENGE__ || {
-      nonce: "demo-nonce",
-      difficulty: 10,
-    };
-
     this.network = new NetworkClient();
 
     // Prefer WebWorker if supported
@@ -52,11 +47,6 @@ class ChallengeUI {
   private initEvents() {
     this.uiElements.btnStart.onclick = () => this.startSolving();
     this.uiElements.btnCancel.onclick = () => this.cancelSolving();
-
-    if (this.challenge.expiresAt && this.challenge.expiresAt < Date.now()) {
-      this.uiElements.btnStart.disabled = true;
-      this.updateStatus("Challenge expired");
-    }
   }
 
   private updateStatus(text: string) {
@@ -70,11 +60,22 @@ class ChallengeUI {
 
   private async startSolving() {
     this.uiElements.btnStart.disabled = true;
-    this.uiElements.btnCancel.disabled = false;
+    this.uiElements.btnCancel.disabled = true; // Disabled during fetch
     this.uiElements.resultEl.textContent = "";
-    this.updateStatus("Solving...");
+    this.updateStatus("Fetching challenge...");
 
     try {
+      this.challenge = await this.network.getChallenge();
+
+      if (this.challenge.expiresAt && this.challenge.expiresAt < Date.now()) {
+        this.updateStatus("Challenge expired");
+        this.uiElements.btnStart.disabled = false;
+        return;
+      }
+
+      this.updateStatus("Solving...");
+      this.uiElements.btnCancel.disabled = false;
+
       const result = await this.solver.start(this.challenge, (p) => this.updateProgress(p));
       this.updateStatus("Solved! Validating...");
       this.updateProgress({
@@ -97,7 +98,6 @@ class ChallengeUI {
         this.updateStatus("Failed");
         this.uiElements.resultEl.textContent = `Rejected: ${validateRes.reason}`;
         this.uiElements.resultEl.style.color = "red";
-        this.uiElements.btnStart.disabled = false;
       }
     } catch (e: any) {
       if (e.message !== "Cancelled") {
@@ -107,8 +107,8 @@ class ChallengeUI {
       } else {
         this.updateStatus("Ready");
       }
-      this.uiElements.btnStart.disabled = false;
     } finally {
+      this.uiElements.btnStart.disabled = false;
       this.uiElements.btnCancel.disabled = true;
     }
   }

@@ -3,6 +3,7 @@ package ru.itmo.enterprise.pow.controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import ru.itmo.enterprise.pow.config.PowProperties
+import ru.itmo.enterprise.pow.model.ChallengeResponse
 import ru.itmo.enterprise.pow.service.NonceService
 
 @RestController
@@ -10,53 +11,12 @@ class ChallengeController(
     private val nonceService: NonceService,
     private val props: PowProperties
 ) {
-    @GetMapping("/challenge", produces = ["text/html"])
-    fun getChallenge(): String {
+    @GetMapping("/challenge")
+    fun getChallenge(): ChallengeResponse {
         val nonce = nonceService.generateNonce()
-        return """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PoW Challenge</title>
-    <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f2f5; }
-        .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 300px; }
-        h2 { margin-top: 0; }
-        .stats { margin: 1rem 0; font-size: 0.9rem; color: #667; }
-        .stats div { margin-bottom: 0.2rem; }
-        #status { font-weight: bold; }
-        #result { margin-top: 1rem; padding: 0.5rem; border-radius: 4px; font-size: 0.8rem; word-break: break-all; }
-        button { width: 100%; padding: 0.6rem; margin-top: 0.5rem; cursor: pointer; border: none; border-radius: 4px; background: #007bff; color: white; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        button#btnCancel { background: #6c757d; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h2>PoW Challenge</h2>
-        <div class="stats">
-            <div id="status">Status: Ready</div>
-            <div id="attempts">Attempts: 0</div>
-            <div id="hps">Hashes/sec: 0</div>
-        </div>
-        <button id="btnStart">Solve Challenge</button>
-        <button id="btnCancel" disabled>Cancel</button>
-        <div id="result"></div>
-    </div>
-
-    <script>
-        window.__CHALLENGE__ = {
-            nonce: "$nonce",
-            difficulty: ${props.difficultyBits}
-        };
-    </script>
-    <script type="module">
-        import "/js/index.js";
-    </script>
-</body>
-</html>
-        """.trimIndent()
+        return ChallengeResponse(
+            nonce = nonce,
+            difficulty = props.difficultyBits
+        )
     }
 }
