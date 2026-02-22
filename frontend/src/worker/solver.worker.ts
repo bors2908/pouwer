@@ -1,3 +1,4 @@
+import { sha256 } from "js-sha256";
 import { Challenge, WorkerInMessage, WorkerOutMessage } from "../lib/types";
 import { bytesToHex, concatUint8, hexToBytes, leadingZeroBits, nowMs, utf8ToBytes } from "../lib/utils";
 
@@ -35,7 +36,7 @@ async function solve(challenge: Challenge) {
 
   // Use a random starting point for the solution
   let counter = BigInt(Math.floor(Math.random() * 0xffffffff));
-  const batchSize = 1000;
+  const batchSize = 5000;
 
   while (running) {
     for (let i = 0; i < batchSize; i++) {
@@ -44,9 +45,7 @@ async function solve(challenge: Challenge) {
       const solutionBytes = utf8ToBytes(solution);
       const data = concatUint8(nonceBytes, solutionBytes);
 
-      // WebCrypto is async. crypto.subtle.digest is available in workers.
-      const hashBuffer = await crypto.subtle.digest("SHA-256", data.buffer as ArrayBuffer);
-      const hashBytes = new Uint8Array(hashBuffer);
+      const hashBytes = new Uint8Array(sha256.array(data));
 
       if (leadingZeroBits(hashBytes) >= difficulty) {
         const durationMs = nowMs() - startTime;
@@ -77,13 +76,16 @@ async function solve(challenge: Challenge) {
       lastProgressTime = currentTime;
     }
 
-    // Yield to the event loop if needed, though subtle.digest is already yielding.
-    // In workers, we don't necessarily need to sleep(0) if we are doing async work.
+    // Since we are no longer using await inside the loop, we should yield
+    // to allow 'cancel' message to be processed.
+    await new Promise(r => setTimeout(r, 0));
   }
+}
 
 async function solveCrypto(challenge: Challenge) {
   const headerPrefix = hexToBytes(challenge.headerPrefixHex!);
   const targetHex = challenge.targetHex!;
+  const targetBI = BigInt("0x" + targetHex);
   const nonceStart = BigInt(challenge.nonceStart || 0);
   const nonceEnd = BigInt(challenge.nonceEnd || 0xffffffff);
   
@@ -92,7 +94,7 @@ async function solveCrypto(challenge: Challenge) {
   let lastProgressTime = startTime;
   let nonce = nonceStart;
 
-  const batchSize = 1000;
+  const batchSize = 10000;
   const header = new Uint8Array(80);
   header.set(headerPrefix);
 
@@ -106,20 +108,29 @@ async function solveCrypto(challenge: Challenge) {
       header[78] = Number((nonce >> 16n) & 0xffn);
       header[79] = Number((nonce >> 24n) & 0xffn);
 
-      const hash1 = await crypto.subtle.digest("SHA-256", header);
-      const hash2 = await crypto.subtle.digest("SHA-256", hash1);
+      const hash1 = sha256.array(header);
+      const hash2 = sha256.array(hash1);
       const hashBytes = new Uint8Array(hash2);
       
-      // Bitcoin hash is displayed reversed (LE)
-      const currentHashHex = bytesToHex(hashBytes.reverse());
+      // Bitcoin hash is compared numerically. 
+      // The hash we get from sha256 is Big Endian, but Bitcoin compares it as Little Endian for the RPC,
+      // HOWEVER, the standard says we compare the 256-bit integer.
+      // In the previous code we were doing: bytesToHex(hashBytes.reverse()) <= targetHex
+      // If we want to compare BigInts, we need to make sure we treat hashBytes correctly.
+      // Bitcoin hashes are typically shown reversed.
+      
+      // Let's stick to the numerical comparison:
+      // We need to convert hashBytes (which is reversed in Bitcoin terms) to BigInt.
+      // If currentHashHex was bytesToHex(hashBytes.reverse()), then:
+      const hashBI = BigInt("0x" + bytesToHex(new Uint8Array(hashBytes).reverse()));
 
-      if (currentHashHex.padStart(64, "0") <= targetHex.padStart(64, "0")) {
+      if (hashBI <= targetBI) {
         const durationMs = Date.now() - startTime;
         self.postMessage({
           type: "solved",
           solution: nonce.toString(),
           nonce: Number(nonce),
-          hashHex: currentHashHex,
+          hashHex: bytesToHex(new Uint8Array(hashBytes).reverse()),
           attempts,
           durationMs,
         } as WorkerOutMessage);
@@ -141,6 +152,9 @@ async function solveCrypto(challenge: Challenge) {
       } as WorkerOutMessage);
       lastProgressTime = currentTime;
     }
+    
+    // Yield
+    await new Promise(r => setTimeout(r, 0));
   }
 
   if (nonce > nonceEnd) {
@@ -148,7 +162,4 @@ async function solveCrypto(challenge: Challenge) {
   } else {
      self.postMessage({ type: "stopped", reason: "Cancelled" } as WorkerOutMessage);
   }
-}
-
-self.postMessage({ type: "stopped", reason: "Cancelled" } as WorkerOutMessage);
 }
