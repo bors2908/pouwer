@@ -1,128 +1,124 @@
-import { Challenge, ISolver, Progress, SolveResult, WorkerOutMessage } from "./types";
-import { bytesToHex, hexToBytes, nowMs, sleep } from "./utils";
+import { Task, ISolver, Progress, SolveResult, WorkerOutMessage, JobType } from "./types";
 
-export class MainThreadSolver implements ISolver {
-  private running = false;
+type WorkerScriptMap = Record<JobType, string>;
 
-  async start(challenge: Challenge, onProgress?: (stats: Progress) => void): Promise<SolveResult> {
-    this.running = true;
-    const nonceBytes = hexToBytes(challenge.payload.dataHex);
-    const targetBI = BigInt("0x" + challenge.payload.targetHex);
-    const startTime = nowMs();
-    let attempts = 0;
-    let lastProgressTime = startTime;
-    let nonce = BigInt(challenge.payload.nonceRange.start);
-    const nonceEnd = BigInt(challenge.payload.nonceRange.end);
-    const offset = challenge.payload.nonceOffset;
-    const isLE = challenge.payload.nonceIsLE;
-
-    const batchSize = 10;
-    const buffer = new Uint8Array(Math.max(nonceBytes.length, offset + 4));
-    buffer.set(nonceBytes);
-
-    while (this.running && nonce <= nonceEnd) {
-      for (let i = 0; i < batchSize && nonce <= nonceEnd; i++) {
-        attempts++;
-        const n = Number(nonce & 0xffffffffn);
-        if (isLE) {
-          buffer[offset] = n & 0xff;
-          buffer[offset + 1] = (n >> 8) & 0xff;
-          buffer[offset + 2] = (n >> 16) & 0xff;
-          buffer[offset + 3] = (n >> 24) & 0xff;
-        } else {
-          buffer[offset] = (n >> 24) & 0xff;
-          buffer[offset + 1] = (n >> 16) & 0xff;
-          buffer[offset + 2] = (n >> 8) & 0xff;
-          buffer[offset + 3] = n & 0xff;
-        }
-
-        const hashBuffer1 = await crypto.subtle.digest("SHA-256", buffer.buffer as ArrayBuffer);
-        const hashBuffer2 = await crypto.subtle.digest("SHA-256", hashBuffer1);
-        const hashBytes = new Uint8Array(hashBuffer2);
-        
-        const reversedHash = new Uint8Array(hashBytes).reverse();
-        const hashBI = BigInt("0x" + bytesToHex(reversedHash));
-
-        if (hashBI <= targetBI) {
-          this.running = false;
-          const hashHex = bytesToHex(reversedHash);
-          const durationMs = nowMs() - startTime;
-          return {
-            solution: nonce.toString(),
-            hashHex,
-            attempts,
-            durationMs,
-            payload: {
-              dataHex: challenge.payload.dataHex,
-              nonce: Number(nonce),
-              hashHex,
-              durationMs,
-              attempts,
-            }
-          } as any;
-        }
-        nonce++;
-      }
-
-      const currentTime = nowMs();
-      if (currentTime - lastProgressTime >= 500) {
-        if (onProgress) {
-          const elapsedMs = currentTime - startTime;
-          onProgress({
-            attempts,
-            elapsedMs,
-            hashesPerSec: Math.floor((attempts * 1000) / elapsedMs),
-          });
-        }
-        lastProgressTime = currentTime;
-        // Yield to UI
-        await sleep(0);
-      }
-    }
-    throw new Error("Cancelled");
-  }
-
-  cancel(): void {
-    this.running = false;
-  }
+interface WorkerEntry {
+    worker: Worker;
+    resolve: (res: SolveResult) => void;
+    reject: (err: any) => void;
+    onProgress?: (p: Progress) => void;
 }
 
+/**
+ * WebWorkerSolver: one worker instance per JobType.
+ * constructor accepts a map from JobType -> worker script path (relative to this file).
+ */
 export class WebWorkerSolver implements ISolver {
-  private worker: Worker | null = null;
+    private workers = new Map<JobType, WorkerEntry>();
+    private readonly scriptMap: WorkerScriptMap;
 
-  async start(challenge: Challenge, onProgress?: (stats: Progress) => void): Promise<SolveResult> {
-    return new Promise((resolve, reject) => {
-      // Assuming solver.worker.ts is in the same directory or accessible
-      this.worker = new Worker(new URL("../worker/solver.worker.ts", import.meta.url), { type: "module" });
-
-      this.worker.onmessage = (e: MessageEvent<WorkerOutMessage>) => {
-        const msg = e.data;
-        if (msg.type === "progress" && onProgress) {
-          onProgress(msg);
-        } else if (msg.type === "solved") {
-          this.worker?.terminate();
-          resolve(msg);
-        } else if (msg.type === "stopped") {
-          this.worker?.terminate();
-          reject(new Error(msg.reason || "Stopped"));
-        }
-      };
-
-      this.worker.onerror = (e) => {
-        this.worker?.terminate();
-        reject(e);
-      };
-
-      this.worker.postMessage({ type: "init", challenge });
-      this.worker.postMessage({ type: "start" });
-    });
-  }
-
-  cancel(): void {
-    if (this.worker) {
-      this.worker.postMessage({ type: "cancel" });
-      this.worker.terminate();
-      this.worker = null;
+    constructor(scriptMap: WorkerScriptMap) {
+        this.scriptMap = scriptMap;
     }
-  }
+
+    async start(task: Task, onProgress?: (stats: Progress) => void): Promise<SolveResult> {
+        const jobType = task.jobType as JobType;
+        const scriptPath = this.scriptMap[jobType];
+
+        if (!scriptPath) {
+            throw new Error(`No worker script registered for jobType: ${String(jobType)}`);
+        }
+
+        if (this.workers.has(jobType)) {
+            throw new Error(`Worker for jobType ${String(jobType)} is already running`);
+        }
+
+        return new Promise<SolveResult>((resolve, reject) => {
+            const worker = new Worker(new URL(scriptPath, import.meta.url), { type: "module" });
+
+            const entry: WorkerEntry = { worker, resolve, reject, onProgress };
+            this.workers.set(jobType, entry);
+
+            const cleanup = () => {
+                // remove listeners and terminate if not already
+                try {
+                    entry.worker.onmessage = null;
+                    entry.worker.onerror = null;
+                } catch {}
+                if (this.workers.get(jobType) === entry) {
+                    this.workers.delete(jobType);
+                }
+            };
+
+            entry.worker.onmessage = (e: MessageEvent<WorkerOutMessage>) => {
+                const msg = e.data;
+                if (msg.type === "progress") {
+                    if (onProgress) {
+                        onProgress(msg);
+                    }
+                    return;
+                }
+                if (msg.type === "solved") {
+                    cleanup();
+                    entry.worker.terminate();
+                    resolve(msg as SolveResult);
+                    return;
+                }
+                if (msg.type === "stopped") {
+                    cleanup();
+                    entry.worker.terminate();
+                    reject(new Error(msg.reason || "Stopped"));
+                    return;
+                }
+                // unknown message: ignore or log if you need
+            };
+
+            entry.worker.onerror = (e) => {
+                cleanup();
+                try { entry.worker.terminate(); } catch {}
+                reject(e);
+            };
+
+            // initialize + start
+            entry.worker.postMessage({ type: "init", challenge: task });
+            entry.worker.postMessage({ type: "start" });
+        });
+    }
+
+    /**
+     * Cancel a specific worker by JobType, or all if no jobType is provided.
+     */
+    cancel(jobType?: JobType): void {
+        if (jobType !== undefined) {
+            const entry = this.workers.get(jobType);
+            if (!entry) {
+                return;
+            }
+            try {
+                entry.worker.postMessage({ type: "cancel" });
+            } catch {}
+            try { entry.worker.terminate(); } catch {}
+            this.workers.delete(jobType);
+            // reject outstanding promise to signal cancellation (optional)
+            entry.reject(new Error("Cancelled"));
+            return;
+        }
+
+        // cancel all
+        for (const [jt, entry] of Array.from(this.workers.entries())) {
+            try {
+                entry.worker.postMessage({ type: "cancel" });
+            } catch {}
+            try { entry.worker.terminate(); } catch {}
+            entry.reject(new Error("Cancelled"));
+            this.workers.delete(jt);
+        }
+    }
+
+    /**
+     * Utility: check whether a worker is active for given JobType
+     */
+    isRunning(jobType: JobType): boolean {
+        return this.workers.has(jobType);
+    }
 }

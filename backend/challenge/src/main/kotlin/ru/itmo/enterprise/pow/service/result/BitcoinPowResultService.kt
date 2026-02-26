@@ -3,6 +3,7 @@ package ru.itmo.enterprise.pow.service.result
 import org.bitcoinj.core.*
 import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.script.ScriptBuilder
+import org.springframework.stereotype.Service
 import ru.itmo.enterprise.pow.model.*
 import ru.itmo.enterprise.pow.service.BitcoinRpcClient
 import ru.itmo.enterprise.pow.service.LeaseManager
@@ -12,12 +13,14 @@ import ru.itmo.enterprise.pow.service.TaskStore
 import ru.itmo.enterprise.pow.service.orchestrator.BitcoinPowTaskOrchestrator
 import java.util.HexFormat
 
+@Service
 class BitcoinPowResultService(
     private val taskStore: TaskStore,
     private val leaseManager: LeaseManager,
     private val validator: PowValidator<Sha256PowTaskPayload, Sha256PowResultPayload>,
     private val rpcClient: BitcoinRpcClient
 ) : ResultService {
+    override val type: JobType = JobType.BITCOIN_RPC_SHA256
     private val params = RegTestParams.get()
     private val hex = HexFormat.of()
 

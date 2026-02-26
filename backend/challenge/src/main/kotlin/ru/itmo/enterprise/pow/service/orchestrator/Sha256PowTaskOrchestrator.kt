@@ -1,5 +1,6 @@
 package ru.itmo.enterprise.pow.service.orchestrator
 
+import org.springframework.stereotype.Component
 import ru.itmo.enterprise.pow.model.JobType
 import ru.itmo.enterprise.pow.model.NonceRange
 import ru.itmo.enterprise.pow.model.Sha256PowTaskPayload
@@ -9,10 +10,12 @@ import ru.itmo.enterprise.pow.service.TaskStore
 import java.util.HexFormat
 import java.util.UUID
 
+@Component
 class Sha256PowTaskOrchestrator(
     private val taskStore: TaskStore
 ) : TaskOrchestrator {
     private val hex = HexFormat.of()
+    override val type: JobType = JobType.POW_TEST_SHA256
 
     override fun createTask(workerId: String?): Task {
         val jobId = UUID.randomUUID()
@@ -20,7 +23,7 @@ class Sha256PowTaskOrchestrator(
 
         val task = Task(
             jobId = jobId,
-            jobType = JobType.POW_TEST_SHA256,
+            jobType = type,
             expiresAt = System.currentTimeMillis() + 60_000,
             payload = payload
         )

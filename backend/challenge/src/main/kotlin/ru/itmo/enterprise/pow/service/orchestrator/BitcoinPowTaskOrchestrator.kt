@@ -12,7 +12,9 @@ import java.util.UUID
 import org.bitcoinj.core.*
 import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.script.ScriptBuilder
+import org.springframework.stereotype.Component
 
+@Component
 class BitcoinPowTaskOrchestrator(
     private val rpcClient: BitcoinRpcClient,
     private val taskStore: TaskStore
@@ -20,6 +22,7 @@ class BitcoinPowTaskOrchestrator(
     private val params = RegTestParams.get()
     private val hex = HexFormat.of()
     private val chunkSize = 500_000L
+    override val type: JobType = JobType.BITCOIN_RPC_SHA256
 
     override fun createTask(workerId: String?): Task {
         val template = rpcClient.getBlockTemplate()
@@ -41,7 +44,7 @@ class BitcoinPowTaskOrchestrator(
 
         val task = Task(
             jobId = jobId,
-            jobType = JobType.BITCOIN_RPC_SHA256,
+            jobType = type,
             expiresAt = System.currentTimeMillis() + 60_000,
             payload = payload
         )

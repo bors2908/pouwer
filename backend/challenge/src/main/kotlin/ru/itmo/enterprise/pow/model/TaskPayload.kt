@@ -16,6 +16,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(
         value = Sha256PowTaskPayload::class,
         name = "BITCOIN_RPC_SHA256"
+    ),
+    JsonSubTypes.Type(
+        value = MoneroRandomXTaskPayload::class,
+        name = "RANDOMX_MONERO"
     )
 )
 sealed interface TaskPayload
@@ -26,4 +30,11 @@ data class Sha256PowTaskPayload(
     val nonceIsLE: Boolean,
     val targetHex: String,
     val nonceRange: NonceRange
+) : TaskPayload
+
+data class MoneroRandomXTaskPayload(
+    val id: String,
+    val blob: String,
+    val difficulty: String?,
+    val targetHex: String?
 ) : TaskPayload

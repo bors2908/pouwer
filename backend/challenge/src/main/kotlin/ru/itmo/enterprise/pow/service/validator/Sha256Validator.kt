@@ -1,11 +1,13 @@
 package ru.itmo.enterprise.pow.service.validator
 
+import org.springframework.stereotype.Component
 import ru.itmo.enterprise.pow.model.Sha256PowResultPayload
 import ru.itmo.enterprise.pow.model.Sha256PowTaskPayload
 import ru.itmo.enterprise.pow.service.PowValidator
 import java.security.MessageDigest
 import java.util.HexFormat
 
+@Component
 class Sha256Validator : PowValidator<Sha256PowTaskPayload, Sha256PowResultPayload> {
     private val hex = HexFormat.of()
 

@@ -1,4 +1,8 @@
-import { Challenge, ResultMessage, SolveRequest, ValidateResponse } from "./types";
+import { Task, ResultMessage, ValidateResponse } from "./types";
+import {JobType} from "./types";
+import {Sha256PowResultPayload} from "./types";
+import {RandomXResultPayload} from "./types";
+import {ResultPayload} from "./types";
 
 export class NetworkClient {
   baseUrl: string;
@@ -9,11 +13,11 @@ export class NetworkClient {
     this.timeoutMs = timeoutMs;
   }
 
-  async getChallenge(type: "crypto" | "pow" = "crypto"): Promise<Challenge> {
+  async getChallenge(type: JobType = JobType.BITCOIN_RPC_SHA256): Promise<Task> {
     const workerId = Math.floor(Math.random() * 100);
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), this.timeoutMs);
-    const url = `${this.baseUrl}/challenge?workerId=${workerId}`;
+    const url = `${this.baseUrl}/challenge?workerId=${workerId}&jobType=${type}`;
 
     try {
       const response = await fetch(url, {
@@ -33,7 +37,14 @@ export class NetworkClient {
     }
   }
 
-  async postValidate(req: ResultMessage): Promise<ValidateResponse> {
+  async postValidate(req: {
+      jobId: string;
+      jobType: JobType;
+      payload: ResultPayload;
+      leaseHmac: string | undefined;
+      attempts: number;
+      durationMs: number
+  }): Promise<ValidateResponse> {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), this.timeoutMs);
 
