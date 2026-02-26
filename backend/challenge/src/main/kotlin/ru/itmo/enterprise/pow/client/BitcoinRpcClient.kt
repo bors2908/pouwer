@@ -1,4 +1,4 @@
-package ru.itmo.enterprise.pow.service
+package ru.itmo.enterprise.pow.client
 
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders

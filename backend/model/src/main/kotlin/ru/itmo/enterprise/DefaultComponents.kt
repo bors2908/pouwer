@@ -8,7 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 
 val DEFAULT_OBJECT_MAPPER: ObjectMapper = ObjectMapper().apply {
-    setSerializationInclusion(JsonInclude.Include.NON_NULL)
+    setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
     configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
     configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     registerModule(KotlinModule.Builder().build())

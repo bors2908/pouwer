@@ -1,18 +1,22 @@
 package ru.itmo.enterprise.pow.service.orchestrator
 
+import org.bitcoinj.core.Coin
+import org.bitcoinj.core.LegacyAddress
+import org.bitcoinj.core.Sha256Hash
+import org.bitcoinj.core.Transaction
+import org.bitcoinj.core.Utils
+import org.bitcoinj.params.RegTestParams
+import org.bitcoinj.script.ScriptBuilder
+import org.springframework.stereotype.Component
+import ru.itmo.enterprise.pow.client.BitcoinRpcClient
 import ru.itmo.enterprise.pow.model.JobType
 import ru.itmo.enterprise.pow.model.NonceRange
 import ru.itmo.enterprise.pow.model.Sha256PowTaskPayload
 import ru.itmo.enterprise.pow.model.Task
-import ru.itmo.enterprise.pow.service.BitcoinRpcClient
 import ru.itmo.enterprise.pow.service.TaskOrchestrator
 import ru.itmo.enterprise.pow.service.TaskStore
 import java.util.HexFormat
 import java.util.UUID
-import org.bitcoinj.core.*
-import org.bitcoinj.params.RegTestParams
-import org.bitcoinj.script.ScriptBuilder
-import org.springframework.stereotype.Component
 
 @Component
 class BitcoinPowTaskOrchestrator(
@@ -27,9 +31,9 @@ class BitcoinPowTaskOrchestrator(
     override fun createTask(workerId: String?): Task {
         val template = rpcClient.getBlockTemplate()
         val job = createJobFromTemplate(template)
-        
+
         val jobId = UUID.fromString(job.jobId)
-        
+
         val workerNum = workerId?.toIntOrNull() ?: 0
         val nonceStart = workerNum * chunkSize
         val nonceEnd = nonceStart + chunkSize
@@ -113,9 +117,13 @@ class BitcoinPowTaskOrchestrator(
             for (i in 0 until level.size step 2) {
                 val left = level[i]
                 val right = if (i + 1 < level.size) level[i + 1] else level[i]
-                nextLevel.add(Sha256Hash.wrapReversed(Sha256Hash.hashTwice(
-                    Utils.reverseBytes(left.bytes) + Utils.reverseBytes(right.bytes)
-                )))
+                nextLevel.add(
+                    Sha256Hash.wrapReversed(
+                        Sha256Hash.hashTwice(
+                            Utils.reverseBytes(left.bytes) + Utils.reverseBytes(right.bytes)
+                        )
+                    )
+                )
             }
             level = nextLevel
         }

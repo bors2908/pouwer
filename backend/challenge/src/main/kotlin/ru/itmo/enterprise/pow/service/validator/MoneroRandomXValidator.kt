@@ -1,19 +1,18 @@
 package ru.itmo.enterprise.pow.service.validator
 
 import org.springframework.stereotype.Component
+import ru.itmo.enterprise.pow.client.monero.stratum.StratumSubmitService
 import ru.itmo.enterprise.pow.model.MoneroRandomXResultPayload
 import ru.itmo.enterprise.pow.model.MoneroRandomXTaskPayload
-import ru.itmo.enterprise.pow.service.MoneroRpcClient
 import ru.itmo.enterprise.pow.service.PowValidator
 import java.math.BigInteger
 import java.util.HexFormat
 
 @Component
 class MoneroRandomXValidator(
-    val moneroRpcClient: MoneroRpcClient
+    val stratumSubmitService: StratumSubmitService
 ) : PowValidator<MoneroRandomXTaskPayload, MoneroRandomXResultPayload> {
     private val hex = HexFormat.of()
-
 
     override fun verify(
         taskPayload: MoneroRandomXTaskPayload,
@@ -42,24 +41,7 @@ class MoneroRandomXValidator(
             }
 
             // Now authoritative check via daemon
-
-            // Fetch current template to get full blocktemplate_blob
-            val template = moneroRpcClient.getBlockTemplate(walletAddress = null)
-
-            val fullBlobHex = template.blocktemplateBlob ?: return false
-
-            val fullBlobBytes = hex.parseHex(fullBlobHex).toMutableList()
-
-            // Insert nonce at offset 39 (little-endian)
-            writeNonceLE(fullBlobBytes, nonce.toInt(), 39)
-
-            val reconstructedHex = fullBlobBytes
-                .map { String.format("%02x", it) }
-                .joinToString("")
-
-            return moneroRpcClient.submitBlock(reconstructedHex)
-
-
+            return stratumSubmitService.submitShare(taskPayload.stratumJobId, nonce)
         } catch (ex: Exception) {
             // Defensive: any unexpected error -> invalid
             return false
@@ -95,12 +77,5 @@ class MoneroRandomXValidator(
     private fun u8ToBigIntLE(bytes: ByteArray): BigInteger {
         if (bytes.isEmpty()) return BigInteger.ZERO
         return BigInteger(1, bytes.reversedArray())
-    }
-
-    private fun writeNonceLE(buffer: MutableList<Byte>, nonce: Int, offset: Int) {
-        buffer[offset] = (nonce and 0xff).toByte()
-        buffer[offset + 1] = ((nonce shr 8) and 0xff).toByte()
-        buffer[offset + 2] = ((nonce shr 16) and 0xff).toByte()
-        buffer[offset + 3] = ((nonce shr 24) and 0xff).toByte()
     }
 }

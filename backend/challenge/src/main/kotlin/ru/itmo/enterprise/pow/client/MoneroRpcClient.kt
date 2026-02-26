@@ -1,4 +1,4 @@
-package ru.itmo.enterprise.pow.service
+package ru.itmo.enterprise.pow.client
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import java.math.BigInteger
 
+@Deprecated("Unused")
 @Component
 class MoneroRpcClient(
     private val objectMapper: ObjectMapper,

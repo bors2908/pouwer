@@ -2,6 +2,7 @@ rootProject.name = "backend"
 
 include("common")
 include("model")
+include("jstratum")
 
 include("challenge")
 

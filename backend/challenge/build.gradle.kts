@@ -23,6 +23,7 @@ dependencyManagement {
 
 dependencies {
     implementation(project(":common"))
+    implementation(project(":jstratum"))
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.bitcoinj:bitcoinj-core:0.16.3")
 

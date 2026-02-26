@@ -1,11 +1,21 @@
 package ru.itmo.enterprise.pow.service.result
 
-import org.bitcoinj.core.*
+import org.bitcoinj.core.Block
+import org.bitcoinj.core.Coin
+import org.bitcoinj.core.LegacyAddress
+import org.bitcoinj.core.Sha256Hash
+import org.bitcoinj.core.Transaction
+import org.bitcoinj.core.Utils
 import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.script.ScriptBuilder
 import org.springframework.stereotype.Service
-import ru.itmo.enterprise.pow.model.*
-import ru.itmo.enterprise.pow.service.BitcoinRpcClient
+import ru.itmo.enterprise.pow.client.BitcoinRpcClient
+import ru.itmo.enterprise.pow.model.JobType
+import ru.itmo.enterprise.pow.model.ResultMessage
+import ru.itmo.enterprise.pow.model.Sha256PowResultPayload
+import ru.itmo.enterprise.pow.model.Sha256PowTaskPayload
+import ru.itmo.enterprise.pow.model.ValidationResult
+import ru.itmo.enterprise.pow.model.ValidationStatus
 import ru.itmo.enterprise.pow.service.LeaseManager
 import ru.itmo.enterprise.pow.service.PowValidator
 import ru.itmo.enterprise.pow.service.ResultService
@@ -50,7 +60,7 @@ class BitcoinPowResultService(
 
         val block = reconstructBlock(template, header)
         val submitResult = rpcClient.submitBlock(hex.formatHex(block.bitcoinSerialize()))
-        
+
         return if (submitResult == null) {
             ValidationResult(ValidationStatus.ACCEPTED)
         } else {
