@@ -1,5 +1,6 @@
 package ru.itmo.enterprise.pow.controller
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -12,11 +13,13 @@ import ru.itmo.enterprise.pow.model.Task
 import ru.itmo.enterprise.pow.model.ValidationStatus
 import ru.itmo.enterprise.pow.service.ResultService
 import ru.itmo.enterprise.pow.service.TaskOrchestrator
+import tools.jackson.databind.ObjectMapper
 
 @RestController
 class GatewayController(
     orchestrators: Collection<TaskOrchestrator>,
-    resultServices: Collection<ResultService>
+    resultServices: Collection<ResultService>,
+    val objectMapper: ObjectMapper
 ) {
     private val orchestratorsByType = orchestrators.associateBy { it.type }
     private val resultServiceByType = resultServices.associateBy { it.type }
@@ -30,7 +33,11 @@ class GatewayController(
         val orchestrator = orchestratorsByType[jobType]
             ?: throw IllegalArgumentException("Unknown job type: $jobType")
 
-        return orchestrator.createTask(workerId)
+        val task = orchestrator.createTask(workerId)
+
+        log.info { "Task: " + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(task) }
+
+        return task
     }
 
     @PostMapping("/validate")
@@ -52,5 +59,9 @@ class GatewayController(
                 ResponseEntity.status(409)
                     .body(mapOf("status" to "conflict", "reason" to validation.reason))
         }
+    }
+
+    companion object {
+        private val log = KotlinLogging.logger {}
     }
 }
