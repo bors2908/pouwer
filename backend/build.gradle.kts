@@ -12,6 +12,7 @@ repositories {
 subprojects {
     repositories {
         mavenCentral()
+        mavenLocal()
     }
 
     tasks.withType<Copy>().configureEach {

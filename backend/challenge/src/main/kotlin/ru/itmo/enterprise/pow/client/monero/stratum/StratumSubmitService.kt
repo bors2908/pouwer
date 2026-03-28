@@ -1,7 +1,6 @@
-// StratumSubmitService.kt
 package ru.itmo.enterprise.pow.client.monero.stratum
 
-import com.redbottledesign.bitcoin.rpc.stratum.message.ResponseMessage
+import ge.becrin.kt.stratum.message.ResponseMessage
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -28,6 +27,8 @@ class StratumSubmitService(
         val nonceHex = nonceToLEHex(nonce)
         val params = listOfNotNull(workerName, stratumJobId, nonceHex)
         val future: CompletableFuture<ResponseMessage> = transport.sendRequest("mining.submit", params)
+
+        log.info("Submitting share. Waiting for pool response [jobId=$stratumJobId]")
 
         return try {
             val resp = future.get(defaultTimeoutSec, TimeUnit.SECONDS)

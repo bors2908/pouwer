@@ -1,7 +1,7 @@
 package ru.itmo.enterprise.pow.client.monero.stratum
 
-import com.redbottledesign.bitcoin.rpc.stratum.message.RequestMessage
-import com.redbottledesign.bitcoin.rpc.stratum.message.ResponseMessage
+import ge.becrin.kt.stratum.message.RequestMessage
+import ge.becrin.kt.stratum.message.ResponseMessage
 import org.springframework.stereotype.Component
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
@@ -12,7 +12,7 @@ class JStratumTransport(
     private val jStratumClient: MoneroStratumTcpClient,
     private val adapter: JStratumListenerAdapter
 ) : StratumTransport {
-    //TODO Reuse internal holder/cache
+    // TODO Transform into an evictable cache.
     private val pending = ConcurrentHashMap<Int, CompletableFuture<ResponseMessage>>()
     private val idCounter = AtomicInteger(1)
 

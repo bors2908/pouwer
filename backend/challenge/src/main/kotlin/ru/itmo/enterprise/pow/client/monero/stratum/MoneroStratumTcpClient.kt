@@ -1,8 +1,8 @@
 package ru.itmo.enterprise.pow.client.monero.stratum
 
-import com.redbottledesign.bitcoin.rpc.stratum.message.RequestMessage
-import com.redbottledesign.bitcoin.rpc.stratum.transport.AbstractConnectionState
-import com.redbottledesign.bitcoin.rpc.stratum.transport.tcp.StratumTcpClient
+import ge.becrin.kt.stratum.message.RequestMessage
+import ge.becrin.kt.stratum.transport.AbstractConnectionState
+import ge.becrin.kt.stratum.transport.tcp.StratumTcpClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 

@@ -1,6 +1,6 @@
 package ru.itmo.enterprise.pow.client.monero.stratum
 
-import com.redbottledesign.bitcoin.rpc.stratum.message.ResponseMessage
+import ge.becrin.kt.stratum.message.ResponseMessage
 import java.util.concurrent.CompletableFuture
 
 /**
