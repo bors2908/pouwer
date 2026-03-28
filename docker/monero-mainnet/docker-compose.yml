@@ -1,19 +1,18 @@
 services:
-  monero-testnet:
+  monero-mainnet:
     image: sethsimmons/simple-monerod:v0.18.3.4
-    container_name: monero-testnet
+    container_name: monero-mainnet
     restart: unless-stopped
     networks:
       - monero-net
     ports:
-      - "18089:18089"     # JSON‑RPC restricted
-      - "18088:18088"     # ZMQ
+      - "28089:18089"     # JSON‑RPC restricted
+      - "28088:18088"     # ZMQ
     volumes:
       - type: bind
-        source: D:/docker/monero-testnet-data
+        source: D:/docker/monero-mainnet-data
         target: /home/monero/.bitmonero
     command:
-      - --testnet
       - --rpc-restricted-bind-ip=0.0.0.0
       - --rpc-restricted-bind-port=18089
       - --zmq-pub=tcp://0.0.0.0:18088
@@ -38,7 +37,7 @@ services:
     # This abomination came from space separated parameters and arguments
     command:
       - --host
-      - "monero-testnet"
+      - "monero-mainnet"
       - --rpc-port
       - "18089"
       - --zmq-port
@@ -52,10 +51,10 @@ services:
 
 networks:
   monero-net:
-    name: monero-testnet_default
+    name: monero-mainnet_default
 
 # TODO Make externalizable
 volumes:
-  monero-testnet-data:
+  monero-mainnet-data:
   p2pool-data:
   wallet-data:
