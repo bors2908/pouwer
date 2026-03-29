@@ -1,6 +1,7 @@
 import {Task, ValidateResponse} from "./types";
 import {JobType} from "./types";
 import {ResultPayload} from "./types";
+import {ResultMessage} from "./types";
 
 export class NetworkClient {
   baseUrl: string;
@@ -35,14 +36,7 @@ export class NetworkClient {
     }
   }
 
-  async postValidate(req: {
-      jobId: string;
-      jobType: JobType;
-      payload: ResultPayload;
-      leaseHmac: string | undefined;
-      attempts: number;
-      durationMs: number
-  }): Promise<ValidateResponse> {
+  async postValidate(req: ResultMessage): Promise<ValidateResponse> {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), this.timeoutMs);
 

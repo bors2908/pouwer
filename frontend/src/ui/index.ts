@@ -13,6 +13,7 @@ declare global {
 
 import sha256Worker from "../worker/sha256.worker.ts?worker";
 import randomxWorker from "../worker/randomx.worker.ts?worker";
+import {ResultMessage} from "../lib/types";
 
 const scriptMap = {
     [JobType.POW_TEST_SHA256]: sha256Worker,
@@ -131,17 +132,9 @@ class ChallengeUI {
         }
     }
 
-    private getResultMessage(task: Task, result: SolveResult): {
-        jobId: string;
-        jobType: JobType;
-        payload: ResultPayload;
-        leaseHmac: string | undefined;
-        attempts: number;
-        durationMs: number
-    } {
+    private getResultMessage(task: Task, result: SolveResult): ResultMessage {
         return {
             jobId: task.jobId,
-            jobType: task.jobType,
             payload: result.payload,
             leaseHmac: task.leaseHmac,
             attempts: result.attempts,

@@ -1,5 +1,5 @@
 // @ts-ignore
-import {randomx_create_vm, randomx_init_cache} from '/randomx-web.js';
+import {randomx_create_vm, randomx_init_cache, randomx_benchmark_become_miner} from '/randomx-web.js';
 import {JobType, Task, WorkerInMessage, WorkerOutMessage} from "../lib/types";
 import {RandomXResultPayload} from "../lib/types";
 import {RandomXTask} from "../lib/types";
@@ -74,12 +74,12 @@ async function solveRandomX(task: RandomXTask) {
             const result: RandomXResultPayload = {
                 taskId: taskPayload.id,
                 nonce,
-                hash: hex
+                hash: hex,
+                jobType: JobType.MONERO_RANDOMX
             };
 
             self.postMessage({
                 type: "solved",
-                jobType: task.jobType,
                 attempts: attempts,
                 durationMs: durationMs,
                 payload: result,

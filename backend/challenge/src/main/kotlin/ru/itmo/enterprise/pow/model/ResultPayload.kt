@@ -5,8 +5,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.EXTERNAL_PROPERTY,
-    property = "jobType"
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "jobType",
+    visible = true
 )
 @JsonSubTypes(
     JsonSubTypes.Type(
@@ -22,16 +23,20 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
         name = "MONERO_RANDOMX"
     )
 )
-sealed interface ResultPayload
+sealed interface ResultPayload {
+    val jobType: JobType
+}
 
 data class Sha256PowResultPayload(
     val dataHex: String,
     val nonce: Long,
-    val hashHex: String
+    val hashHex: String,
+    override val jobType: JobType
 ) : ResultPayload
 
 data class MoneroRandomXResultPayload(
     val taskId: String,
     val nonce: Long,
-    val hash: String
+    val hash: String,
+    override val jobType: JobType
 ) : ResultPayload

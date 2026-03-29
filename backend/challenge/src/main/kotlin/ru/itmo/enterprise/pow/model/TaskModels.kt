@@ -12,9 +12,8 @@ data class Task(
 
 data class ResultMessage(
     val jobId: UUID,
-    val jobType: JobType,
     val payload: ResultPayload,
-    val meta: Map<String, String> = emptyMap(),
+    val meta: Map<String, String>? = emptyMap(),
     val leaseHmac: String? = null,
     val durationMs: Long?,
     val attempts: Long?

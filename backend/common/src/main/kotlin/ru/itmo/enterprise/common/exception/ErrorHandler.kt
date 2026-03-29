@@ -4,16 +4,19 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import java.nio.file.AccessDeniedException
+import org.springframework.beans.TypeMismatchException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
+import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import ru.itmo.enterprise.common.exception.handler.response.BadRequestErrorResponse
@@ -22,16 +25,54 @@ import ru.itmo.enterprise.common.exception.handler.response.ForbiddenErrorRespon
 import ru.itmo.enterprise.common.exception.handler.response.InternalServerErrorResponse
 import ru.itmo.enterprise.common.exception.handler.response.NotFoundErrorResponse
 import ru.itmo.enterprise.common.exception.handler.response.UnauthorizedErrorResponse
+import java.nio.file.AccessDeniedException
+
 
 @ControllerAdvice
 class ErrorHandler : ResponseEntityExceptionHandler() {
+    override fun handleHttpMessageNotReadable(
+        ex: HttpMessageNotReadableException,
+        headers: HttpHeaders,
+        status: HttpStatusCode,
+        request: WebRequest
+    ): ResponseEntity<Any>? {
+        logBadRequest(ex, request, "Malformed JSON / unreadable body")
+        return super.handleHttpMessageNotReadable(ex, headers, status, request)
+    }
+
+    override fun handleTypeMismatch(
+        ex: TypeMismatchException,
+        headers: HttpHeaders,
+        status: HttpStatusCode,
+        request: WebRequest
+    ): ResponseEntity<Any>? {
+        logBadRequest(ex, request, "Type mismatch")
+        return super.handleTypeMismatch(ex, headers, status, request)
+    }
+
+    override fun handleMissingServletRequestParameter(
+        ex: MissingServletRequestParameterException,
+        headers: HttpHeaders,
+        status: HttpStatusCode,
+        request: WebRequest
+    ): ResponseEntity<Any>? {
+        logBadRequest(ex, request, "Missing request parameter")
+        return super.handleMissingServletRequestParameter(ex, headers, status, request)
+    }
+
+    private fun logBadRequest(ex: java.lang.Exception, request: WebRequest, reason: String?) {
+        val req = (request as ServletWebRequest).request
+
+        logger.warn("400 ${req.method} ${req.requestURI} - $reason | ${ex.message}")
+    }
+
     @ExceptionHandler(IllegalArgumentException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ApiResponses(
         ApiResponse(
-            responseCode = ru.itmo.enterprise.common.exception.handler.response.BadRequestErrorResponse.CODE,
+            responseCode = BadRequestErrorResponse.CODE,
             description = "Bad Request - Invalid argument",
-            content = arrayOf(Content(schema = Schema(implementation = ru.itmo.enterprise.common.exception.handler.response.BadRequestErrorResponse::class)))
+            content = arrayOf(Content(schema = Schema(implementation = BadRequestErrorResponse::class)))
         )
     )
     fun handleIllegalArgumentException(exception: IllegalArgumentException): ResponseEntity<Any> {
@@ -39,33 +80,33 @@ class ErrorHandler : ResponseEntityExceptionHandler() {
 
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
-            .body(ru.itmo.enterprise.common.exception.handler.response.BadRequestErrorResponse(exception.message))
+            .body(BadRequestErrorResponse(exception.message))
     }
 
-    @ExceptionHandler(ru.itmo.enterprise.common.exception.InsufficientPermissionsException::class)
+    @ExceptionHandler(InsufficientPermissionsException::class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ApiResponses(
         ApiResponse(
-            responseCode = ru.itmo.enterprise.common.exception.handler.response.ForbiddenErrorResponse.CODE,
+            responseCode = ForbiddenErrorResponse.CODE,
             description = "Forbidden - Access Denied",
-            content = arrayOf(Content(schema = Schema(implementation = ru.itmo.enterprise.common.exception.handler.response.ForbiddenErrorResponse::class)))
+            content = arrayOf(Content(schema = Schema(implementation = ForbiddenErrorResponse::class)))
         )
     )
-    fun handleInsufficientPermissionsException(exception: ru.itmo.enterprise.common.exception.InsufficientPermissionsException): ResponseEntity<Any> {
+    fun handleInsufficientPermissionsException(exception: InsufficientPermissionsException): ResponseEntity<Any> {
         logger.warn(exception.message, exception)
 
         return ResponseEntity
             .status(HttpStatus.FORBIDDEN)
-            .body(ru.itmo.enterprise.common.exception.handler.response.ForbiddenErrorResponse(exception.message))
+            .body(ForbiddenErrorResponse(exception.message))
     }
 
     @ExceptionHandler(AccessDeniedException::class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ApiResponses(
         ApiResponse(
-            responseCode = ru.itmo.enterprise.common.exception.handler.response.UnauthorizedErrorResponse.CODE,
+            responseCode = UnauthorizedErrorResponse.CODE,
             description = "Unauthorized - Access Denied",
-            content = arrayOf(Content(schema = Schema(implementation = ru.itmo.enterprise.common.exception.handler.response.UnauthorizedErrorResponse::class)))
+            content = arrayOf(Content(schema = Schema(implementation = UnauthorizedErrorResponse::class)))
         )
     )
     fun handleAccessDeniedException(exception: AccessDeniedException): ResponseEntity<Any> {
@@ -73,67 +114,67 @@ class ErrorHandler : ResponseEntityExceptionHandler() {
 
         return ResponseEntity
             .status(HttpStatus.UNAUTHORIZED)
-            .body(ru.itmo.enterprise.common.exception.handler.response.UnauthorizedErrorResponse(exception.message))
+            .body(UnauthorizedErrorResponse(exception.message))
     }
 
-    @ExceptionHandler(ru.itmo.enterprise.common.exception.DataNotFoundException::class)
+    @ExceptionHandler(DataNotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ApiResponses(
         ApiResponse(
-            responseCode = ru.itmo.enterprise.common.exception.handler.response.NotFoundErrorResponse.CODE,
+            responseCode = NotFoundErrorResponse.CODE,
             description = "Not Found - Data not found",
-            content = arrayOf(Content(schema = Schema(implementation = ru.itmo.enterprise.common.exception.handler.response.NotFoundErrorResponse::class)))
+            content = arrayOf(Content(schema = Schema(implementation = NotFoundErrorResponse::class)))
         )
     )
-    fun handleNotFoundException(exception: ru.itmo.enterprise.common.exception.DataNotFoundException): ResponseEntity<Any> {
+    fun handleNotFoundException(exception: DataNotFoundException): ResponseEntity<Any> {
         logger.warn(exception.message, exception)
 
         return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
-            .body(ru.itmo.enterprise.common.exception.handler.response.NotFoundErrorResponse(exception.message))
+            .body(NotFoundErrorResponse(exception.message))
     }
 
-    @ExceptionHandler(ru.itmo.enterprise.common.exception.DataConflictException::class)
+    @ExceptionHandler(DataConflictException::class)
     @ResponseStatus(HttpStatus.CONFLICT)
     @ApiResponses(
         ApiResponse(
-            responseCode = ru.itmo.enterprise.common.exception.handler.response.ConflictErrorResponse.CODE,
+            responseCode = ConflictErrorResponse.CODE,
             description = "Conflict - Data conflict",
-            content = arrayOf(Content(schema = Schema(implementation = ru.itmo.enterprise.common.exception.handler.response.ConflictErrorResponse::class)))
+            content = arrayOf(Content(schema = Schema(implementation = ConflictErrorResponse::class)))
         )
     )
-    fun handleDataConflictException(exception: ru.itmo.enterprise.common.exception.DataConflictException): ResponseEntity<Any> {
+    fun handleDataConflictException(exception: DataConflictException): ResponseEntity<Any> {
         logger.warn(exception.message, exception)
 
         return ResponseEntity
             .status(HttpStatus.CONFLICT)
-            .body(ru.itmo.enterprise.common.exception.handler.response.ConflictErrorResponse(exception.message))
+            .body(ConflictErrorResponse(exception.message))
     }
 
-    @ExceptionHandler(ru.itmo.enterprise.common.exception.InvalidRequestException::class)
+    @ExceptionHandler(InvalidRequestException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ApiResponses(
         ApiResponse(
-            responseCode = ru.itmo.enterprise.common.exception.handler.response.BadRequestErrorResponse.CODE,
+            responseCode = BadRequestErrorResponse.CODE,
             description = "Bad Request - Invalid argument",
-            content = arrayOf(Content(schema = Schema(implementation = ru.itmo.enterprise.common.exception.handler.response.BadRequestErrorResponse::class)))
+            content = arrayOf(Content(schema = Schema(implementation = BadRequestErrorResponse::class)))
         )
     )
-    fun handleInvalidRequestException(exception: ru.itmo.enterprise.common.exception.InvalidRequestException): ResponseEntity<Any> {
+    fun handleInvalidRequestException(exception: InvalidRequestException): ResponseEntity<Any> {
         logger.warn(exception.message, exception)
 
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
-            .body(ru.itmo.enterprise.common.exception.handler.response.BadRequestErrorResponse(exception.message))
+            .body(BadRequestErrorResponse(exception.message))
     }
 
     @ExceptionHandler(Exception::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ApiResponses(
         ApiResponse(
-            responseCode = ru.itmo.enterprise.common.exception.handler.response.InternalServerErrorResponse.CODE,
+            responseCode = InternalServerErrorResponse.CODE,
             description = "Internal Server Error - Unknown error occurred",
-            content = arrayOf(Content(schema = Schema(implementation = ru.itmo.enterprise.common.exception.handler.response.InternalServerErrorResponse::class)))
+            content = arrayOf(Content(schema = Schema(implementation = InternalServerErrorResponse::class)))
         )
     )
     fun handleAllUncaughtException(exception: Exception): ResponseEntity<Any> {
@@ -141,14 +182,14 @@ class ErrorHandler : ResponseEntityExceptionHandler() {
 
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(ru.itmo.enterprise.common.exception.handler.response.InternalServerErrorResponse(exception.message))
+            .body(InternalServerErrorResponse(exception.message))
     }
 
     @ApiResponses(
         ApiResponse(
-            responseCode = ru.itmo.enterprise.common.exception.handler.response.BadRequestErrorResponse.CODE,
+            responseCode = BadRequestErrorResponse.CODE,
             description = "Bad Request - Invalid argument",
-            content = arrayOf(Content(schema = Schema(implementation = ru.itmo.enterprise.common.exception.handler.response.BadRequestErrorResponse::class)))
+            content = arrayOf(Content(schema = Schema(implementation = BadRequestErrorResponse::class)))
         )
     )
     override fun handleMethodArgumentNotValid(
@@ -160,13 +201,13 @@ class ErrorHandler : ResponseEntityExceptionHandler() {
         val validationErrors: MutableMap<String, String> = HashMap()
 
         ex.bindingResult.fieldErrors.forEach { error: FieldError ->
-            validationErrors[error.field] = error.defaultMessage?.toString() ?: ""
+            validationErrors[error.field] = error.defaultMessage ?: ""
         }
 
         val errorMessage = validationErrors.values.toString()
 
         return ResponseEntity
             .status(status)
-            .body(ru.itmo.enterprise.common.exception.handler.response.BadRequestErrorResponse(errorMessage))
+            .body(BadRequestErrorResponse(errorMessage))
     }
 }

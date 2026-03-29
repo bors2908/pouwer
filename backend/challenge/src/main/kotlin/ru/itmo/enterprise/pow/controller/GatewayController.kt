@@ -42,8 +42,10 @@ class GatewayController(
 
     @PostMapping("/validate")
     fun validate(@RequestBody result: ResultMessage): ResponseEntity<Any> {
-        val resultService = resultServiceByType[result.jobType]
-            ?: throw IllegalArgumentException("Unknown job type: ${result.jobType}")
+        val jobType = result.payload.jobType
+
+        val resultService = resultServiceByType[jobType]
+            ?: throw IllegalArgumentException("Unknown job type: $jobType")
 
         val validation = resultService.handleResult(result)
 

@@ -19,7 +19,7 @@ class Sha256PowResultService(
         val task = taskStore.find(result.jobId)
             ?: return ValidationResult(ValidationStatus.CONFLICT, "Unknown job")
 
-        if (task.jobType != result.jobType)
+        if (task.jobType != result.payload.jobType)
             return ValidationResult(ValidationStatus.REJECTED, "JobType mismatch")
 
         val resultPayload = result.payload as? Sha256PowResultPayload

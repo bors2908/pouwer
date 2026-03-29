@@ -87,12 +87,12 @@ async function solveSha256(task: Sha256PowTask) {
                 const resultPayload: Sha256PowResultPayload = {
                     dataHex: payload.dataHex,
                     nonce: Number(nonce),
-                    hashHex: bytesToHex(reversedHash)
+                    hashHex: bytesToHex(reversedHash),
+                    jobType: JobType.POW_TEST_SHA256
                 };
 
                 self.postMessage({
                     type: "solved",
-                    jobType: task.jobType,
                     attempts: attempts,
                     durationMs: durationMs,
                     payload: resultPayload, // Extension to match ResultMessage later

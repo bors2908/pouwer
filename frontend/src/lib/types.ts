@@ -37,48 +37,20 @@ export interface RandomXTask extends BaseTask {
 
 export type Task = Sha256PowTask | RandomXTask;
 
-export interface BaseResultMessage {
+export interface ResultMessage {
     jobId: string;
-    jobType: JobType;
     meta?: Record<string, string>;
     leaseHmac?: string;
     attempts: number;
     durationMs: number;
+    payload: ResultPayload;
 }
 
-export interface Sha256PowResultMessage extends BaseResultMessage {
-    jobType: JobType.POW_TEST_SHA256;
-    payload: Sha256PowResultPayload;
-}
-
-export interface RandomXResultMessage extends BaseResultMessage {
-    jobType: JobType.MONERO_RANDOMX;
-    payload: RandomXResultPayload;
-}
-
-export type ResultMessage =
-    | Sha256PowResultMessage
-    | RandomXResultMessage;
-
-export interface BaseSolveResult {
+export interface SolveResult {
     attempts: number;
     durationMs: number;
-    jobType: JobType;
+    payload: ResultPayload;
 }
-
-export interface Sha256SolveResult extends BaseSolveResult {
-    jobType: JobType.POW_TEST_SHA256;
-    payload: Sha256PowResultPayload;
-}
-
-export interface RandomXSolveResult extends BaseSolveResult {
-    jobType: JobType.MONERO_RANDOMX;
-    payload: RandomXResultPayload;
-}
-
-export type SolveResult =
-    | Sha256SolveResult
-    | RandomXSolveResult;
 
 export interface Sha256PowTaskPayload {
     dataHex: string;
@@ -95,16 +67,22 @@ export interface RandomXTaskPayload {
     targetHex?: string;
 }
 
-export interface Sha256PowResultPayload {
+export interface ResultPayloadBase {
+    jobType: JobType;
+}
+
+export interface Sha256PowResultPayload extends ResultPayloadBase {
     dataHex: string;
     nonce: number;
     hashHex: string;
+    jobType: JobType.POW_TEST_SHA256;
 }
 
-export interface RandomXResultPayload {
+export interface RandomXResultPayload extends ResultPayloadBase {
     taskId: string;
     nonce: number;
     hash: string;
+    jobType: JobType.MONERO_RANDOMX;
 }
 
 export type TaskPayload = Sha256PowTaskPayload | RandomXTaskPayload;
