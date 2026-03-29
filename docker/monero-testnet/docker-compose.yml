@@ -31,7 +31,7 @@ services:
       - monero-net
     ports:
       - "3333:3333"
-      - "37889:37889"
+      - "37888:37888"
     volumes:
       - p2pool-data:/home/p2pool
       - /dev/hugepages:/dev/hugepages:rw
@@ -48,9 +48,10 @@ services:
       - --stratum
       - "0.0.0.0:3333"
       - --p2p
-      - "0.0.0.0:37889"
+      - "0.0.0.0:37888"
       - --loglevel
       - "4"
+      - --mini
 
 networks:
   monero-net:
