@@ -1,6 +1,6 @@
 import {ISolver, JobType, Progress, SolveResult, Task, WorkerOutMessage} from "./types";
 
-type WorkerScriptMap = Record<JobType, string>;
+type WorkerScriptMap = Record<JobType, new () => Worker>;
 
 interface WorkerEntry {
     worker: Worker;
@@ -11,7 +11,7 @@ interface WorkerEntry {
 
 /**
  * WebWorkerSolver: one worker instance per JobType.
- * constructor accepts a map from JobType -> worker script path (relative to this file).
+ * constructor accepts a map from JobType -> worker constructor (Vite worker import).
  */
 export class WebWorkerSolver implements ISolver {
     private workers = new Map<JobType, WorkerEntry>();
@@ -24,9 +24,9 @@ export class WebWorkerSolver implements ISolver {
 
     async start(task: Task, onProgress?: (stats: Progress) => void): Promise<SolveResult> {
         const jobType = task.jobType as JobType;
-        const scriptPath = this.scriptMap[jobType];
+        const WorkerConstructor = this.scriptMap[jobType];
 
-        if (!scriptPath) {
+        if (!WorkerConstructor) {
             throw new Error(`No worker script registered for jobType: ${String(jobType)}`);
         }
 
@@ -35,7 +35,7 @@ export class WebWorkerSolver implements ISolver {
         }
 
         return new Promise<SolveResult>((resolve, reject) => {
-            const worker = new Worker(new URL(scriptPath, import.meta.url), {type: "module"});
+            const worker = new WorkerConstructor();
 
             const entry: WorkerEntry = {worker, resolve, reject, onProgress};
             this.workers.set(jobType, entry);

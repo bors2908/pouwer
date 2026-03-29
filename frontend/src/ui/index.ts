@@ -11,10 +11,13 @@ declare global {
     }
 }
 
+import sha256Worker from "../worker/sha256.worker.ts?worker";
+import randomxWorker from "../worker/randomx.worker.ts?worker";
+
 const scriptMap = {
-    [JobType.POW_TEST_SHA256]: "../worker/sha256.worker.ts",
-    [JobType.BITCOIN_RPC_SHA256]: "../worker/sha256.worker.ts",
-    [JobType.MONERO_RANDOMX]: "../worker/randomx.worker.ts",
+    [JobType.POW_TEST_SHA256]: sha256Worker,
+    [JobType.BITCOIN_RPC_SHA256]: sha256Worker,
+    [JobType.MONERO_RANDOMX]: randomxWorker,
 };
 
 class ChallengeUI {
