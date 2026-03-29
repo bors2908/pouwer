@@ -4,19 +4,15 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import org.springframework.beans.TypeMismatchException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
-import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
-import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import ru.itmo.enterprise.common.exception.handler.response.BadRequestErrorResponse
@@ -27,45 +23,8 @@ import ru.itmo.enterprise.common.exception.handler.response.NotFoundErrorRespons
 import ru.itmo.enterprise.common.exception.handler.response.UnauthorizedErrorResponse
 import java.nio.file.AccessDeniedException
 
-
 @ControllerAdvice
 class ErrorHandler : ResponseEntityExceptionHandler() {
-    override fun handleHttpMessageNotReadable(
-        ex: HttpMessageNotReadableException,
-        headers: HttpHeaders,
-        status: HttpStatusCode,
-        request: WebRequest
-    ): ResponseEntity<Any>? {
-        logBadRequest(ex, request, "Malformed JSON / unreadable body")
-        return super.handleHttpMessageNotReadable(ex, headers, status, request)
-    }
-
-    override fun handleTypeMismatch(
-        ex: TypeMismatchException,
-        headers: HttpHeaders,
-        status: HttpStatusCode,
-        request: WebRequest
-    ): ResponseEntity<Any>? {
-        logBadRequest(ex, request, "Type mismatch")
-        return super.handleTypeMismatch(ex, headers, status, request)
-    }
-
-    override fun handleMissingServletRequestParameter(
-        ex: MissingServletRequestParameterException,
-        headers: HttpHeaders,
-        status: HttpStatusCode,
-        request: WebRequest
-    ): ResponseEntity<Any>? {
-        logBadRequest(ex, request, "Missing request parameter")
-        return super.handleMissingServletRequestParameter(ex, headers, status, request)
-    }
-
-    private fun logBadRequest(ex: java.lang.Exception, request: WebRequest, reason: String?) {
-        val req = (request as ServletWebRequest).request
-
-        logger.warn("400 ${req.method} ${req.requestURI} - $reason | ${ex.message}")
-    }
-
     @ExceptionHandler(IllegalArgumentException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ApiResponses(
