@@ -1,5 +1,3 @@
-export type HexString = string; // "ab12..."
-
 export enum JobType {
     POW_TEST_SHA256 = "POW_TEST_SHA256",
     BITCOIN_RPC_SHA256 = "BITCOIN_RPC_SHA256",
