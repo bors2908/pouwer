@@ -91,7 +91,16 @@
     <div id="result"></div>
 </div>
 
-<!-- The challenge is no longer injected here, fetched dynamically -->
+<script type="importmap">
+{
+  "imports": {
+    "js-sha256": "https://cdn.jsdelivr.net/npm/js-sha256@0.11.1/src/sha256.js",
+    "randomx.js": "/node_modules/randomx.js/dist/web/index.js",
+    "/dist/worker/sha256.worker.js": "/dist/worker/sha256.worker.js",
+    "/dist/worker/randomx.worker.js": "/dist/worker/randomx.worker.js"
+  }
+}
+</script>
 
 <script type="module" src="/dist/ui/index.js"></script>
 </body>
