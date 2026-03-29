@@ -63,8 +63,8 @@ export interface Sha256PowTaskPayload {
 export interface RandomXTaskPayload {
     id: string;
     blob: string;
-    difficulty?: string;
-    targetHex?: string;
+    targetHex: string;
+    seedHash: string;
 }
 
 export interface ResultPayloadBase {

@@ -60,17 +60,6 @@ class MoneroRandomXValidator(
                 }
             }
 
-            !task.difficulty.isNullOrBlank() -> {
-                val difficulty = try {
-                    BigInteger(task.difficulty)
-                } catch (ex: Exception) {
-                    return null
-                }
-                if (difficulty <= BigInteger.ZERO) return null
-                val max = BigInteger.ONE.shiftLeft(256).subtract(BigInteger.ONE)
-                max.divide(difficulty)
-            }
-
             else -> null
         }
     }

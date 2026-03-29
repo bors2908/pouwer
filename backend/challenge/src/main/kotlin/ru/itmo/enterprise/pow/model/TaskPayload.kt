@@ -35,7 +35,7 @@ data class Sha256PowTaskPayload(
 data class MoneroRandomXTaskPayload(
     val id: String,
     val blob: String,
-    val difficulty: String?,
     val targetHex: String?,
-    val stratumJobId: String? = null
+    val stratumJobId: String? = null,
+    val seedHash: String? = null,
 ) : TaskPayload

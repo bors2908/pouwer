@@ -35,9 +35,9 @@ class StratumToMoneroConverter {
         return MoneroRandomXTaskPayload(
             id = UUID.randomUUID().toString(),
             blob = raw.blob,
-            difficulty = difficultyStr,
             targetHex = raw.targetHex,
-            stratumJobId = raw.jobId
+            stratumJobId = raw.jobId,
+            seedHash = raw.seedHash,
         )
     }
 }

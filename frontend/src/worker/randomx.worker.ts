@@ -1,13 +1,24 @@
 // @ts-ignore
-import {randomx_create_vm, randomx_init_cache, randomx_benchmark_become_miner} from '/randomx-web.js';
-import {JobType, Task, WorkerInMessage, WorkerOutMessage} from "../lib/types";
-import {RandomXResultPayload} from "../lib/types";
-import {RandomXTask} from "../lib/types";
+import {randomx_create_vm, randomx_init_cache} from '/randomx-web.js';
+
+import {JobType, RandomXResultPayload, RandomXTask, Task, WorkerInMessage, WorkerOutMessage,} from "../lib/types";
+
 import {nowMs} from "../lib/utils";
+
+type RandomXRuntimeState = {
+    cache: any | null;
+    vm: any | null;
+    seedHash?: string;
+};
 
 let currentTask: Task | null = null;
 let running = false;
-let vm: any = null;
+
+const state: RandomXRuntimeState = {
+    cache: null,
+    vm: null,
+    seedHash: undefined,
+};
 
 self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
     const msg = e.data;
@@ -37,11 +48,9 @@ async function solve(task: Task) {
 }
 
 async function solveRandomX(task: RandomXTask) {
-    if (!vm) {
-        await initRandomx();
-    }
+    await ensureRandomXReady(task);
 
-    const taskPayload = task.payload
+    const taskPayload = task.payload;
     postMessage({type: 'log', payload: `fetched task ${taskPayload.id}`});
 
     const startTime = nowMs();
@@ -59,7 +68,7 @@ async function solveRandomX(task: RandomXTask) {
         writeNonceLE(blobBytes, nonce, 39);
 
         // randomx.js calculate_hash accepts string or ArrayBuffer per README
-        const hashU8: Uint8Array = vm.calculate_hash(blobBytes);
+        const hashU8: Uint8Array = state.vm!.calculate_hash(blobBytes);
 
         attempts++;
 
@@ -67,15 +76,14 @@ async function solveRandomX(task: RandomXTask) {
             postMessage({type: 'progress', payload: `task ${taskPayload.id} nonce ${nonce}`});
         }
 
-        if (meetsTargetCorrect(hashU8, {difficulty: taskPayload.difficulty, targetHex: taskPayload.targetHex})) {
+        if (meetsTargetCorrect(hashU8, {targetHex: taskPayload.targetHex})) {
             const durationMs = nowMs() - startTime;
 
-            const hex = toHex(hashU8);
             const result: RandomXResultPayload = {
                 taskId: taskPayload.id,
-                nonce,
-                hash: hex,
-                jobType: JobType.MONERO_RANDOMX
+                nonce: nonce,
+                hash: toHex(hashU8),
+                jobType: JobType.MONERO_RANDOMX,
             };
 
             self.postMessage({
@@ -83,7 +91,8 @@ async function solveRandomX(task: RandomXTask) {
                 attempts: attempts,
                 durationMs: durationMs,
                 payload: result,
-            } as any);
+            } as WorkerOutMessage);
+
             running = false;
             return;
         }
@@ -91,7 +100,8 @@ async function solveRandomX(task: RandomXTask) {
         const currentTime = nowMs();
         if (currentTime - lastProgressTime >= 500) {
             const elapsedMs = currentTime - startTime;
-            const hps = Math.floor((attempts * 1000) / elapsedMs);
+            const hps = elapsedMs > 0 ? Math.floor((attempts * 1000) / elapsedMs) : 0;
+
             self.postMessage({
                 type: "progress",
                 attempts,
@@ -128,7 +138,7 @@ function hexToBytes(hex: string): Uint8Array {
 
     const bytes = new Uint8Array(clean.length / 2);
     for (let i = 0; i < bytes.length; i++) {
-        bytes[i] = parseInt(clean.substr(i * 2, 2), 16);
+        bytes[i] = parseInt(clean.slice(i * 2, i * 2 + 2), 16);
     }
     return bytes;
 }
@@ -152,48 +162,35 @@ function parseDifficulty(d: string | number | bigint): bigint {
     return BigInt(d);
 }
 
-function targetFromDifficulty(difficulty: bigint): bigint {
-    if (difficulty <= 0n) {
-        throw new Error('invalid difficulty');
-    }
-    const max = (1n << 256n) - 1n;
-    return max / difficulty;
-}
-
 function targetFromHexBE(targetHex: string): bigint {
     // normalize
     const hex = targetHex.startsWith('0x') ? targetHex.slice(2) : targetHex;
     if (hex.length > 64) {
         throw new Error('targetHex longer than 32 bytes');
     }
-    const be = BigInt('0x' + hex.padStart(64, '0')); // big-endian value as bigint
-    return be;
+    return BigInt('0x' + hex.padStart(64, '0'));  // big-endian value as bigint
 }
 
 function meetsTargetCorrect(
     hash: Uint8Array,
-    payload: { difficulty?: string | number | bigint; targetHex?: string }
+    payload: { targetHex: string }
 ): boolean {
-    // prefer explicit targetHex if present
-    if (payload.targetHex) {
-        const target = targetFromHexBE(payload.targetHex);
-        const h = u8ToBigIntLE(hash);
-        return h <= target;
-    }
-
-    if (!payload.difficulty) {
-        // permissive for dev/testing; change to false in production
-        return true;
-    }
-
-    const difficulty = parseDifficulty(payload.difficulty);
-    const target = targetFromDifficulty(difficulty);
+    const target = targetFromHexBE(payload.targetHex);
     const h = u8ToBigIntLE(hash);
     return h <= target;
 }
 
-async function initRandomx() {
-    const cache = randomx_init_cache('demo-key');
-    vm = randomx_create_vm(cache);
-    postMessage({type: 'log', payload: 'randomx vm initialized'});
+async function ensureRandomXReady(task: RandomXTask) {
+    // Rebuild cache/VM only when the seed changes.
+    const seedHash = task.payload.seedHash;
+
+    if (state.vm && state.seedHash === seedHash) {
+        return;
+    }
+
+    state.seedHash = seedHash;
+    state.cache = randomx_init_cache(seedHash);
+    state.vm = randomx_create_vm(state.cache);
+
+    postMessage({type: "log", payload: `randomx vm initialized for seed ${seedHash}`});
 }
