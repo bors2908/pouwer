@@ -134,8 +134,8 @@ function hexToBytes(hex: string): Uint8Array {
 
 function writeNonceLE(buffer: Uint8Array, nonce: number, offset: number) {
     // uint32 little-endian
-    buffer[offset]     =  nonce        & 0xff;
-    buffer[offset + 1] = (nonce >> 8)  & 0xff;
+    buffer[offset] = nonce & 0xff;
+    buffer[offset + 1] = (nonce >> 8) & 0xff;
     buffer[offset + 2] = (nonce >> 16) & 0xff;
     buffer[offset + 3] = (nonce >> 24) & 0xff;
 }

@@ -1,7 +1,5 @@
-import { Task, ResultMessage, ValidateResponse } from "./types";
+import {Task, ValidateResponse} from "./types";
 import {JobType} from "./types";
-import {Sha256PowResultPayload} from "./types";
-import {RandomXResultPayload} from "./types";
 import {ResultPayload} from "./types";
 
 export class NetworkClient {

@@ -2,11 +2,6 @@ import {NetworkClient} from "../lib/network";
 import {WebWorkerSolver} from "../lib/solver";
 import {ISolver, Progress, Task} from "../lib/types";
 import {JobType} from "../lib/types";
-import {ResultMessage} from "../lib/types";
-import {Sha256SolveResult} from "../lib/types";
-import {RandomXSolveResult} from "../lib/types";
-import {Sha256PowResultPayload} from "../lib/types";
-import {RandomXResultPayload} from "../lib/types";
 import {ResultPayload} from "../lib/types";
 import {SolveResult} from "../lib/types";
 
