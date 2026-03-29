@@ -1,79 +1,79 @@
-import {Task, ValidateResponse} from "./types.js";
-import {JobType} from "./types.js";
-import {ResultPayload} from "./types.js";
+import { Task, ResultMessage, ValidateResponse } from "./types";
+import {JobType} from "./types";
+import {Sha256PowResultPayload} from "./types";
+import {RandomXResultPayload} from "./types";
+import {ResultPayload} from "./types";
 
 export class NetworkClient {
-    baseUrl: string;
+  baseUrl: string;
+  timeoutMs: number;
 
-    timeoutMs: number;
+  constructor(baseUrl: string = "http://localhost:8081", timeoutMs: number = 10000) {
+    this.baseUrl = baseUrl;
+    this.timeoutMs = timeoutMs;
+  }
 
-    constructor(baseUrl: string = "http://localhost:8081", timeoutMs: number = 10000) {
-        this.baseUrl = baseUrl;
-        this.timeoutMs = timeoutMs;
+  async getChallenge(type: JobType = JobType.BITCOIN_RPC_SHA256): Promise<Task> {
+    const workerId = Math.floor(Math.random() * 100);
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), this.timeoutMs);
+    const url = `${this.baseUrl}/challenge?workerId=${workerId}&jobType=${type}`;
+
+    try {
+      const response = await fetch(url, {
+        signal: controller.signal,
+      });
+
+      clearTimeout(id);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch challenge: HTTP ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (e: any) {
+      clearTimeout(id);
+      throw e;
     }
+  }
 
-    async getChallenge(type: JobType = JobType.BITCOIN_RPC_SHA256): Promise<Task> {
-        const workerId = Math.floor(Math.random() * 100);
-        const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), this.timeoutMs);
-        const url = `${this.baseUrl}/challenge?workerId=${workerId}&jobType=${type}`;
+  async postValidate(req: {
+      jobId: string;
+      jobType: JobType;
+      payload: ResultPayload;
+      leaseHmac: string | undefined;
+      attempts: number;
+      durationMs: number
+  }): Promise<ValidateResponse> {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), this.timeoutMs);
 
+    try {
+      const response = await fetch(`${this.baseUrl}/validate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(req),
+        signal: controller.signal,
+      });
+
+      clearTimeout(id);
+
+      if (response.ok) {
+        return { ok: true };
+      } else {
+        const text = await response.text();
+        let reason = text;
         try {
-            const response = await fetch(url, {
-                signal: controller.signal,
-            });
-
-            clearTimeout(id);
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch challenge: HTTP ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (e: any) {
-            clearTimeout(id);
-            throw e;
-        }
+          const body = JSON.parse(text);
+          reason = body.reason || body.status || text;
+        } catch {}
+        return { ok: false, reason: `HTTP ${response.status}: ${reason}` };
+      }
+    } catch (e: any) {
+      clearTimeout(id);
+      return { ok: false, reason: e.message || "Network error" };
     }
-
-    async postValidate(req: {
-        jobId: string;
-        jobType: JobType;
-        payload: ResultPayload;
-        leaseHmac: string | undefined;
-        attempts: number;
-        durationMs: number
-    }): Promise<ValidateResponse> {
-        const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), this.timeoutMs);
-
-        try {
-            const response = await fetch(`${this.baseUrl}/validate`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(req),
-                signal: controller.signal,
-            });
-
-            clearTimeout(id);
-
-            if (response.ok) {
-                return {ok: true};
-            } else {
-                const text = await response.text();
-                let reason = text;
-                try {
-                    const body = JSON.parse(text);
-                    reason = body.reason || body.status || text;
-                } catch {
-                }
-                return {ok: false, reason: `HTTP ${response.status}: ${reason}`};
-            }
-        } catch (e: any) {
-            clearTimeout(id);
-            return {ok: false, reason: e.message || "Network error"};
-        }
-    }
+  }
 }

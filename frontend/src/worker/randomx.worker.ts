@@ -1,18 +1,15 @@
 import {randomx_create_vm, randomx_init_cache} from 'randomx.js';
-import {JobType, Task, WorkerInMessage, WorkerOutMessage} from "../lib/types.js";
-import {RandomXResultPayload} from "../lib/types.js";
-import {RandomXTask} from "../lib/types.js";
-import {nowMs} from "../lib/utils.js";
+import {JobType, Task, WorkerInMessage, WorkerOutMessage} from "../lib/types";
+import {RandomXResultPayload} from "../lib/types";
+import {RandomXTask} from "../lib/types";
+import {nowMs} from "../lib/utils";
 
 let currentTask: Task | null = null;
 let running = false;
 let vm: any = null;
 
 self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
-    handleMessage(e.data);
-};
-
-function handleMessage(msg: WorkerInMessage) {
+    const msg = e.data;
     switch (msg.type) {
         case "init":
             currentTask = msg.task;
@@ -27,18 +24,14 @@ function handleMessage(msg: WorkerInMessage) {
             running = false;
             break;
     }
-}
-
-function postMessageToParent(msg: WorkerOutMessage | { type: string; payload: string }) {
-    (self as any).postMessage(msg);
-}
+};
 
 async function solve(task: Task) {
     switch (task.jobType) {
         case JobType.MONERO_RANDOMX:
             return solveRandomX(task);
         default:
-            postMessageToParent({type: "stopped", reason: `Unsupported job type: ${task.jobType}`} as WorkerOutMessage);
+            self.postMessage({type: "stopped", reason: `Unsupported job type: ${task.jobType}`} as WorkerOutMessage);
     }
 }
 
@@ -48,7 +41,7 @@ async function solveRandomX(task: RandomXTask) {
     }
 
     const taskPayload = task.payload
-    postMessageToParent({type: 'log', payload: `fetched task ${taskPayload.id}`});
+    postMessage({type: 'log', payload: `fetched task ${taskPayload.id}`});
 
     const startTime = nowMs();
     let attempts = 0;
@@ -70,7 +63,7 @@ async function solveRandomX(task: RandomXTask) {
         attempts++;
 
         if (nonce % 1000 === 0) {
-            postMessageToParent({type: 'progress', payload: `task ${taskPayload.id} nonce ${nonce}`});
+            postMessage({type: 'progress', payload: `task ${taskPayload.id} nonce ${nonce}`});
         }
 
         if (meetsTargetCorrect(hashU8, {difficulty: taskPayload.difficulty, targetHex: taskPayload.targetHex})) {
@@ -83,7 +76,7 @@ async function solveRandomX(task: RandomXTask) {
                 hash: hex
             };
 
-            postMessageToParent({
+            self.postMessage({
                 type: "solved",
                 jobType: task.jobType,
                 attempts: attempts,
@@ -98,7 +91,7 @@ async function solveRandomX(task: RandomXTask) {
         if (currentTime - lastProgressTime >= 500) {
             const elapsedMs = currentTime - startTime;
             const hps = Math.floor((attempts * 1000) / elapsedMs);
-            postMessageToParent({
+            self.postMessage({
                 type: "progress",
                 attempts,
                 elapsedMs,
@@ -108,7 +101,7 @@ async function solveRandomX(task: RandomXTask) {
         }
     }
 
-    postMessageToParent({type: "stopped", reason: "Exhausted"} as WorkerOutMessage);
+    self.postMessage({type: "stopped", reason: "Exhausted"} as WorkerOutMessage);
 
     await new Promise(r => setTimeout(r, 200));
 }
@@ -141,8 +134,8 @@ function hexToBytes(hex: string): Uint8Array {
 
 function writeNonceLE(buffer: Uint8Array, nonce: number, offset: number) {
     // uint32 little-endian
-    buffer[offset] = nonce & 0xff;
-    buffer[offset + 1] = (nonce >> 8) & 0xff;
+    buffer[offset]     =  nonce        & 0xff;
+    buffer[offset + 1] = (nonce >> 8)  & 0xff;
     buffer[offset + 2] = (nonce >> 16) & 0xff;
     buffer[offset + 3] = (nonce >> 24) & 0xff;
 }
@@ -201,5 +194,5 @@ function meetsTargetCorrect(
 async function initRandomx() {
     const cache = randomx_init_cache('demo-key');
     vm = randomx_create_vm(cache);
-    postMessageToParent({type: 'log', payload: 'randomx vm initialized'});
+    postMessage({type: 'log', payload: 'randomx vm initialized'});
 }

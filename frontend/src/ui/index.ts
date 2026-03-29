@@ -1,9 +1,14 @@
-import {NetworkClient} from "../lib/network.js";
-import {WebWorkerSolver} from "../lib/solver.js";
-import {ISolver, Progress, Task} from "../lib/types.js";
-import {JobType} from "../lib/types.js";
-import {ResultPayload} from "../lib/types.js";
-import {SolveResult} from "../lib/types.js";
+import {NetworkClient} from "../lib/network";
+import {WebWorkerSolver} from "../lib/solver";
+import {ISolver, Progress, Task} from "../lib/types";
+import {JobType} from "../lib/types";
+import {ResultMessage} from "../lib/types";
+import {Sha256SolveResult} from "../lib/types";
+import {RandomXSolveResult} from "../lib/types";
+import {Sha256PowResultPayload} from "../lib/types";
+import {RandomXResultPayload} from "../lib/types";
+import {ResultPayload} from "../lib/types";
+import {SolveResult} from "../lib/types";
 
 declare global {
     interface Window {
@@ -12,9 +17,9 @@ declare global {
 }
 
 const scriptMap = {
-    [JobType.POW_TEST_SHA256]: "/dist/worker/sha256.worker.js",
-    [JobType.BITCOIN_RPC_SHA256]: "/dist/worker/sha256.worker.js",
-    [JobType.MONERO_RANDOMX]: "/dist/worker/randomx.worker.js",
+    [JobType.POW_TEST_SHA256]: "../worker/sha256.worker.ts",
+    [JobType.BITCOIN_RPC_SHA256]: "../worker/sha256.worker.ts",
+    [JobType.MONERO_RANDOMX]: "../worker/randomx.worker.ts",
 };
 
 class ChallengeUI {
@@ -110,30 +115,13 @@ class ChallengeUI {
                 this.uiElements.resultEl.style.color = "green";
             } else {
                 this.updateStatus("Failed");
-                // @ts-ignore
                 this.uiElements.resultEl.textContent = `Rejected: ${validateRes.reason}`;
                 this.uiElements.resultEl.style.color = "red";
             }
         } catch (e: any) {
             if (e.message !== "Cancelled") {
                 this.updateStatus("Error");
-                let errorMsg = "Unknown error";
-                if (e instanceof Error) {
-                    errorMsg = e.message;
-                } else if (typeof e === "string") {
-                    errorMsg = e;
-                } else if (e && e.message) {
-                    errorMsg = String(e.message);
-                } else if (e && e.type === "error" && e.target instanceof Worker) {
-                    errorMsg = "Worker error (check console)";
-                } else {
-                    try {
-                        errorMsg = JSON.stringify(e);
-                    } catch {
-                        errorMsg = String(e);
-                    }
-                }
-                this.uiElements.resultEl.textContent = `Error: ${errorMsg}`;
+                this.uiElements.resultEl.textContent = `Error: ${e.message}`;
                 this.uiElements.resultEl.style.color = "red";
             } else {
                 this.updateStatus("Ready");
