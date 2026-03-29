@@ -111,37 +111,28 @@ class ChallengeUI {
             } else {
                 this.updateStatus("Failed");
                 // @ts-ignore
-                this.uiElements.resultEl.textContent = `Rejected: ${validateRes.reason || "Unknown reason"}`;
+                this.uiElements.resultEl.textContent = `Rejected: ${validateRes.reason}`;
                 this.uiElements.resultEl.style.color = "red";
             }
         } catch (e: any) {
-            console.error("[ChallengeUI] Detailed error during solving:", e);
             if (e.message !== "Cancelled") {
                 this.updateStatus("Error");
-                let errorMsg = "Unknown error details";
+                let errorMsg = "Unknown error";
                 if (e instanceof Error) {
                     errorMsg = e.message;
                 } else if (typeof e === "string") {
                     errorMsg = e;
-                } else if (e instanceof ErrorEvent) {
-                    errorMsg = `Worker load error: ${e.message || "Generic error"} at ${e.filename || "unknown file"}:${e.lineno || "unknown line"}`;
-                } else if (e && typeof e.message === "string") {
-                    errorMsg = e.message;
-                } else if (e && e.type === "error") {
+                } else if (e && e.message) {
+                    errorMsg = String(e.message);
+                } else if (e && e.type === "error" && e.target instanceof Worker) {
                     errorMsg = "Worker error (check console)";
                 } else {
                     try {
-                        const str = JSON.stringify(e);
-                        errorMsg = (str === "{}" || !str) ? String(e) : str;
+                        errorMsg = JSON.stringify(e);
                     } catch {
                         errorMsg = String(e);
                     }
                 }
-
-                if (!errorMsg || errorMsg === "undefined" || errorMsg === "[object Object]") {
-                    errorMsg = "An unexpected error occurred. Please check the browser console for more details.";
-                }
-
                 this.uiElements.resultEl.textContent = `Error: ${errorMsg}`;
                 this.uiElements.resultEl.style.color = "red";
             } else {

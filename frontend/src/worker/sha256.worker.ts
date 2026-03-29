@@ -1,11 +1,7 @@
-// @ts-ignore
-import {sha256} from "https://cdn.jsdelivr.net/npm/js-sha256@0.11.1/src/sha256.js";
+import {sha256} from "js-sha256";
 import {JobType, Sha256PowResultPayload, Task, WorkerInMessage, WorkerOutMessage} from "../lib/types.js";
 import {Sha256PowTask} from "../lib/types.js";
 import {bytesToHex, hexToBytes, nowMs} from "../lib/utils.js";
-
-// @ts-ignore
-const actualSha256 = sha256.sha256 || sha256;
 
 let currentTask: Task | null = null;
 let running = false;
@@ -79,8 +75,8 @@ async function solveSha256(task: Sha256PowTask) {
                 buffer[offset + 3] = n & 0xff;
             }
 
-            const hash1 = actualSha256.array(buffer);
-            const hash2 = actualSha256.array(hash1);
+            const hash1 = sha256.array(buffer);
+            const hash2 = sha256.array(hash1);
             const hashBytes = new Uint8Array(hash2);
 
             // Bitcoin comparison: reverse bytes to get Little Endian representation if needed,
