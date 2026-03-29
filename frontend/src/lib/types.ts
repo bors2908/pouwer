@@ -116,7 +116,7 @@ export type ResultPayload = Sha256PowResultPayload | RandomXResultPayload;
 export interface ISolver {
     start(challenge: Task, onProgress?: (stats: Progress) => void): Promise<SolveResult>;
 
-    cancel(): void;
+    cancel(jobType?: JobType): void;
 }
 
 // Worker message types

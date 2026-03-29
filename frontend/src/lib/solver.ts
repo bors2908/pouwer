@@ -1,4 +1,4 @@
-import { Task, ISolver, Progress, SolveResult, WorkerOutMessage, JobType } from "./types";
+import {ISolver, JobType, Progress, SolveResult, Task, WorkerOutMessage} from "./types.js";
 
 type WorkerScriptMap = Record<JobType, string>;
 
@@ -15,6 +15,7 @@ interface WorkerEntry {
  */
 export class WebWorkerSolver implements ISolver {
     private workers = new Map<JobType, WorkerEntry>();
+
     private readonly scriptMap: WorkerScriptMap;
 
     constructor(scriptMap: WorkerScriptMap) {
@@ -34,9 +35,9 @@ export class WebWorkerSolver implements ISolver {
         }
 
         return new Promise<SolveResult>((resolve, reject) => {
-            const worker = new Worker(new URL(scriptPath, import.meta.url), { type: "module" });
+            const worker = new Worker(scriptPath, {type: "module"});
 
-            const entry: WorkerEntry = { worker, resolve, reject, onProgress };
+            const entry: WorkerEntry = {worker, resolve, reject, onProgress};
             this.workers.set(jobType, entry);
 
             const cleanup = () => {
@@ -44,7 +45,8 @@ export class WebWorkerSolver implements ISolver {
                 try {
                     entry.worker.onmessage = null;
                     entry.worker.onerror = null;
-                } catch {}
+                } catch {
+                }
                 if (this.workers.get(jobType) === entry) {
                     this.workers.delete(jobType);
                 }
@@ -75,13 +77,16 @@ export class WebWorkerSolver implements ISolver {
 
             entry.worker.onerror = (e) => {
                 cleanup();
-                try { entry.worker.terminate(); } catch {}
+                try {
+                    entry.worker.terminate();
+                } catch {
+                }
                 reject(e);
             };
 
             // initialize + start
-            entry.worker.postMessage({ type: "init", challenge: task });
-            entry.worker.postMessage({ type: "start" });
+            entry.worker.postMessage({type: "init", task: task});
+            entry.worker.postMessage({type: "start"});
         });
     }
 
@@ -95,9 +100,13 @@ export class WebWorkerSolver implements ISolver {
                 return;
             }
             try {
-                entry.worker.postMessage({ type: "cancel" });
-            } catch {}
-            try { entry.worker.terminate(); } catch {}
+                entry.worker.postMessage({type: "cancel"});
+            } catch {
+            }
+            try {
+                entry.worker.terminate();
+            } catch {
+            }
             this.workers.delete(jobType);
             // reject outstanding promise to signal cancellation (optional)
             entry.reject(new Error("Cancelled"));
@@ -107,9 +116,13 @@ export class WebWorkerSolver implements ISolver {
         // cancel all
         for (const [jt, entry] of Array.from(this.workers.entries())) {
             try {
-                entry.worker.postMessage({ type: "cancel" });
-            } catch {}
-            try { entry.worker.terminate(); } catch {}
+                entry.worker.postMessage({type: "cancel"});
+            } catch {
+            }
+            try {
+                entry.worker.terminate();
+            } catch {
+            }
             entry.reject(new Error("Cancelled"));
             this.workers.delete(jt);
         }

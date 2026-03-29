@@ -1,13 +1,16 @@
 import {sha256} from "js-sha256";
-import {JobType, Sha256PowResultPayload, Task, WorkerInMessage, WorkerOutMessage} from "../lib/types";
-import {Sha256PowTask} from "../lib/types";
-import {bytesToHex, hexToBytes, nowMs} from "../lib/utils";
+import {JobType, Sha256PowResultPayload, Task, WorkerInMessage, WorkerOutMessage} from "../lib/types.js";
+import {Sha256PowTask} from "../lib/types.js";
+import {bytesToHex, hexToBytes, nowMs} from "../lib/utils.js";
 
 let currentTask: Task | null = null;
 let running = false;
 
 self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
-    const msg = e.data;
+    handleMessage(e.data);
+};
+
+function handleMessage(msg: WorkerInMessage) {
     switch (msg.type) {
         case "init":
             currentTask = msg.task;
@@ -22,14 +25,18 @@ self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
             running = false;
             break;
     }
-};
+}
+
+function postMessageToParent(msg: WorkerOutMessage) {
+    (self as any).postMessage(msg);
+}
 
 async function solve(task: Task) {
     switch (task.jobType) {
         case JobType.POW_TEST_SHA256:
             return solveSha256(task);
         default:
-            self.postMessage({type: "stopped", reason: `Unsupported job type: ${task.jobType}`} as WorkerOutMessage);
+            postMessageToParent({type: "stopped", reason: `Unsupported job type: ${task.jobType}`} as WorkerOutMessage);
     }
 }
 
@@ -90,7 +97,7 @@ async function solveSha256(task: Sha256PowTask) {
                     hashHex: bytesToHex(reversedHash)
                 };
 
-                self.postMessage({
+                postMessageToParent({
                     type: "solved",
                     jobType: task.jobType,
                     attempts: attempts,
@@ -107,7 +114,7 @@ async function solveSha256(task: Sha256PowTask) {
         if (currentTime - lastProgressTime >= 500) {
             const elapsedMs = currentTime - startTime;
             const hps = Math.floor((attempts * 1000) / elapsedMs);
-            self.postMessage({
+            postMessageToParent({
                 type: "progress",
                 attempts,
                 elapsedMs,
@@ -120,8 +127,8 @@ async function solveSha256(task: Sha256PowTask) {
     }
 
     if (nonce > nonceEnd) {
-        self.postMessage({type: "stopped", reason: "Range exhausted"} as WorkerOutMessage);
+        postMessageToParent({type: "stopped", reason: "Range exhausted"} as WorkerOutMessage);
     } else {
-        self.postMessage({type: "stopped", reason: "Cancelled"} as WorkerOutMessage);
+        postMessageToParent({type: "stopped", reason: "Cancelled"} as WorkerOutMessage);
     }
 }

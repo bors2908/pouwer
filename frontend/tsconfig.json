@@ -1,14 +1,21 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "strict": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "noImplicitAny": false,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["ESNext", "DOM", "WebWorker"],
+    "lib": [
+      "ESNext",
+      "DOM",
+      "WebWorker"
+    ],
     "outDir": "dist"
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*"
+  ]
 }
