@@ -64,6 +64,7 @@ export interface RandomXTaskPayload {
     id: string;
     blob: string;
     targetHex: string;
+    height: number;
     seedHash: string;
 }
 

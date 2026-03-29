@@ -36,6 +36,7 @@ data class MoneroRandomXTaskPayload(
     val id: String,
     val blob: String,
     val targetHex: String?,
+    val height: Long?,
     val stratumJobId: String? = null,
     val seedHash: String? = null,
 ) : TaskPayload

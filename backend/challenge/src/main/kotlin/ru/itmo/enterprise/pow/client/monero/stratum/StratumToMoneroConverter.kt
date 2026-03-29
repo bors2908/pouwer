@@ -36,6 +36,7 @@ class StratumToMoneroConverter {
             id = UUID.randomUUID().toString(),
             blob = raw.blob,
             targetHex = raw.targetHex,
+            height = raw.height,
             stratumJobId = raw.jobId,
             seedHash = raw.seedHash,
         )

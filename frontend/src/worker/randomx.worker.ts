@@ -189,7 +189,7 @@ async function ensureRandomXReady(task: RandomXTask) {
     }
 
     state.seedHash = seedHash;
-    state.cache = randomx_init_cache(seedHash);
+    state.cache = randomx_init_cache(hexToBytes(seedHash));
     state.vm = randomx_create_vm(state.cache);
 
     postMessage({type: "log", payload: `randomx vm initialized for seed ${seedHash}`});

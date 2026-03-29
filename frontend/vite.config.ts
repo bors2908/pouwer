@@ -25,14 +25,14 @@ export default defineConfig({
       },
       load(id) {
         if (id === '/randomx-web.js') {
-          const pkgPath = resolve(__dirname, 'node_modules/randomx.js/dist/web/index.js');
+          const pkgPath = resolve(__dirname, '../docker/build-randomx-js/build-out/pkg-randomx.js-shared/dist/web/index.js');
           return readFileSync(pkgPath, 'utf-8');
         }
       },
       configureServer(server) {
         server.middlewares.use((req, res, next) => {
           if (req.url === '/randomx-web.js') {
-            const pkgPath = resolve(__dirname, 'node_modules/randomx.js/dist/web/index.js');
+            const pkgPath = resolve(__dirname, '../docker/build-randomx-js/build-out/pkg-randomx.js-shared/dist/web/index.js');
             try {
               const content = readFileSync(pkgPath);
               res.setHeader('Content-Type', 'application/javascript');
