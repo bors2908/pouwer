@@ -23,9 +23,11 @@ class MoneroRandomXValidator(
             val nonce = resultPayload.nonce
             if (nonce < 0L || nonce > 0xFFFF_FFFFL) return false
 
+            val hash = resultPayload.hash
+
             // Hash must be present and valid hex
             val hashBytes = try {
-                hex.parseHex(resultPayload.hash)
+                hex.parseHex(hash)
             } catch (ex: Exception) {
                 return false
             }
@@ -41,7 +43,7 @@ class MoneroRandomXValidator(
             }
 
             // Now authoritative check via daemon
-            return stratumSubmitService.submitShare(taskPayload.stratumJobId, nonce)
+            return stratumSubmitService.submitShare(taskPayload.stratumJobId, nonce, hash)
         } catch (ex: Exception) {
             // Defensive: any unexpected error -> invalid
             return false

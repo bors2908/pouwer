@@ -49,6 +49,8 @@ services:
       - "0.0.0.0:3333"
       - --p2p
       - "0.0.0.0:37889"
+      - --loglevel
+      - "4"
 
 networks:
   monero-net:

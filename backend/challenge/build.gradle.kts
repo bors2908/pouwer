@@ -26,6 +26,7 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.bitcoinj:bitcoinj-core:0.16.3")
     implementation("ge.becrin.kt.stratum:kt-stratum:1.0.0-SNAPSHOT")
+    implementation("org.json:json:20251224")
 
     kapt("org.mapstruct:mapstruct-processor:1.6.3")
 

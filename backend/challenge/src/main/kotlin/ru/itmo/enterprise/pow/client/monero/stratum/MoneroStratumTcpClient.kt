@@ -1,28 +1,110 @@
 package ru.itmo.enterprise.pow.client.monero.stratum
 
 import ge.becrin.kt.stratum.message.RequestMessage
+import ge.becrin.kt.stratum.message.ResponseMessage
 import ge.becrin.kt.stratum.transport.AbstractConnectionState
 import ge.becrin.kt.stratum.transport.tcp.StratumTcpClient
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicLong
 
 @Configuration
 open class MoneroStratumTcpClient(
-    @param:Value("\${stratum.host:127.0.0.1}") private val host: String,
-    @param:Value("\${stratum.port:3333}") private val port: Int,
-    @param:Value("\${stratum.worker:worker}") private val worker: String,
-    @param:Value("\${stratum.password:}") private val password: String
+    @param:Value($$"${stratum.host:127.0.0.1}") private val host: String,
+    @param:Value($$"${stratum.port:3333}") private val port: Int,
+    @param:Value($$"${stratum.worker:worker}") private val worker: String,
+    @param:Value($$"${stratum.password:}") private val password: String,
+    private val jobStore: StratumJobStore
 ) : StratumTcpClient() {
+
+    // TODO Transform into an evictable cache.
+    private val pending = ConcurrentHashMap<Long, CompletableFuture<ResponseMessage>>()
+    private val idCounter = AtomicLong(1)
+    var sessionId: String? = null
+
+    //TODO Encapsulate parent client logic.
     init {
+        log.info { "Connecting to Monero Stratum Pool $host:$port" }
+
         connect(host, port)
     }
 
     override fun createPostConnectState(): AbstractConnectionState? {
         return object : AbstractConnectionState(this) {
             override fun start() {
-                sendRequest(RequestMessage(null, "mining.subscribe", listOf("jstratum-client")))
-                sendRequest(RequestMessage(null, "mining.authorize", listOf(worker, password)))
+                assertConnected()
+
+                log.info { "Connected to Monero Stratum Pool $host:$port" }
+
+                registerResponseListener {
+                    log.info { "Got response: ${it.toJson()}" }
+
+                    if (it.id != null) {
+                        val id = it.id
+
+                        val f = pending.remove(id)
+
+                        f?.complete(it)
+                    }
+                }
+
+                registerNotificationListener {
+                    log.info { "Got notification: ${it.toJson()}" }
+
+                    if (it.methodName == "job") {
+                        jobStore.parseJob(it.objectParams)
+                    }
+                }
+
+                log.info { "Logging in to Monero Stratum Pool" }
+
+                sendRequest(
+                    "login",
+                    mapOf(
+                        "login" to worker,
+                        "pass" to password,
+                        "agent" to "jstratum-client"
+                    )
+                )
+                    .thenAccept { response ->
+                        val result = (response.result.toJson() as JSONObject)
+
+                        if (response.error == null && result.getString("status") == "OK") {
+                            log.info { "Logged in to Monero Stratum Pool" }
+
+                            result.getString("id")?.let { sessionId = it }
+                        } else {
+                            log.error { "Failed to login to Monero Stratum Pool: ${result.getString("status")}" }
+                        }
+
+                        if (result.has("job")) {
+                            log.info { "Received job on init." }
+
+                            jobStore.parseJob(result.getJSONObject("job").toMap())
+                        }
+                    }
             }
         }
+    }
+
+    fun sendRequest(method: String, params: Map<String, Any?>): CompletableFuture<ResponseMessage> {
+        val id = idCounter.getAndIncrement()
+        val future = CompletableFuture<ResponseMessage>()
+        pending[id] = future
+
+        sendRequest(
+            RequestMessage(id, method, params),
+            ResponseMessage::class.java
+        )
+
+        return future
+    }
+
+    companion object {
+        private val log = KotlinLogging.logger {}
     }
 }
