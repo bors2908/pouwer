@@ -85,7 +85,7 @@ export class WebWorkerSolver implements ISolver {
             };
 
             // initialize + start
-            entry.worker.postMessage({type: "init", challenge: task});
+            entry.worker.postMessage({type: "init", task: task});
             entry.worker.postMessage({type: "start"});
         });
     }

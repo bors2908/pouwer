@@ -1,4 +1,5 @@
-import {randomx_create_vm, randomx_init_cache} from 'randomx.js';
+// @ts-ignore
+import {randomx_create_vm, randomx_init_cache} from '/randomx-web.js';
 import {JobType, Task, WorkerInMessage, WorkerOutMessage} from "../lib/types";
 import {RandomXResultPayload} from "../lib/types";
 import {RandomXTask} from "../lib/types";
