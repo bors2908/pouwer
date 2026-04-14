@@ -23,25 +23,24 @@ ARG GIT_REF=master
 # Clone the repo directly instead of copying the local build context.
 RUN set -eux; \
     echo "clone cache bust: ${CLONE_CACHEBUST}"; \
-    git clone --depth 1 --branch "${GIT_REF}" https://github.com/bors2908/randomx.js.git /workspace
+    git clone --depth 1 --branch "${GIT_REF}" --tags https://github.com/bors2908/randomx.js.git /workspace
 
 RUN bun install --frozen-lockfile
 RUN bun run scripts/build.ts
 
 RUN set -eux; \
     outDir="/workspace/pkg-randomx.js-shared/dist/web"; \
+    artifactBase="randomx-web"; \
     inputJs="${outDir}/index.js"; \
-    hash="$(sha256sum "${inputJs}" | awk '{print $1}')"; \
-    hashedJs="${outDir}/randomx-shared-web.${hash}.js"; \
-    mv "${inputJs}" "${hashedJs}"; \
+    shortCommit="$(git -C /workspace rev-parse --short=12 HEAD)"; \
+    taggedJs="${outDir}/${artifactBase}.${shortCommit}.js"; \
+    mv "${inputJs}" "${taggedJs}"; \
     if [ -f "${outDir}/index.js.map" ]; then \
-      mv "${outDir}/index.js.map" "${outDir}/randomx-shared-web.${hash}.js.map"; \
+      mv "${outDir}/index.js.map" "${outDir}/${artifactBase}.${shortCommit}.js.map"; \
     fi; \
-    printf '%s  %s\n' "${hash}" "randomx-shared-web.${hash}.js" > "${outDir}/randomx-shared-web.${hash}.sha256"; \
     mkdir -p /artifact; \
-    cp "${hashedJs}" /artifact/; \
-    [ -f "${outDir}/randomx-shared-web.${hash}.js.map" ] && cp "${outDir}/randomx-shared-web.${hash}.js.map" /artifact/ || true; \
-    cp "${outDir}/randomx-shared-web.${hash}.sha256" /artifact/
+    cp "${taggedJs}" /artifact/; \
+    [ -f "${outDir}/${artifactBase}.${shortCommit}.js.map" ] && cp "${outDir}/${artifactBase}.${shortCommit}.js.map" /artifact/ || true
 
 FROM scratch AS artifacts
 COPY --from=build /artifact/ /

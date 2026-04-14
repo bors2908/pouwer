@@ -8,8 +8,6 @@ declare module '*?worker' {
 }
 
 declare module '/randomx-web.js' {
-  export function randomx_init_cache(key: string): any;
-  export function randomx_create_vm(cache: any): any;
   export function mine(job: Job): any;
 
   export interface Job {
