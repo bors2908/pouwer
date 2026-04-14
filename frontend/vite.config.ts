@@ -15,7 +15,7 @@ const SECURITY_HEADERS = {
 const RANDOMX_REQUEST_PATH = '/randomx-web.js';
 const RANDOMX_COMMIT_ID = '7a439f3eec74';
 const RANDOMX_DIST_FILE = `randomx-web.${RANDOMX_COMMIT_ID}.js`;
-const RANDOMX_DIST_PATH = resolve(__dirname, `./dist/${RANDOMX_DIST_FILE}`);
+const RANDOMX_DIST_PATH = resolve(__dirname, `./vendor/randomx/${RANDOMX_DIST_FILE}`);
 
 export default defineConfig({
   server: {

@@ -38,12 +38,13 @@ class StratumSubmitService(
 
         return try {
             val resp = future.get(defaultTimeoutSec, TimeUnit.SECONDS)
-            if (resp.error == null) {
+            if (resp.error != null) {
                 log.info("Pool rejected share: ${resp.error}")
                 false
             } else if (resp.result != null) {
-                return resp.toJson().getBoolean("result")
+                return (resp.result.toJson() as JSONObject).getString("status") == "OK"
             } else {
+                //TODO Sure??
                 true
             }
         } catch (ex: Exception) {

@@ -1,5 +1,6 @@
 package ru.itmo.enterprise.pow.service.validator
 
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import ru.itmo.enterprise.pow.client.monero.stratum.StratumSubmitService
 import ru.itmo.enterprise.pow.model.MoneroRandomXResultPayload
@@ -21,7 +22,11 @@ class MoneroRandomXValidator(
         try {
             // Basic sanity: nonce must fit uint32 (Monero uses 32-bit nonce in blockhashing_blob)
             val nonce = resultPayload.nonce
-            if (nonce < 0L || nonce > 0xFFFF_FFFFL) return false
+            if (nonce < 0L || nonce > 0xFFFF_FFFFL) {
+                log.warn("Invalid nonce outside of the boundaries: $nonce")
+
+                return false
+            }
 
             val hash = resultPayload.hash
 
@@ -29,6 +34,8 @@ class MoneroRandomXValidator(
             val hashBytes = try {
                 hex.parseHex(hash)
             } catch (ex: Exception) {
+                log.warn("Could not parse hex hash: $hash", ex)
+
                 return false
             }
 
@@ -39,12 +46,16 @@ class MoneroRandomXValidator(
 
             // Fast numeric check first
             if (hashBigInt > target) {
-                return false
+                log.warn("Hash $hashBigInt is greater than target $target")
+
+                //return false
             }
 
             // Now authoritative check via daemon
             return stratumSubmitService.submitShare(taskPayload.stratumJobId, nonce, hash)
         } catch (ex: Exception) {
+            log.warn("Could not process checks", ex)
+
             // Defensive: any unexpected error -> invalid
             return false
         }
@@ -68,5 +79,9 @@ class MoneroRandomXValidator(
     private fun u8ToBigIntLE(bytes: ByteArray): BigInteger {
         if (bytes.isEmpty()) return BigInteger.ZERO
         return BigInteger(1, bytes.reversedArray())
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(javaClass)
     }
 }

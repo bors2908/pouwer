@@ -1,7 +1,18 @@
 // @ts-ignore
-import {mine} from '/randomx-web.js';
+import {Config, Job, mine, MinerCallbacks} from "/randomx-web.js";
+import {
+    WorkerEventJobDisposed,
+    WorkerEventJobStarted,
+    WorkerEventNonceSpaceExhausted,
+    WorkerEventResultFound,
+    WorkerEventWorkerReady,
+    WorkerPong
+// @ts-ignore
+} from "/randomx-web.js";
 
-import {JobType, RandomXResultPayload, RandomXTask, Task, WorkerInMessage, WorkerOutMessage,} from "../lib/types";
+import {JobType, RandomXTask, Task, WorkerInMessage, WorkerOutMessage,} from "../lib/types";
+import {RandomXResultPayload} from "../lib/types";
+import {nowMs} from "../lib/utils";
 
 let currentTask: Task | null = null;
 let running = false;
@@ -34,30 +45,80 @@ async function solve(task: Task) {
 }
 
 async function solveRandomX(task: RandomXTask) {
-    self.postMessage({
-        type: "progress",
-        attempts: 69,
-        elapsedMs: 69,
-        hashesPerSec: 69,
-    } as WorkerOutMessage);
-
-    mine({
+    const job: Job = {
         blob: task.payload.blob,
         job_id: task.jobId,
         target: task.payload.targetHex,
         height: task.payload.height,
         seed_hash: task.payload.seedHash
-    })
+    };
+    const taskPayload = task.payload;
+    const startTime = nowMs();
 
-    self.postMessage({
-        type: "progress",
-        attempts: 70,
-        elapsedMs: 70,
-        hashesPerSec: 70,
-    } as WorkerOutMessage);
+    const callbacks: MinerCallbacks = {
+        on_cache_initialising: () => {
+            console.log(`Cache Initialising...`)
+        },
+        on_cache_initialised: (duration_ms: number) => {
+            console.log(`Cache Initialised in ${duration_ms}ms`)
+        },
+        on_worker_ready: (event: WorkerEventWorkerReady) => {
+            console.log(`Worker ${event.miner_id} ready`)
+        },
+        on_job_started: (event: WorkerEventJobStarted) => {
+            console.log(`Job ${event.job_id} started on worker ${event.miner_id}`)
+        },
+        on_job_disposed: (event: WorkerEventJobDisposed) => {
+            console.log(`Job ${event.job_id} disposed on worker ${event.miner_id}`)
+        },
+        on_nonce_space_exhausted: (event: WorkerEventNonceSpaceExhausted) => {
+            self.postMessage({type: "stopped", reason: "Exhausted"} as WorkerOutMessage);
+        },
+        on_result_found: (event: WorkerEventResultFound) => {
+            const durationMs = nowMs() - startTime;
 
+            console.log(`Result found: ${toHex(event.result)}`)
 
-    //self.postMessage({type: "stopped", reason: "Exhausted"} as WorkerOutMessage);
+            const result: RandomXResultPayload = {
+                taskId: taskPayload.id,
+                nonce: event.nonce,
+                hash: toHex(event.result),
+                jobType: JobType.MONERO_RANDOMX,
+            };
+
+            self.postMessage({
+                type: "solved",
+                attempts: event.hash_count,
+                durationMs: durationMs,
+                payload: result,
+            } as WorkerOutMessage);
+
+            running = false;
+            return;
+        },
+        on_pong: (event: WorkerPong) => {
+            const elapsedMs = nowMs() - startTime;
+
+            console.log(`Pong: ${event.stats.hashes_total} hashes in ${elapsedMs}ms`)
+
+            self.postMessage({
+                type: "progress",
+                attempts: event.stats.hashes_total,
+                elapsedMs,
+                hashesPerSec: event.stats.hashes_per_second,
+            } as WorkerOutMessage)
+        },
+    }
+
+    const config: Config = {
+        callbacks: callbacks
+    }
+
+    mine(job, config)
 
     await new Promise(r => setTimeout(r, 200));
+}
+
+function toHex(u8: Uint8Array): string {
+    return Array.from(u8).map(b => b.toString(16).padStart(2, '0')).join('');
 }

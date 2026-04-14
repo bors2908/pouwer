@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-DEST_DIR="${1:-./dist}"
+DEST_DIR="${1:-./vendor/randomx}"
 GIT_REF="${GIT_REF:-master}"
 BUN_IMAGE="${BUN_IMAGE:-oven/bun:1.3.12-debian}"
 
