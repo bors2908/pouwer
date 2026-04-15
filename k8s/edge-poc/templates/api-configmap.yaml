@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-nginx-conf
+data:
+  default.conf: |
+    server {
+      listen 80;
+
+      location = /healthz {
+        add_header Content-Type text/plain;
+        return 200 "ok\n";
+      }
+
+      location = /v1/ping {
+        add_header Content-Type application/json;
+        return 200 '{"status":"ok"}';
+      }
+
+      location / {
+        add_header Content-Type application/json;
+        return 404 '{"error":"not_found"}';
+      }
+    }
+

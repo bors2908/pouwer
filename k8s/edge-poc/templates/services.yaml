@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: browser-web
+spec:
+  selector:
+    app: browser-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-web
+spec:
+  selector:
+    app: api-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-authz
+spec:
+  selector:
+    app: api-authz
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+

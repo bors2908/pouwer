@@ -1,0 +1,7 @@
+apiVersion: v2
+name: edge-poc
+description: CrowdSec + Traefik split browser/api edge PoC workloads
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+

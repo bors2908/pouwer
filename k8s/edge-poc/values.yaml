@@ -1,0 +1,24 @@
+hosts:
+  browser: example.com
+  api: api.example.com
+
+trustedIPMatch:
+  browser: "ClientIP(`198.51.100.0/24`) || ClientIP(`203.0.113.0/24`)"
+  api: "ClientIP(`198.51.100.0/24`) || ClientIP(`203.0.113.0/24`)"
+
+crowdsec:
+  lapiHost: crowdsec-lapi.crowdsec.svc.cluster.local:8080
+  lapiKey: replace-me-traefik-bouncer-key
+  trustedIPs:
+    - 198.51.100.0/24
+    - 203.0.113.0/24
+  captcha:
+    provider: hcaptcha
+    siteKey: replace-me-hcaptcha-site-key
+    secretKey: replace-me-hcaptcha-secret-key
+
+api:
+  rateLimit:
+    average: 20
+    burst: 40
+

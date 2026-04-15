@@ -1,0 +1,15 @@
+type: leaky
+name: local/browser-login-grace
+description: "Allow one browser login attempt, then trigger remediation for repeated attempts"
+filter: "evt.Meta.service == 'http' && evt.Meta.http_host == 'example.com' && evt.Meta.http_path == '/login' && evt.Meta.http_verb == 'POST'"
+groupby: "evt.Meta.source_ip"
+capacity: 1
+leakspeed: "10m"
+blackhole: 10m
+labels:
+  service: http
+  behavior: "http:browser-login-abuse"
+  confidence: 3
+  remediation: true
+  traffic_scope: browser
+

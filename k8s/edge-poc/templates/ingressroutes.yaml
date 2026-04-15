@@ -1,0 +1,96 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: browser-health-bypass
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: "Host(`{{ .Values.hosts.browser }}`) && Path(`/healthz`)"
+      kind: Rule
+      priority: 300
+      services:
+        - name: browser-web
+          port: 80
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: browser-trusted-bypass
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: "Host(`{{ .Values.hosts.browser }}`) && ({{ .Values.trustedIPMatch.browser }})"
+      kind: Rule
+      priority: 250
+      services:
+        - name: browser-web
+          port: 80
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: browser-main
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: "Host(`{{ .Values.hosts.browser }}`)"
+      kind: Rule
+      priority: 100
+      middlewares:
+        - name: browser-challenge-adapter
+      services:
+        - name: browser-web
+          port: 80
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: api-health-bypass
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: "Host(`{{ .Values.hosts.api }}`) && Path(`/healthz`)"
+      kind: Rule
+      priority: 300
+      services:
+        - name: api-web
+          port: 80
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: api-trusted-bypass
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: "Host(`{{ .Values.hosts.api }}`) && ({{ .Values.trustedIPMatch.api }})"
+      kind: Rule
+      priority: 250
+      services:
+        - name: api-web
+          port: 80
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: api-main
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: "Host(`{{ .Values.hosts.api }}`)"
+      kind: Rule
+      priority: 100
+      middlewares:
+        - name: api-crowdsec-remediation
+        - name: api-authz
+        - name: api-rate-limit
+      services:
+        - name: api-web
+          port: 80
+

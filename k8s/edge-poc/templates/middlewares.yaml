@@ -1,0 +1,58 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: browser-challenge-adapter
+spec:
+  plugin:
+    bouncer:
+      enabled: true
+      crowdsecMode: stream
+      crowdsecLapiScheme: http
+      crowdsecLapiHost: {{ .Values.crowdsec.lapiHost | quote }}
+      crowdsecLapiPath: "/"
+      crowdsecLapiKey: {{ .Values.crowdsec.lapiKey | quote }}
+      remediationHeadersCustomName: X-Crowdsec-Remediation
+      captchaProvider: {{ .Values.crowdsec.captcha.provider | quote }}
+      captchaSiteKey: {{ .Values.crowdsec.captcha.siteKey | quote }}
+      captchaSecretKey: {{ .Values.crowdsec.captcha.secretKey | quote }}
+      updateIntervalSeconds: 60
+      clientTrustedIPs:
+{{ toYaml .Values.crowdsec.trustedIPs | indent 8 }}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: api-crowdsec-remediation
+spec:
+  plugin:
+    bouncer:
+      enabled: true
+      crowdsecMode: stream
+      crowdsecLapiScheme: http
+      crowdsecLapiHost: {{ .Values.crowdsec.lapiHost | quote }}
+      crowdsecLapiPath: "/"
+      crowdsecLapiKey: {{ .Values.crowdsec.lapiKey | quote }}
+      remediationHeadersCustomName: X-Crowdsec-Remediation
+      updateIntervalSeconds: 60
+      clientTrustedIPs:
+{{ toYaml .Values.crowdsec.trustedIPs | indent 8 }}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: api-authz
+spec:
+  forwardAuth:
+    address: "http://api-authz.{{ .Release.Namespace }}.svc.cluster.local/check"
+    trustForwardHeader: true
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: api-rate-limit
+spec:
+  rateLimit:
+    average: {{ .Values.api.rateLimit.average }}
+    burst: {{ .Values.api.rateLimit.burst }}
+    period: 1m
+

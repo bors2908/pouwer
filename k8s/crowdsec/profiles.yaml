@@ -1,0 +1,31 @@
+name: browser_captcha
+filters:
+  - Alert.Remediation == true && Alert.GetScope() == "Ip" && Alert.GetScenario() startsWith "local/browser"
+decisions:
+  - type: captcha
+    duration: 4h
+on_success: break
+---
+name: api_remediation
+filters:
+  - Alert.Remediation == true && Alert.GetScope() == "Ip" && Alert.GetScenario() startsWith "local/api"
+decisions:
+  - type: ban
+    duration: 2h
+on_success: break
+---
+name: http_fallback_ban
+filters:
+  - Alert.Remediation == true && Alert.GetScope() == "Ip" && Alert.GetScenario() contains "http"
+decisions:
+  - type: ban
+    duration: 4h
+on_success: break
+---
+name: default_ip_ban
+filters:
+  - Alert.Remediation == true && Alert.GetScope() == "Ip"
+decisions:
+  - type: ban
+    duration: 4h
+

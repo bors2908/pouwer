@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: browser-html
+data:
+  index.html: |
+    <!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Example Login</title>
+      <style>
+        body { font-family: Arial, sans-serif; max-width: 720px; margin: 3rem auto; padding: 0 1rem; }
+        .card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; }
+        label { display: block; margin-top: 0.5rem; }
+        input { width: 100%; margin-top: 0.25rem; padding: 0.5rem; }
+        button { margin-top: 0.75rem; padding: 0.5rem 0.75rem; }
+      </style>
+    </head>
+    <body>
+      <h1>Example.com (PoC)</h1>
+      <p>Placeholder browser app behind CrowdSec remediation.</p>
+      <div class="card">
+        <h2>Fake Login</h2>
+        <form method="post" action="/login">
+          <label>Email</label>
+          <input type="email" name="email" placeholder="alice@example.com" required />
+          <label>Password</label>
+          <input type="password" name="password" placeholder="********" required />
+          <button type="submit">Login</button>
+        </form>
+      </div>
+      <p>Health endpoint: <code>/healthz</code></p>
+    </body>
+    </html>
+

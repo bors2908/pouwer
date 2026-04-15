@@ -1,0 +1,37 @@
+container_runtime: containerd
+
+config:
+  # Loaded from --set-file in install command:
+  # --set-file config.profiles.yaml=k8s/crowdsec/profiles.yaml
+  profiles.yaml: ""
+  # Loaded from --set-file in install command:
+  # --set-file config.scenarios.browser-login-grace.yaml=...
+  # --set-file config.scenarios.api-burst.yaml=...
+  scenarios: {}
+  config.yaml.local: |
+    api:
+      server:
+        auto_registration:
+          enabled: true
+          token: "${REGISTRATION_TOKEN}"
+          allowed_ranges:
+            - "127.0.0.1/32"
+            - "10.0.0.0/8"
+            - "172.16.0.0/12"
+            - "192.168.0.0/16"
+
+agent:
+  hostVarLog: true
+  acquisition:
+    - namespace: traefik
+      podName: traefik-*
+      program: traefik
+  env:
+    - name: COLLECTIONS
+      value: "crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/base-http-scenarios"
+
+lapi:
+  env:
+    - name: BOUNCER_KEY_traefik
+      value: "replace-me-traefik-bouncer-key"
+

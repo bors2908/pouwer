@@ -1,0 +1,33 @@
+deployment:
+  replicas: 1
+
+logs:
+  general:
+    level: INFO
+  access:
+    enabled: true
+    format: json
+
+experimental:
+  plugins:
+    bouncer:
+      moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
+      version: v1.4.5
+
+providers:
+  kubernetesCRD:
+    enabled: true
+  kubernetesIngress:
+    enabled: true
+
+service:
+  type: NodePort
+  spec:
+    externalTrafficPolicy: Local
+
+ports:
+  web:
+    nodePort: 30080
+  websecure:
+    nodePort: 30443
+
