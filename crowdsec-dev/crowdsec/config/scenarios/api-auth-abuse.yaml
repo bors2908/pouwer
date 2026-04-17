@@ -1,0 +1,15 @@
+type: leaky
+name: local/traefik-api-too-many-429
+description: Escalate API clients that repeatedly hit Traefik 429 responses
+filter: |
+  evt.Meta.log_type == "http_access-log" &&
+  evt.Meta.http_status == "429" &&
+  evt.Meta.traefik_router_name contains "api@"
+groupby: evt.Meta.source_ip
+capacity: 3
+leakspeed: 1m
+blackhole: 2m
+labels:
+  service: api
+  behavior: api-too-many-429
+  remediation: true

@@ -1,0 +1,30 @@
+api:
+  dashboard: true
+  insecure: true
+
+entryPoints:
+  web:
+    address: ":80"
+
+providers:
+  docker:
+    exposedByDefault: false
+  file:
+    filename: /etc/traefik/dynamic.yml
+    watch: true
+
+experimental:
+  plugins:
+    bouncer:
+      moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
+      version: v1.4.5
+
+log:
+  level: INFO
+
+accessLog:
+  filePath: /var/log/traefik/access.log
+  format: json
+  filters:
+    statusCodes:
+      - "401-599"

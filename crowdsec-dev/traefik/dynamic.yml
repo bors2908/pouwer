@@ -1,0 +1,56 @@
+http:
+  middlewares:
+    crowdsec-remediation-adapter:
+      plugin:
+        bouncer:
+          enabled: true
+          logLevel: DEBUG
+          crowdsecMode: live
+          crowdsecLapiScheme: http
+          crowdsecLapiHost: crowdsec:8080
+          crowdsecLapiPath: /
+          crowdsecLapiKey: replace-with-long-random-key
+          defaultDecisionSeconds: 1
+          metricsUpdateIntervalSeconds: 0
+          captchaProvider: turnstile
+          captchaSiteKey: 1x00000000000000000000AA
+          captchaSecretKey: 1x0000000000000000000000000000000AA
+          captchaHTMLFilePath: /etc/traefik/captcha.html
+          captchaGracePeriodSeconds: 1800
+          remediationHeadersCustomName: X-Crowdsec-Remediation
+
+    api-rate-limit:
+      rateLimit:
+        average: 5
+        burst: 5
+        period: 1s
+
+    browser-page-rate-limit:
+      rateLimit:
+        average: 5
+        burst: 5
+        period: 1s
+
+    browser-auth-rate-limit:
+      rateLimit:
+        average: 2
+        burst: 2
+        period: 10s
+
+    browser-page-enforcement-chain:
+      chain:
+        middlewares:
+          - crowdsec-remediation-adapter
+          - browser-page-rate-limit
+
+    browser-auth-enforcement-chain:
+      chain:
+        middlewares:
+          - crowdsec-remediation-adapter
+          - browser-auth-rate-limit
+
+    api-enforcement-chain:
+      chain:
+        middlewares:
+          - crowdsec-remediation-adapter
+          - api-rate-limit

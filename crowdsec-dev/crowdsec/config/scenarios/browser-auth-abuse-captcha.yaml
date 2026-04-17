@@ -1,0 +1,13 @@
+type: trigger
+name: local/traefik-browser-auth-too-many-429
+description: Escalate browser clients that trip the login/logout rate limit
+filter: |
+  evt.Meta.log_type == "http_access-log" &&
+  evt.Meta.http_status == "429" &&
+  evt.Meta.traefik_router_name contains "browser-auth@"
+groupby: evt.Meta.source_ip
+blackhole: 2m
+labels:
+  service: browser
+  behavior: browser-auth-too-many-429
+  remediation: true

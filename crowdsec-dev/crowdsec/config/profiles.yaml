@@ -1,0 +1,25 @@
+name: local-browser-abuse-captcha
+debug: false
+filters:
+  - Alert.Remediation == true && Alert.GetScope() == "Ip" && Alert.GetScenario() contains "local/traefik-browser-"
+decisions:
+  - type: captcha
+    duration: 1m
+on_success: break
+---
+name: local-api-abuse-ban
+debug: false
+filters:
+  - Alert.Remediation == true && Alert.GetScope() == "Ip" && Alert.GetScenario() contains "local/traefik-api-too-many-429"
+decisions:
+  - type: ban
+    duration: 30m
+on_success: break
+---
+name: local-default-http-ban
+debug: false
+filters:
+  - Alert.Remediation == true && Alert.GetScope() == "Ip"
+decisions:
+  - type: ban
+    duration: 4h

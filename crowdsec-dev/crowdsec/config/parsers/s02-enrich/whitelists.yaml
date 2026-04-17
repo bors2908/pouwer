@@ -1,0 +1,8 @@
+name: crowdsecurity/whitelists
+description: "Local dev override: do not whitelist Docker bridge addresses"
+whitelist:
+  reason: "loopback ip"
+  ip:
+    - "::1"
+  cidr:
+    - "127.0.0.0/8"

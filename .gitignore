@@ -47,3 +47,5 @@ secrets/
 **/dist/
 **/vendor/
 **/node_modules/
+/crowdsec-dev/logs/
+/crowdsec-dev/crowdsec/data/

@@ -1,0 +1,15 @@
+type: leaky
+name: local/traefik-browser-page-too-many-429
+description: Escalate browser clients that repeatedly hit the page refresh rate limit
+filter: |
+  evt.Meta.log_type == "http_access-log" &&
+  evt.Meta.http_status == "429" &&
+  evt.Meta.traefik_router_name contains "browser@"
+groupby: evt.Meta.source_ip
+capacity: 2
+leakspeed: 30s
+blackhole: 2m
+labels:
+  service: browser
+  behavior: browser-page-too-many-429
+  remediation: true
