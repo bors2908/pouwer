@@ -1,0 +1,12 @@
+services:
+  backend:
+    image: ${BACKEND_IMAGE:-pouw-backend:local}
+    container_name: pouw-backend
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+    environment:
+      STRATUM_HOST: p2pool
+
+volumes:
+  backend-postgres-data:

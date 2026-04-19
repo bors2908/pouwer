@@ -1,11 +1,10 @@
 ARG BUN_IMAGE=oven/bun:1.3.12-debian
 
-FROM ${BUN_IMAGE} AS build
+FROM ${BUN_IMAGE} AS randomx-builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /workspace
 
-#TODO: Rewrite to buildx to cache and reuse builder as image
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     clang \
@@ -42,5 +41,8 @@ RUN set -eux; \
     cp "${taggedJs}" /artifact/; \
     [ -f "${outDir}/${artifactBase}.${shortCommit}.js.map" ] && cp "${outDir}/${artifactBase}.${shortCommit}.js.map" /artifact/ || true
 
+FROM scratch AS randomx-builder-image
+COPY --from=randomx-builder /artifact/ /artifact/
+
 FROM scratch AS artifacts
-COPY --from=build /artifact/ /
+COPY --from=randomx-builder /artifact/ /
