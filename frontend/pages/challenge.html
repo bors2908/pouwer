@@ -107,25 +107,50 @@
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>PoW Challenge</h2>
-        <div class="field">
-            <label for="challengeType">Computation type</label>
-            <select id="challengeType" aria-label="Challenge type"></select>
-        </div>
-        <div class="stats">
-            <div id="status">Status: Ready</div>
-            <div id="attempts">Attempts: 0</div>
-            <div id="hps">Hashes/sec: 0</div>
-        </div>
-        <div id="result"></div>
-        <button id="btnStart">Solve Challenge</button>
-        <button id="btnCancel" disabled>Cancel</button>
-        <div class="legal">
-            <strong>Notice and consent:</strong> by pressing <strong>Solve Challenge</strong>, you authorize this site to temporarily use your device resources to perform mining or comparable proof-of-work calculations for anti-abuse protection and service operations.
-            If you prefer not to participate, do not start the challenge and wait for the cooldown window before retrying access.
-        </div>
+<div class="card">
+    <h2>PoW Challenge</h2>
+    <div class="field">
+        <label for="challengeType">Computation type</label>
+        <select id="challengeType" aria-label="Challenge type"></select>
     </div>
-    <script type="module" src="/src/ui/index.ts"></script>
+
+    <div class="stats">
+        <div id="status">Status: Ready</div>
+        <div id="attempts">Attempts: 0</div>
+        <div id="hps">Hashes/sec: 0</div>
+    </div>
+
+    <div id="result"></div>
+    <button id="btnStart" type="button">Solve Challenge</button>
+    <button id="btnCancel" type="button" disabled>Cancel</button>
+
+    <div
+        id="captcha"
+        class="{{ .FrontendKey }}"
+        data-sitekey="{{ .SiteKey }}"
+        data-callback="captchaCallback"
+        data-challenge-url="/captcha/api/challenge"
+        data-response-field="response"
+    ></div>
+
+    <form id="captcha-form" method="POST" action="" novalidate>
+        <input type="hidden" id="captcha-response" name="response" value="" />
+    </form>
+
+    <div class="legal">
+        <strong>Notice and consent:</strong> by pressing <strong>Solve Challenge</strong>, you authorize this site to temporarily use your device resources to perform mining or comparable proof-of-work calculations for anti-abuse protection and service operations.
+        If you prefer not to participate, do not start the challenge and wait for the cooldown window before retrying access.
+    </div>
+</div>
+
+<script src="{{ .FrontendJS }}" defer></script>
+<script>
+    function captchaCallback() {
+        const form = document.getElementById("captcha-form");
+        if (form) {
+            form.submit();
+        }
+    }
+</script>
 </body>
 </html>

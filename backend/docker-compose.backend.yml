@@ -3,7 +3,7 @@ services:
     image: ${BACKEND_IMAGE:-pouw-backend:local}
     container_name: pouw-backend
     ports:
-      - "8081:8081"
+      - "8082:8082"
     restart: unless-stopped
     environment:
       STRATUM_HOST: p2pool

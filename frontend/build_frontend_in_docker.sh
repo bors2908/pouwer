@@ -24,6 +24,7 @@ docker buildx build \
   --target frontend-image \
   --tag "${FRONTEND_IMAGE}" \
   --load \
+  --no-cache \
   -f frontend-complete.Dockerfile \
   .
 

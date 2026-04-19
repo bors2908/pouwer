@@ -1,5 +1,5 @@
 FROM node:20-alpine
 WORKDIR /app
 COPY server.js ./
-EXPOSE 3000
+EXPOSE 3003
 CMD ["node", "server.js"]

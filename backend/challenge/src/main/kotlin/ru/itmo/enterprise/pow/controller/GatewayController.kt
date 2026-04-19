@@ -1,6 +1,7 @@
 package ru.itmo.enterprise.pow.controller
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -21,6 +22,7 @@ class GatewayController(
     resultServices: Collection<ResultService>,
     val objectMapper: ObjectMapper
 ) {
+
     private val orchestratorsByType = orchestrators.associateBy { it.type }
     private val resultServiceByType = resultServices.associateBy { it.type }
 
@@ -63,7 +65,38 @@ class GatewayController(
         }
     }
 
+    @PostMapping(
+        path = [CAPTCHA_CUSTOM_VALIDATE_PATH],
+        consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    fun validateCustomCaptcha(
+        @RequestParam(CAPTCHA_CUSTOM_RESPONSE) response: String
+    ): ResponseEntity<Map<String, Boolean>> {
+        val result = objectMapper.readValue(response, ResultMessage::class.java)
+
+        val jobType = result.payload.jobType
+
+        val resultService = resultServiceByType[jobType]
+            ?: throw IllegalArgumentException("Unknown job type: $jobType")
+
+        val validation = resultService.handleResult(result)
+
+        return when (validation.status) {
+            ValidationStatus.ACCEPTED ->
+                ResponseEntity.ok(mapOf("success" to true))
+
+            ValidationStatus.REJECTED ->
+                ResponseEntity.ok(mapOf("success" to false))
+
+            else -> throw UnsupportedOperationException("not supported")
+        }
+    }
+
     companion object {
         private val log = KotlinLogging.logger {}
+
+        const val CAPTCHA_CUSTOM_VALIDATE_PATH: String = "/validate-custom-captcha"
+        const val CAPTCHA_CUSTOM_RESPONSE: String = "response"
     }
 }

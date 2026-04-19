@@ -1,13 +1,12 @@
 import {Task, ValidateResponse} from "./types";
 import {JobType} from "./types";
-import {ResultPayload} from "./types";
 import {ResultMessage} from "./types";
 
 export class NetworkClient {
   baseUrl: string;
   timeoutMs: number;
 
-  constructor(baseUrl: string = "http://localhost:8081", timeoutMs: number = 10000) {
+  constructor(baseUrl: string = "http://localhost:8082", timeoutMs: number = 10000) {
     this.baseUrl = baseUrl;
     this.timeoutMs = timeoutMs;
   }

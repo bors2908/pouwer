@@ -13,10 +13,10 @@ http:
           defaultDecisionSeconds: 1
           metricsUpdateIntervalSeconds: 0
           captchaProvider: custom
-          captchaCustomJsURL:
-          captchaCustomValidateURL:
-          captchaSiteKey: 1x00000000000000000000AA
-          captchaSecretKey: 1x0000000000000000000000000000000AA
+          captchaCustomKey: pouw-firewall
+          captchaCustomJsURL: http://localhost/captcha-standalone.js
+          captchaCustomValidateURL: http://pouw-backend:8082/validate-custom-captcha
+          captchaCustomResponse: response
           captchaHTMLFilePath: /etc/traefik/captcha.html
           banHTMLFilePath: /etc/traefik/ban.html
           captchaGracePeriodSeconds: 1800
@@ -40,15 +40,23 @@ http:
         burst: 2
         period: 10s
 
+    captcha-isolation-headers:
+      headers:
+        customResponseHeaders:
+          Cross-Origin-Opener-Policy: same-origin
+          Cross-Origin-Embedder-Policy: require-corp
+
     browser-page-enforcement-chain:
       chain:
         middlewares:
+          - captcha-isolation-headers
           - crowdsec-remediation-adapter
           - browser-page-rate-limit
 
     browser-auth-enforcement-chain:
       chain:
         middlewares:
+          - captcha-isolation-headers
           - crowdsec-remediation-adapter
           - browser-auth-rate-limit
 
@@ -57,3 +65,19 @@ http:
         middlewares:
           - crowdsec-remediation-adapter
           - api-rate-limit
+
+  routers:
+    captcha-frontend-assets:
+      rule: "(Host(`localhost`) || Host(`example.com`)) && (Path(`/captcha-standalone.js`) || Path(`/randomx-web.js`) || PathPrefix(`/src/`) || PathPrefix(`/@vite/`) || PathPrefix(`/node_modules/`) || PathPrefix(`/@id/`) || PathPrefix(`/@fs/`))"
+      entryPoints:
+        - web
+      middlewares:
+        - captcha-isolation-headers
+      service: captcha-frontend-dev
+      priority: 200
+
+  services:
+    captcha-frontend-dev:
+      loadBalancer:
+        servers:
+          - url: http://pouw-frontend:3001

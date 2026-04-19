@@ -16,12 +16,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     nodejs \
   && rm -rf /var/lib/apt/lists/*
 
-ARG CLONE_CACHEBUST=1
 ARG GIT_REF=master
 
 # Clone the repo directly instead of copying the local build context.
 RUN set -eux; \
-    echo "clone cache bust: ${CLONE_CACHEBUST}"; \
     git clone --depth 1 --branch "${GIT_REF}" --tags https://github.com/bors2908/randomx.js.git /workspace
 
 RUN bun install --frozen-lockfile

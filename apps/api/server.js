@@ -31,6 +31,6 @@ const server = http.createServer((req, res) => {
   sendJson(res, 200, { ok: true, data: { message: "dummy API payload" } });
 });
 
-server.listen(3001, () => {
-  console.log("api-app listening on 3001");
+server.listen(3003, () => {
+  console.log("api-app listening on 3003");
 });

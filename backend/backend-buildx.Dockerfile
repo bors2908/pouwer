@@ -32,7 +32,7 @@ RUN set -eux; \
 FROM ${RUNTIME_IMAGE} AS backend-image
 WORKDIR /opt/app
 COPY --from=build /workspace/app.jar /opt/app/app.jar
-EXPOSE 8081
+EXPOSE 8082
 ENTRYPOINT ["java", "-jar", "/opt/app/app.jar"]
 
 FROM scratch AS compose

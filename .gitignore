@@ -49,3 +49,5 @@ secrets/
 **/node_modules/
 /crowdsec-dev/logs/
 /crowdsec-dev/crowdsec/data/
+/logs/
+/crowdsec/data/

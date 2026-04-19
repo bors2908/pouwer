@@ -1,19 +1,11 @@
+import sha256Worker from "../worker/sha256.worker.ts?worker";
+import randomxWorker from "../worker/randomx.worker.ts?worker";
+import { ResultMessage } from "../lib/types";
 import {NetworkClient} from "../lib/network";
 import {WebWorkerSolver} from "../lib/solver";
 import {ISolver, Progress, Task} from "../lib/types";
 import {JobType} from "../lib/types";
-import {ResultPayload} from "../lib/types";
 import {SolveResult} from "../lib/types";
-
-declare global {
-    interface Window {
-        __CHALLENGE__?: Task;
-    }
-}
-
-import sha256Worker from "../worker/sha256.worker.ts?worker";
-import randomxWorker from "../worker/randomx.worker.ts?worker";
-import {ResultMessage} from "../lib/types";
 
 const scriptMap = {
     [JobType.POW_TEST_SHA256]: sha256Worker,
@@ -41,6 +33,8 @@ class ChallengeUI {
     solver: ISolver;
 
     uiElements: {
+        container: HTMLElement;
+        form: HTMLFormElement;
         statusEl: HTMLElement;
         hpsEl: HTMLElement;
         attemptsEl: HTMLElement;
@@ -48,6 +42,7 @@ class ChallengeUI {
         btnCancel: HTMLButtonElement;
         btnType: HTMLSelectElement;
         resultEl: HTMLElement;
+        hiddenResponse: HTMLInputElement;
     };
 
     constructor() {
@@ -60,7 +55,17 @@ class ChallengeUI {
             throw new Error("Workers are not supported in this browser. Main thread solver is not implemented yet.");
         }
 
+        const container = document.getElementById("captcha");
+        const form = document.getElementById("captcha-form");
+        const hiddenResponse = document.getElementById("captcha-response");
+
+        if (!container || !(form instanceof HTMLFormElement) || !(hiddenResponse instanceof HTMLInputElement)) {
+            throw new Error("Captcha widget markup is missing.");
+        }
+
         this.uiElements = {
+            container,
+            form,
             statusEl: document.getElementById("status")!,
             hpsEl: document.getElementById("hps")!,
             attemptsEl: document.getElementById("attempts")!,
@@ -68,6 +73,7 @@ class ChallengeUI {
             btnCancel: document.getElementById("btnCancel") as HTMLButtonElement,
             btnType: document.getElementById("challengeType") as HTMLSelectElement,
             resultEl: document.getElementById("result")!,
+            hiddenResponse,
         };
 
         this.populateChallengeTypeOptions();
@@ -133,19 +139,12 @@ class ChallengeUI {
                 hashesPerSec: Math.floor((result.attempts * 1000) / result.durationMs),
             });
 
-            const resultMessage = this.getResultMessage(this.task, result)
+            const resultMessage = this.getResultMessage(this.task, result);
+            this.deliverResultToPlugin(resultMessage);
 
-            const validateRes = await this.network.postValidate(resultMessage);
-
-            if (validateRes.ok) {
-                this.updateStatus("Success!");
-                this.uiElements.resultEl.textContent = "OK (200)";
-                this.uiElements.resultEl.style.color = "green";
-            } else {
-                this.updateStatus("Failed");
-                this.uiElements.resultEl.textContent = `Rejected: ${validateRes.reason}`;
-                this.uiElements.resultEl.style.color = "red";
-            }
+            this.updateStatus("Submitted to plugin");
+            this.uiElements.resultEl.textContent = "Result handed back to Traefik";
+            this.uiElements.resultEl.style.color = "green";
         } catch (e: any) {
             if (e.message !== "Cancelled") {
                 this.updateStatus("Error");
@@ -167,8 +166,27 @@ class ChallengeUI {
             payload: result.payload,
             leaseHmac: task.leaseHmac,
             attempts: result.attempts,
-            durationMs: result.durationMs
+            durationMs: result.durationMs,
         };
+    }
+
+    private deliverResultToPlugin(resultMessage: ResultMessage) {
+        const responseField =
+            this.uiElements.container.dataset.responseField || "response";
+
+        const serialized = JSON.stringify(resultMessage);
+        this.uiElements.hiddenResponse.name = responseField;
+        this.uiElements.hiddenResponse.value = serialized;
+
+        const callbackName = this.uiElements.container.dataset.callback || "captchaCallback";
+        const callback = (window as any)[callbackName];
+
+        if (typeof callback === "function") {
+            callback(serialized);
+            return;
+        }
+
+        this.uiElements.form.submit();
     }
 
     private cancelSolving() {
@@ -180,6 +198,12 @@ class ChallengeUI {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+const bootstrapChallengeUI = () => {
     new ChallengeUI();
-});
+};
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootstrapChallengeUI, {once: true});
+} else {
+    bootstrapChallengeUI();
+}
