@@ -16,11 +16,22 @@ const RANDOMX_REQUEST_PATH = '/randomx-web.js';
 const RANDOMX_COMMIT_ID = '7a439f3eec74';
 const RANDOMX_DIST_FILE = `randomx-web.${RANDOMX_COMMIT_ID}.js`;
 const RANDOMX_DIST_PATH = resolve(__dirname, `./vendor/randomx/${RANDOMX_DIST_FILE}`);
+const CHALLENGE_HTML_PATH = resolve(__dirname, './pages/challenge.html');
+const BAN_HTML_PATH = resolve(__dirname, './pages/ban.html');
 
 export default defineConfig({
   server: {
     port: DEV_SERVER_PORT,
+    open: '/pages/challenge.html',
     headers: SECURITY_HEADERS,
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        challenge: CHALLENGE_HTML_PATH,
+        ban: BAN_HTML_PATH,
+      },
+    },
   },
   worker: {
     rollupOptions: {

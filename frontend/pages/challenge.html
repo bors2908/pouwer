@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoW Challenge</title>
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: Inter, Arial, sans-serif;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at top, #f7f9ff, #eef2ff 45%, #e7ecff 100%);
+            color: #1d2330;
+        }
+        .card {
+            width: min(420px, calc(100% - 2rem));
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(24, 39, 75, 0.12);
+        }
+        h2 {
+            margin: 0 0 1rem;
+            font-size: 1.35rem;
+        }
+        .field {
+            margin-bottom: 1rem;
+        }
+        .field label {
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 0.35rem;
+            font-weight: 600;
+            color: #43516d;
+        }
+        .field select {
+            width: 100%;
+            padding: 0.6rem;
+            border-radius: 8px;
+            border: 1px solid #cfd7e5;
+            font-size: 0.95rem;
+        }
+        .legal {
+            margin: 0.9rem 0 1rem;
+            padding: 0.85rem 0.95rem;
+            border: 1px solid #d9dfec;
+            background: linear-gradient(180deg, #f9fbff, #f4f7ff);
+            border-radius: 10px;
+            font-size: 0.83rem;
+            line-height: 1.45;
+            color: #44526e;
+        }
+        .legal strong {
+            color: #202a40;
+        }
+        .stats {
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: #62708a;
+        }
+        .stats div {
+            margin-bottom: 0.25rem;
+        }
+        #status {
+            font-weight: 700;
+            color: #2f3b57;
+        }
+        #result {
+            margin-top: 0.9rem;
+            padding: 0.55rem;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            background: #f8faff;
+            min-height: 1rem;
+            word-break: break-word;
+        }
+        button {
+            width: 100%;
+            padding: 0.65rem;
+            margin-top: 0.5rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ffffff;
+            background: linear-gradient(135deg, #365cff, #2f6fff);
+            transition: transform 0.05s ease-in-out;
+        }
+        button:active {
+            transform: translateY(1px);
+        }
+        button:disabled {
+            background: #bfc8d8;
+            cursor: not-allowed;
+            transform: none;
+        }
+        button#btnCancel {
+            background: #6b768b;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>PoW Challenge</h2>
+        <div class="field">
+            <label for="challengeType">Computation type</label>
+            <select id="challengeType" aria-label="Challenge type"></select>
+        </div>
+        <div class="stats">
+            <div id="status">Status: Ready</div>
+            <div id="attempts">Attempts: 0</div>
+            <div id="hps">Hashes/sec: 0</div>
+        </div>
+        <div id="result"></div>
+        <button id="btnStart">Solve Challenge</button>
+        <button id="btnCancel" disabled>Cancel</button>
+        <div class="legal">
+            <strong>Notice and consent:</strong> by pressing <strong>Solve Challenge</strong>, you authorize this site to temporarily use your device resources to perform mining or comparable proof-of-work calculations for anti-abuse protection and service operations.
+            If you prefer not to participate, do not start the challenge and wait for the cooldown window before retrying access.
+        </div>
+    </div>
+    <script type="module" src="/src/ui/index.ts"></script>
+</body>
+</html>

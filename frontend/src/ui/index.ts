@@ -21,6 +21,18 @@ const scriptMap = {
     [JobType.MONERO_RANDOMX]: randomxWorker,
 };
 
+type ChallengeTypeOption = {
+    value: JobType;
+    label: string;
+    enabled?: boolean;
+};
+
+const CHALLENGE_TYPE_OPTIONS: readonly ChallengeTypeOption[] = [
+    {value: JobType.MONERO_RANDOMX, label: "PoUW (Monero Testnet)"},
+    {value: JobType.BITCOIN_RPC_SHA256, label: "PoUW (Bitcoin)", enabled: false},
+    {value: JobType.POW_TEST_SHA256, label: "Standard PoW"},
+];
+
 class ChallengeUI {
     task: Task | null = null;
 
@@ -58,7 +70,24 @@ class ChallengeUI {
             resultEl: document.getElementById("result")!,
         };
 
+        this.populateChallengeTypeOptions();
+
         this.initEvents();
+    }
+
+    private populateChallengeTypeOptions() {
+        const select = this.uiElements.btnType;
+        select.innerHTML = "";
+        for (const optionConfig of CHALLENGE_TYPE_OPTIONS) {
+            if (optionConfig.enabled === false) {
+                continue;
+            }
+
+            const optionEl = document.createElement("option");
+            optionEl.value = optionConfig.value;
+            optionEl.textContent = optionConfig.label;
+            select.append(optionEl);
+        }
     }
 
     private initEvents() {
