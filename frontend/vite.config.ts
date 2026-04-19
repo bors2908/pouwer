@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
-const DEV_SERVER_PORT = 3000;
+const DEV_SERVER_PORT = 3001;
 const COOP_HEADER = 'Cross-Origin-Opener-Policy';
 const COEP_HEADER = 'Cross-Origin-Embedder-Policy';
 const COOP_VALUE = 'same-origin';
@@ -21,8 +21,9 @@ const BAN_HTML_PATH = resolve(__dirname, './pages/ban.html');
 
 export default defineConfig({
   server: {
+    host: '0.0.0.0',
     port: DEV_SERVER_PORT,
-    open: '/pages/challenge.html',
+    open: false,
     headers: SECURITY_HEADERS,
   },
   build: {

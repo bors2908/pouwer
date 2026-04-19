@@ -3,5 +3,5 @@ services:
     image: ${FRONTEND_IMAGE:-pouw-frontend:local}
     container_name: pouw-frontend
     ports:
-      - "3000:80"
+      - "3001:3001"
     restart: unless-stopped

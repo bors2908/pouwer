@@ -8,7 +8,6 @@ COMPOSE_DEST_DIR="${1:-./out/frontend-compose}"
 GIT_REF="${GIT_REF:-master}"
 BUN_IMAGE="${BUN_IMAGE:-oven/bun:1.3.12-debian}"
 CLONE_CACHEBUST="${CLONE_CACHEBUST:-$(date +%s)}"
-NPM_REGISTRY="${NPM_REGISTRY:-https://registry.npmjs.org/}"
 
 docker buildx build \
   --build-arg BUN_IMAGE="$BUN_IMAGE" \
@@ -22,7 +21,6 @@ docker buildx build \
 
 docker buildx build \
   --build-arg RANDOMX_BUILDER_IMAGE="${RANDOMX_BUILDER_IMAGE}" \
-  --build-arg NPM_REGISTRY="${NPM_REGISTRY}" \
   --target frontend-image \
   --tag "${FRONTEND_IMAGE}" \
   --load \
