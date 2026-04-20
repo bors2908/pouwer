@@ -1,0 +1,68 @@
+@startuml
+title Browser abuse -> PoUW challenge -> access restored
+
+skinparam shadowing false
+skinparam responseMessageBelowArrow true
+
+actor User
+participant "Rate Limiter/Load Balancer\n(Traefik)" as RateLimiter
+participant "Remediation Middleware\n(crowdsec-bouncer-traefik-plugin)" as Middleware
+participant "Security Engine\n(CrowdSec)" as SecurityEngine
+participant "Web Resource" as WebResource
+
+participant "Worker Engine" as Worker
+collections "PoUW Scripts\nRandomX.js/BTC Regtest\n(JS/WASM)" as Miner
+
+participant "Worker Server" as WorkerServer
+participant "Task Orchestrator" as Orchestrator
+participant "Task Generator Interface" as TaskIF
+participant "Result Service" as ResultService
+participant "Validation Interface" as ValidationIF
+participant "Custom Monero Stratum Adapter" as MoneroAdapter
+participant "P2Pool Monero\n(RandomX Mining Pool)" as P2Pool
+
+User -> RateLimiter: GET /
+RateLimiter -> Middleware: browser-page-enforcement-chain
+Middleware -> SecurityEngine: check remediation by source IP
+SecurityEngine --> Middleware: captcha decision
+Middleware --> User: serve challenge.html
+
+User -> RateLimiter: GET /captcha-standalone.js
+RateLimiter --> User: captcha JS bundle
+
+User -> Worker: click "Solve Challenge"
+Worker -> WorkerServer: GET /challenge?jobType=MONERO_RANDOMX
+WorkerServer -> Orchestrator: createTask(workerId, jobType)
+Orchestrator -> TaskIF: build task payload
+TaskIF -> MoneroAdapter: getLatest() stratum job
+MoneroAdapter --> TaskIF: RawStratumJob
+TaskIF --> Orchestrator: MoneroRandomXTaskPayload
+Orchestrator --> WorkerServer: Task(jobId, expiresAt, payload)
+WorkerServer --> Worker: task JSON
+
+Worker -> Miner: start RandomX mining
+loop solving
+Miner --> Worker: progress (hashrate, attempts)
+end
+Miner --> Worker: solution (nonce, hash)
+Worker -> User: write hidden field "response" and submit form
+
+User -> RateLimiter: POST challenge form (response)
+RateLimiter -> Middleware: captcha validation flow
+Middleware -> ResultService: POST /validate-custom-captcha
+ResultService -> ValidationIF: verify task/result
+ValidationIF -> MoneroAdapter: submitShare(stratumJobId, nonce, hash)
+MoneroAdapter -> P2Pool: stratum submit
+P2Pool --> MoneroAdapter: status=OK
+MoneroAdapter --> ValidationIF: accepted
+ValidationIF --> ResultService: ACCEPTED
+ResultService --> Middleware: {"success": true}
+
+Middleware --> User: set captcha pass (grace) + redirect to original URL
+User -> RateLimiter: follow redirect GET /
+RateLimiter -> Middleware: check pass/grace state
+Middleware --> RateLimiter: allow
+RateLimiter -> WebResource: forward request
+WebResource --> User: 200 OK page
+
+@enduml
