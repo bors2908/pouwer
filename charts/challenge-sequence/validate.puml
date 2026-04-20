@@ -1,0 +1,28 @@
+@startuml
+title Validate Challenge Flow
+
+skinparam shadowing false
+skinparam responseMessageBelowArrow true
+
+actor User
+participant "Rate Limiter/Load Balancer\n(Traefik)" as RateLimiter
+participant "Remediation Middleware\n(crowdsec-bouncer-traefik-plugin)" as Middleware
+participant "Result Service" as ResultService
+participant "Validation Interface" as ValidationIF
+participant "Custom Monero Stratum Adapter" as MoneroAdapter
+participant "P2Pool Monero\n(RandomX Mining Pool)" as P2Pool
+
+User -> RateLimiter: POST challenge form (response)
+RateLimiter -> Middleware: captcha validation flow
+Middleware -> ResultService: POST /validate-custom-captcha
+ResultService -> ValidationIF: verify task/result
+ValidationIF -> MoneroAdapter: submitShare(stratumJobId, nonce, hash)
+MoneroAdapter -> P2Pool: stratum submit
+P2Pool --> MoneroAdapter: status=OK
+MoneroAdapter --> ValidationIF: accepted
+ValidationIF --> ResultService: ACCEPTED
+ResultService --> Middleware: {"success": true}
+
+Middleware --> User: set captcha pass (grace) + redirect to original URL
+
+@enduml

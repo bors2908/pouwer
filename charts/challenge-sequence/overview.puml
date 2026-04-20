@@ -1,0 +1,37 @@
+@startuml
+title Browser abuse flow
+
+skinparam shadowing false
+skinparam responseMessageBelowArrow true
+skinparam ReferenceBackgroundColor #111111
+skinparam ReferenceBorderColor #111111
+skinparam ReferenceFontColor #ffffff
+
+actor User
+participant "Worker Engine" as Worker
+participant "Rate Limiter/Load Balancer\n(Traefik)" as RateLimiter
+participant "Remediation Middleware\n(crowdsec-bouncer-traefik-plugin)" as Middleware
+participant "Security Engine\n(CrowdSec)" as SecurityEngine
+participant "Worker Server" as WorkerServer
+participant "Web Resource" as WebResource
+
+User -> RateLimiter: GET /
+RateLimiter -> Middleware: browser-page-enforcement-chain
+Middleware -> SecurityEngine: check remediation by source IP
+SecurityEngine --> Middleware: captcha decision
+Middleware --> User: serve challenge.html
+
+User -> WorkerServer: GET /challenge.js
+WorkerServer --> Worker: Worker Engine with challenge JS bundle
+
+ref over User, WorkerServer : Solve Challenge
+ref over User, Middleware : Validate Challenge
+
+Middleware --> User: set captcha pass (grace) + redirect to original URL
+User -> RateLimiter: follow redirect GET /
+RateLimiter -> Middleware: check pass/grace state
+Middleware --> RateLimiter: allow
+RateLimiter -> WebResource: forward request
+WebResource --> User: 200 OK page
+
+@enduml
