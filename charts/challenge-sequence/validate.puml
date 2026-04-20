@@ -16,13 +16,13 @@ User -> RateLimiter: POST challenge form (response)
 RateLimiter -> Middleware: captcha validation flow
 Middleware -> ResultService: POST /validate-custom-captcha
 ResultService -> ValidationIF: verify task/result
-ValidationIF -> MoneroAdapter: submitShare(stratumJobId, nonce, hash)
+ValidationIF -> MoneroAdapter: submitShare()
 MoneroAdapter -> P2Pool: stratum submit
 P2Pool --> MoneroAdapter: status=OK
 MoneroAdapter --> ValidationIF: accepted
 ValidationIF --> ResultService: ACCEPTED
 ResultService --> Middleware: {"success": true}
 
-Middleware --> User: set captcha pass (grace) + redirect to original URL
+Middleware --> User: captcha grace + redirect to URL
 
 @enduml

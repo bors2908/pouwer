@@ -8,29 +8,23 @@ actor User
 participant "Worker Engine" as Worker
 collections "PoUW Scripts\nRandomX.js/BTC Regtest\n(JS/WASM)" as Miner
 
-participant "Worker Server" as WorkerServer
 participant "Task Orchestrator" as Orchestrator
 participant "Task Generator Interface" as TaskIF
-participant "Custom Monero Stratum Adapter" as MoneroAdapter
-participant "P2Pool Monero\n(RandomX Mining Pool)" as P2Pool
-
-P2Pool --> MoneroAdapter: latest stratum job notification (cached)
+participant "Monero Stratum" as MoneroAdapter
 
 User -> Worker: click "Solve Challenge"
-Worker -> WorkerServer: GET /challenge?jobType=MONERO_RANDOMX
-WorkerServer -> Orchestrator: createTask(workerId, jobType)
+Worker -> Orchestrator: GET /challenge?jobType=MONERO_RANDOMX
 Orchestrator -> TaskIF: build task payload
 TaskIF -> MoneroAdapter: getLatest() stratum job
 MoneroAdapter --> TaskIF: RawStratumJob
 TaskIF --> Orchestrator: MoneroRandomXTaskPayload
-Orchestrator --> WorkerServer: Task(jobId, expiresAt, payload)
-WorkerServer --> Worker: task JSON
+Orchestrator --> Worker: task JSON
 
 Worker -> Miner: start RandomX mining
 loop solving
 Miner --> Worker: progress (hashrate, attempts)
 end
 Miner --> Worker: solution (nonce, hash)
-Worker -> User: write hidden field "response" and submit form
+Worker -> User: submit response form
 
 @enduml
