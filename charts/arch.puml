@@ -40,11 +40,6 @@ package "Framework Core" {
 }
 
 package "Abstraction Layer" {
-  component "Task Generator Interface" as TaskIF
-  component "Validation Interface" as ValidationIF
-}
-
-package "Payload Adapters" {
   component "Custom Monero Stratum Adapter" as MoneroAdapter
   component "Custom BTC Regtest Client" as BTCRegtestClient
   collections "Other Payload Adapters" as OtherPayload
@@ -78,17 +73,14 @@ RateLimiter <-> Middleware
 
 Middleware <-> Worker
 
-ResultService <-down-> ValidationIF
-Orchestrator <-down-> TaskIF
+ResultService <-down-> MoneroAdapter
+Orchestrator <-down-> MoneroAdapter
 
-TaskIF <-down-> MoneroAdapter
-ValidationIF <-down-> MoneroAdapter
+ResultService <-down-> BTCRegtestClient
+Orchestrator <-down-> BTCRegtestClient
 
-TaskIF <-down-> BTCRegtestClient
-ValidationIF <-down-> BTCRegtestClient
-
-TaskIF <-down-> OtherPayload
-ValidationIF <-down-> OtherPayload
+ResultService <-down-> OtherPayload
+Orchestrator <-down-> OtherPayload
 
 MoneroAdapter <-down-> P2Pool: Stratum
 BTCRegtestClient <-down-> BTCRegtest: JSON-RPC
