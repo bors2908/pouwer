@@ -105,7 +105,8 @@ async function solveRandomX(task: RandomXTask) {
                 type: "progress",
                 attempts: event.stats.hashes_total,
                 elapsedMs,
-                hashesPerSec: event.stats.hashes_per_second,
+                //TODO: Fix, combine multiple pongs instead of this.
+                hashesPerSec: event.stats.hashes_per_second * 12,
             } as WorkerOutMessage)
         },
     }

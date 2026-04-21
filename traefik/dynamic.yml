@@ -19,7 +19,7 @@ http:
           captchaCustomResponse: response
           captchaHTMLFilePath: /etc/traefik/captcha.html
           banHTMLFilePath: /etc/traefik/ban.html
-          captchaGracePeriodSeconds: 1800
+          captchaGracePeriodSeconds: 60
           remediationHeadersCustomName: X-Crowdsec-Remediation
 
     api-rate-limit:

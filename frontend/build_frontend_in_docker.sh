@@ -7,12 +7,10 @@ COMPOSE_DEST_DIR="${1:-./out/frontend-compose}"
 
 GIT_REF="${GIT_REF:-master}"
 BUN_IMAGE="${BUN_IMAGE:-oven/bun:1.3.12-debian}"
-CLONE_CACHEBUST="${CLONE_CACHEBUST:-$(date +%s)}"
 
 docker buildx build \
   --build-arg BUN_IMAGE="$BUN_IMAGE" \
   --build-arg GIT_REF="$GIT_REF" \
-  --build-arg CLONE_CACHEBUST="$CLONE_CACHEBUST" \
   --target randomx-builder-image \
   --tag "${RANDOMX_BUILDER_IMAGE}" \
   --load \
@@ -24,7 +22,6 @@ docker buildx build \
   --target frontend-image \
   --tag "${FRONTEND_IMAGE}" \
   --load \
-  --no-cache \
   -f frontend-complete.Dockerfile \
   .
 
