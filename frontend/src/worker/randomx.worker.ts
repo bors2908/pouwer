@@ -1,14 +1,14 @@
 // @ts-ignore
-import {Config, Job, mine, MinerCallbacks} from "/randomx-web.js";
-import {
+import { mine } from "randomx.js-shared/web";
+import type {Config, Job, MinerCallbacks} from "randomx.js-shared";
+import type {
     WorkerEventJobDisposed,
     WorkerEventJobStarted,
     WorkerEventNonceSpaceExhausted,
     WorkerEventResultFound,
     WorkerEventWorkerReady,
     WorkerPong
-// @ts-ignore
-} from "/randomx-web.js";
+} from "randomx.js-shared";
 
 import {JobType, RandomXTask, Task, WorkerInMessage, WorkerOutMessage,} from "../lib/types";
 import {RandomXResultPayload} from "../lib/types";
@@ -69,7 +69,7 @@ async function solveRandomX(task: RandomXTask) {
             console.log(`Job ${event.job_id} started on worker ${event.miner_id}`)
         },
         on_job_disposed: (event: WorkerEventJobDisposed) => {
-            console.log(`Job ${event.job_id} disposed on worker ${event.miner_id}`)
+            console.log(`Job disposed on worker ${event.miner_id}`)
         },
         on_nonce_space_exhausted: (event: WorkerEventNonceSpaceExhausted) => {
             self.postMessage({type: "stopped", reason: "Exhausted"} as WorkerOutMessage);

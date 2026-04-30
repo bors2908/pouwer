@@ -1,24 +1,10 @@
 #!/usr/bin/env sh
 set -eu
 
-RANDOMX_BUILDER_IMAGE="${RANDOMX_BUILDER_IMAGE:-pouw-randomx-builder:local}"
 FRONTEND_IMAGE="${FRONTEND_IMAGE:-pouw-frontend:local}"
 COMPOSE_DEST_DIR="${1:-./out/frontend-compose}"
 
-GIT_REF="${GIT_REF:-master}"
-BUN_IMAGE="${BUN_IMAGE:-oven/bun:1.3.12-debian}"
-
 docker buildx build \
-  --build-arg BUN_IMAGE="$BUN_IMAGE" \
-  --build-arg GIT_REF="$GIT_REF" \
-  --target randomx-builder-image \
-  --tag "${RANDOMX_BUILDER_IMAGE}" \
-  --load \
-  -f randomx-builder.Dockerfile \
-  .
-
-docker buildx build \
-  --build-arg RANDOMX_BUILDER_IMAGE="${RANDOMX_BUILDER_IMAGE}" \
   --target frontend-image \
   --tag "${FRONTEND_IMAGE}" \
   --load \

@@ -1,6 +1,6 @@
-1. Create repos: Docker, maven and npm. Nexus maybe?
-2. Rework build flow for supporting projects: KtStratum and RandomX.js fork. Import as dependencies to the project.
-3. Make frontend build and publish to local npm.
+v 1. Create repos: Docker, maven and npm. Nexus maybe?
+v 2. Rework build flow for supporting projects: KtStratum and RandomX.js fork. Import as dependencies to the project.
+v 3. Make frontend build and publish to local npm.
 4. Extract common contract and interface for scripts. Make it build as a separate standalone script for each payload type, bound by common contract.
 5. Rework backend, drop inherited classes for CRUD. Extract common contracts and interface into a separate module. Make a separate module and build for each payload type.
 6. Move demo-app to examples module.

@@ -68,7 +68,7 @@ http:
 
   routers:
     captcha-frontend-assets:
-      rule: "(Host(`localhost`) || Host(`example.com`)) && (Path(`/captcha-standalone.js`) || Path(`/randomx-web.js`) || PathPrefix(`/src/`) || PathPrefix(`/@vite/`) || PathPrefix(`/node_modules/`) || PathPrefix(`/@id/`) || PathPrefix(`/@fs/`))"
+      rule: "(Host(`localhost`) || Host(`example.com`)) && (Path(`/captcha-standalone.js`) || PathPrefix(`/src/`) || PathPrefix(`/@vite/`) || PathPrefix(`/node_modules/`) || PathPrefix(`/@id/`) || PathPrefix(`/@fs/`))"
       entryPoints:
         - web
       middlewares:
