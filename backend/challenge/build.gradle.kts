@@ -5,6 +5,7 @@ plugins {
     java
     id("org.springframework.boot")
     id("io.spring.dependency-management")
+    id("com.google.cloud.tools.jib") version "3.4.5"
     kotlin("jvm")
     kotlin("kapt")
     kotlin("plugin.allopen") apply true
@@ -12,7 +13,6 @@ plugins {
 }
 
 group = "ru.itmo"
-version = "0.0.1-SNAPSHOT"
 
 dependencyManagement {
     imports {
@@ -58,4 +58,28 @@ noArg {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+jib {
+    val projectName = "pouw-backend"
+    val dockerRepoName = "localhost:9002"
+    val nexusUser = findProperty("nexusUser") as String?
+    val nexusPass = findProperty("nexusPass") as String?
+
+    setAllowInsecureRegistries(true)
+    from {
+        image = "eclipse-temurin:25-jre"
+    }
+    to {
+        image = "$dockerRepoName/$projectName:${project.version}"
+        auth {
+            username = nexusUser
+            password = nexusPass
+        }
+    }
+    container.apply {
+        mainClass = "ru.itmo.enterprise.ApplicationKt"
+        ports = listOf("8082")
+        creationTime = "USE_CURRENT_TIMESTAMP"
+    }
 }

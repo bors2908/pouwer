@@ -3,11 +3,10 @@ plugins {
 }
 
 group = "ru.itmo"
-version = "0.0.1-SNAPSHOT"
 
 repositories {
     maven {
-        url = uri("http://localhost:8081/repository/maven-public/")
+        url = uri("http://localhost:9001/repository/maven-public/")
         isAllowInsecureProtocol = true
     }
     mavenCentral()
@@ -16,7 +15,7 @@ repositories {
 subprojects {
     repositories {
         maven {
-            url = uri("http://localhost:8081/repository/maven-public/")
+            url = uri("http://localhost:9001/repository/maven-public/")
             isAllowInsecureProtocol = true
         }
         mavenCentral()
