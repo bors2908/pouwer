@@ -39,6 +39,9 @@ export default defineConfig({
       },
     },
   },
+  worker: {
+    format: 'es',
+  },
   plugins: [
     {
       name: 'serve-captcha-standalone',
