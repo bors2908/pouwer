@@ -1,6 +1,6 @@
 services:
   monero-testnet:
-    image: sethsimmons/simple-monerod:v0.18.3.4
+    image: ghcr.io/sethforprivacy/simple-monerod:v0.18.4.6
     container_name: monero-testnet
     restart: unless-stopped
     networks:
@@ -24,7 +24,7 @@ services:
       - --confirm-external-bind
 
   p2pool:
-    image: sethsimmons/p2pool:v4.3
+    image: ghcr.io/sethforprivacy/p2pool:v4.15
     container_name: p2pool
     restart: unless-stopped
     depends_on:
@@ -56,7 +56,7 @@ services:
       - --mini
 
   backend:
-    image: ${BACKEND_IMAGE:-pouw-backend:local}
+    image: localhost:9002/pouw-backend:0.1.0
     container_name: pouw-backend
     restart: unless-stopped
     environment:
@@ -71,7 +71,7 @@ services:
       - app-net
 
   frontend:
-    image: ${FRONTEND_IMAGE:-pouw-frontend:local}
+    image: localhost:9002/pouw-frontend:0.1.0
     container_name: pouw-frontend
     restart: unless-stopped
     ports:
