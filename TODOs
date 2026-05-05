@@ -7,6 +7,7 @@ v 3. Make frontend build and publish to local npm.
 7. Build backend images with jib. Rework compose
 8. Add multiple tasks support for Monero and other payloads.
 9. Implement and integrate Reputation engine and Difficulty engine.
+10. Rename modules and paths
 
 ???
 Move to k8s and helm charts.

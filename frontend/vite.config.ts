@@ -11,11 +11,16 @@ const SECURITY_HEADERS = {
   [COEP_HEADER]: COEP_VALUE,
 } as const;
 
-const CAPTCHA_STANDALONE_REQUEST_PATH = '/captcha-standalone.js';
-const CAPTCHA_STANDALONE_ENTRY_PATH = '/src/captcha-standalone.ts';
+const CAPTCHA_ENTRY_BY_REQUEST_PATH = {
+  '/captcha-standalone-sha256.js': '/src/entries/captcha-standalone-sha256.ts',
+  '/captcha-standalone-bitcoin.js': '/src/entries/captcha-standalone-bitcoin.ts',
+  '/captcha-standalone-randomx.js': '/src/entries/captcha-standalone-randomx.ts',
+} as const;
 const CHALLENGE_HTML_PATH = resolve(__dirname, './pages/challenge.html');
 const BAN_HTML_PATH = resolve(__dirname, './pages/ban.html');
-const CAPTCHA_STANDALONE_BUILD_PATH = resolve(__dirname, './src/captcha-standalone.ts');
+const CAPTCHA_STANDALONE_SHA256_BUILD_PATH = resolve(__dirname, './src/entries/captcha-standalone-sha256.ts');
+const CAPTCHA_STANDALONE_BITCOIN_BUILD_PATH = resolve(__dirname, './src/entries/captcha-standalone-bitcoin.ts');
+const CAPTCHA_STANDALONE_RANDOMX_BUILD_PATH = resolve(__dirname, './src/entries/captcha-standalone-randomx.ts');
 
 export default defineConfig({
   server: {
@@ -31,11 +36,23 @@ export default defineConfig({
       input: {
         challenge: CHALLENGE_HTML_PATH,
         ban: BAN_HTML_PATH,
-        captchaStandalone: CAPTCHA_STANDALONE_BUILD_PATH,
+        captchaStandaloneSha256: CAPTCHA_STANDALONE_SHA256_BUILD_PATH,
+        captchaStandaloneBitcoin: CAPTCHA_STANDALONE_BITCOIN_BUILD_PATH,
+        captchaStandaloneRandomx: CAPTCHA_STANDALONE_RANDOMX_BUILD_PATH,
       },
       output: {
-        entryFileNames: (chunkInfo) =>
-          chunkInfo.name === 'captchaStandalone' ? 'captcha-standalone.js' : 'assets/[name]-[hash].js',
+        entryFileNames: (chunkInfo) => {
+          switch (chunkInfo.name) {
+            case 'captchaStandaloneSha256':
+              return 'captcha-standalone-sha256.js';
+            case 'captchaStandaloneBitcoin':
+              return 'captcha-standalone-bitcoin.js';
+            case 'captchaStandaloneRandomx':
+              return 'captcha-standalone-randomx.js';
+            default:
+              return 'assets/[name]-[hash].js';
+          }
+        },
       },
     },
   },
@@ -47,7 +64,12 @@ export default defineConfig({
       name: 'serve-captcha-standalone',
       configureServer(server) {
         server.middlewares.use((req, res, next) => {
-          if (req.url?.startsWith(CAPTCHA_STANDALONE_REQUEST_PATH)) {
+          const requestUrl = req.url?.split('?')[0];
+          const entryPath = requestUrl
+            ? CAPTCHA_ENTRY_BY_REQUEST_PATH[requestUrl as keyof typeof CAPTCHA_ENTRY_BY_REQUEST_PATH]
+            : undefined;
+
+          if (entryPath) {
             res.setHeader('Content-Type', 'application/javascript');
             for (const [header, value] of Object.entries(SECURITY_HEADERS)) {
               res.setHeader(header, value);
@@ -56,7 +78,7 @@ export default defineConfig({
               `(() => {` +
                 `const s = document.createElement("script");` +
                 `s.type = "module";` +
-                `s.src = "${CAPTCHA_STANDALONE_ENTRY_PATH}";` +
+                `s.src = "${entryPath}";` +
                 `document.head.appendChild(s);` +
               `})();`
             );

@@ -1,6 +1,13 @@
 import {sha256} from "js-sha256";
-import {JobType, Sha256PowResultPayload, Task, WorkerInMessage, WorkerOutMessage} from "../lib/types";
-import {Sha256PowTask} from "../lib/types";
+import {
+    BitcoinSha256ResultPayload,
+    JobType,
+    Sha256PowResultPayload,
+    Task,
+    WorkerInMessage,
+    WorkerOutMessage
+} from "../lib/types";
+import {BitcoinSha256Task, Sha256PowTask} from "../lib/types";
 import {bytesToHex, hexToBytes, nowMs} from "../lib/utils";
 
 let currentTask: Task | null = null;
@@ -27,13 +34,14 @@ self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
 async function solve(task: Task) {
     switch (task.jobType) {
         case JobType.POW_TEST_SHA256:
+        case JobType.BITCOIN_RPC_SHA256:
             return solveSha256(task);
         default:
             self.postMessage({type: "stopped", reason: `Unsupported job type: ${task.jobType}`} as WorkerOutMessage);
     }
 }
 
-async function solveSha256(task: Sha256PowTask) {
+async function solveSha256(task: Sha256PowTask | BitcoinSha256Task) {
     const payload = task.payload; // Already typed as Sha256PowTaskPayload due to current TaskPayload definition
     const data = hexToBytes(payload.dataHex);
     const targetBI = BigInt("0x" + payload.targetHex);
@@ -84,11 +92,11 @@ async function solveSha256(task: Sha256PowTask) {
 
             if (hashBI <= targetBI) {
                 const durationMs = nowMs() - startTime;
-                const resultPayload: Sha256PowResultPayload = {
+                const resultPayload: Sha256PowResultPayload | BitcoinSha256ResultPayload = {
                     dataHex: payload.dataHex,
                     nonce: Number(nonce),
                     hashHex: bytesToHex(reversedHash),
-                    jobType: JobType.POW_TEST_SHA256
+                    jobType: task.jobType
                 };
 
                 self.postMessage({

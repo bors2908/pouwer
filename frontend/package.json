@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "check:contracts": "node ./scripts/check-contract-parity.cjs",
+    "build": "npm run check:contracts && tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

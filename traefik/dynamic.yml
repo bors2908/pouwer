@@ -14,7 +14,7 @@ http:
           metricsUpdateIntervalSeconds: 0
           captchaProvider: custom
           captchaCustomKey: pouw-firewall
-          captchaCustomJsURL: http://localhost/captcha-standalone.js
+          captchaCustomJsURL: http://localhost/captcha-standalone-randomx.js
           captchaCustomValidateURL: http://pouw-backend:8082/validate-custom-captcha
           captchaCustomResponse: response
           captchaHTMLFilePath: /etc/traefik/captcha.html
@@ -68,7 +68,7 @@ http:
 
   routers:
     captcha-frontend-assets:
-      rule: "(Host(`localhost`) || Host(`example.com`)) && (Path(`/captcha-standalone.js`) || PathPrefix(`/src/`) || PathPrefix(`/@vite/`) || PathPrefix(`/node_modules/`) || PathPrefix(`/@id/`) || PathPrefix(`/@fs/`))"
+      rule: "(Host(`localhost`) || Host(`example.com`)) && (Path(`/captcha-standalone-sha256.js`) || Path(`/captcha-standalone-bitcoin.js`) || Path(`/captcha-standalone-randomx.js`) || PathPrefix(`/src/`) || PathPrefix(`/@vite/`) || PathPrefix(`/node_modules/`) || PathPrefix(`/@id/`) || PathPrefix(`/@fs/`))"
       entryPoints:
         - web
       middlewares:

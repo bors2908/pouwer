@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     ),
     JsonSubTypes.Type(
         value = MoneroRandomXTaskPayload::class,
-        name = "RANDOMX_MONERO"
+        name = "MONERO_RANDOMX"
     )
 )
 sealed interface TaskPayload
