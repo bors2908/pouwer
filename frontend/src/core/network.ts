@@ -1,6 +1,6 @@
-import { JobType, ResultMessage, Task, ValidateResponse } from "../contracts";
+import { BaseTask, JobType, ResultMessage, ValidateResponse } from "./models";
 
-export class NetworkClient {
+export class NetworkClient<TTask extends BaseTask = BaseTask> {
     baseUrl: string;
     timeoutMs: number;
 
@@ -9,7 +9,7 @@ export class NetworkClient {
         this.timeoutMs = timeoutMs;
     }
 
-    async getChallenge(type: JobType = JobType.BITCOIN_RPC_SHA256): Promise<Task> {
+    async getChallenge(type: JobType): Promise<TTask> {
         const workerId = Math.floor(Math.random() * 100);
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), this.timeoutMs);
@@ -26,7 +26,7 @@ export class NetworkClient {
                 throw new Error(`Failed to fetch challenge: HTTP ${response.status}`);
             }
 
-            return await response.json();
+            return await response.json() as TTask;
         } catch (error) {
             clearTimeout(id);
             throw error;

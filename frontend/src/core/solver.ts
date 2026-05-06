@@ -1,4 +1,4 @@
-import {ISolver, JobType, Progress, SolveResult, Task, WorkerOutMessage} from "../contracts";
+import {BaseTask, ISolver, JobType, Progress, SolveResult, WorkerOutMessage} from "./models";
 
 type WorkerScriptMap = Record<JobType, new () => Worker>;
 
@@ -7,7 +7,7 @@ interface WorkerEntry {
     reject: (err: Error) => void;
 }
 
-export class WebWorkerSolver implements ISolver {
+export class WebWorkerSolver<TTask extends BaseTask = BaseTask, TResultPayload = unknown> implements ISolver<TTask, TResultPayload> {
     private workers = new Map<JobType, WorkerEntry>();
 
     private readonly scriptMap: WorkerScriptMap;
@@ -16,7 +16,7 @@ export class WebWorkerSolver implements ISolver {
         this.scriptMap = scriptMap;
     }
 
-    async start(task: Task, onProgress?: (stats: Progress) => void): Promise<SolveResult> {
+    async start(task: TTask, onProgress?: (stats: Progress) => void): Promise<SolveResult<TResultPayload>> {
         const jobType = task.jobType;
         const WorkerConstructor = this.scriptMap[jobType];
 
@@ -28,7 +28,7 @@ export class WebWorkerSolver implements ISolver {
             throw new Error(`Worker for jobType ${String(jobType)} is already running`);
         }
 
-        return new Promise<SolveResult>((resolve, reject) => {
+        return new Promise<SolveResult<TResultPayload>>((resolve, reject) => {
             const worker = new WorkerConstructor();
 
             const entry: WorkerEntry = {worker, reject};
@@ -45,7 +45,7 @@ export class WebWorkerSolver implements ISolver {
                 }
             };
 
-            entry.worker.onmessage = (event: MessageEvent<WorkerOutMessage>) => {
+            entry.worker.onmessage = (event: MessageEvent<WorkerOutMessage<TResultPayload>>) => {
                 const message = event.data;
                 if (message.type === "progress") {
                     onProgress?.(message);

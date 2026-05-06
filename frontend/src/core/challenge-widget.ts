@@ -1,4 +1,4 @@
-import {ISolver, JobType, Progress, ResultMessage, SolveResult, Task} from "../contracts";
+import {BaseTask, ISolver, JobType, Progress, ResultMessage, SolveResult} from "./models";
 import {NetworkClient} from "./network";
 import {PayloadModule} from "./payload-module";
 import {WebWorkerSolver} from "./solver";
@@ -14,11 +14,11 @@ type ChallengeTypeOption = {
 };
 
 class ChallengeUI {
-    task: Task | null = null;
+    task: BaseTask | null = null;
 
-    network: NetworkClient;
+    network: NetworkClient<BaseTask>;
 
-    solver: ISolver;
+    solver: ISolver<BaseTask, unknown>;
 
     private readonly modulesByType: Map<JobType, PayloadModule>;
     private readonly defaultJobType?: JobType;
@@ -224,7 +224,7 @@ class ChallengeUI {
         }
     }
 
-    private getResultMessage(task: Task, result: SolveResult): ResultMessage {
+    private getResultMessage(task: BaseTask, result: SolveResult<unknown>): ResultMessage<unknown> {
         return {
             jobId: task.jobId,
             payload: result.payload,

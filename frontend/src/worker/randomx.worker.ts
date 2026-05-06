@@ -10,14 +10,15 @@ import type {
     WorkerPong
 } from "randomx.js-shared";
 
-import {JobType, RandomXTask, Task, WorkerInMessage, WorkerOutMessage,} from "../lib/types";
-import {RandomXResultPayload} from "../lib/types";
+import {JobType} from "../contracts";
+import {WorkerInMessage, WorkerOutMessage} from "../core/models";
+import {RandomXResultPayload, RandomXTask} from "../lib/randomx/types";
 import {nowMs} from "../lib/utils";
 
-let currentTask: Task | null = null;
+let currentTask: RandomXTask | null = null;
 let running = false;
 
-self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
+self.onmessage = (e: MessageEvent<WorkerInMessage<RandomXTask>>) => {
     const msg = e.data;
     switch (msg.type) {
         case "init":
@@ -35,12 +36,12 @@ self.onmessage = (e: MessageEvent<WorkerInMessage>) => {
     }
 };
 
-async function solve(task: Task) {
+async function solve(task: RandomXTask) {
     switch (task.jobType) {
         case JobType.MONERO_RANDOMX:
             return solveRandomX(task);
         default:
-            self.postMessage({type: "stopped", reason: `Unsupported job type: ${task.jobType}`} as WorkerOutMessage);
+            self.postMessage({type: "stopped", reason: `Unsupported job type: ${task.jobType}`} as WorkerOutMessage<RandomXResultPayload>);
     }
 }
 
@@ -72,7 +73,7 @@ async function solveRandomX(task: RandomXTask) {
             console.log(`Job disposed on worker ${event.miner_id}`)
         },
         on_nonce_space_exhausted: (event: WorkerEventNonceSpaceExhausted) => {
-            self.postMessage({type: "stopped", reason: "Exhausted"} as WorkerOutMessage);
+            self.postMessage({type: "stopped", reason: "Exhausted"} as WorkerOutMessage<RandomXResultPayload>);
         },
         on_result_found: (event: WorkerEventResultFound) => {
             const durationMs = nowMs() - startTime;
@@ -91,7 +92,7 @@ async function solveRandomX(task: RandomXTask) {
                 attempts: event.hash_count,
                 durationMs: durationMs,
                 payload: result,
-            } as WorkerOutMessage);
+            } as WorkerOutMessage<RandomXResultPayload>);
 
             running = false;
             return;
@@ -107,7 +108,7 @@ async function solveRandomX(task: RandomXTask) {
                 elapsedMs,
                 //TODO: Fix, combine multiple pongs instead of this.
                 hashesPerSec: event.stats.hashes_per_second * 12,
-            } as WorkerOutMessage)
+            } as WorkerOutMessage<RandomXResultPayload>)
         },
     }
 

@@ -1,6 +1,6 @@
 import {JobType} from "../contracts";
 import {bootstrapChallengeWidget} from "../core/challenge-widget";
-import {randomxModule} from "../payloads/randomx";
+import {randomxModule} from "../lib/randomx/module";
 
 bootstrapChallengeWidget({
     modules: [randomxModule],

@@ -1,4 +1,4 @@
-import { JobType } from "../contracts";
+import { JobType } from "./models";
 
 export interface PayloadModule {
     readonly jobType: JobType;
