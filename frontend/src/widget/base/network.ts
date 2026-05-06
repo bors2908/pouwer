@@ -1,4 +1,4 @@
-import {BaseTask, JobType} from "./models";
+import type {BaseTask, JobType} from "../../contracts";
 
 type NetworkClientConfig = {
     challengeUrl?: string;

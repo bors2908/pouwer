@@ -5,11 +5,11 @@ import {
     Sha256PowResultPayload,
     Sha256PowTask,
     Sha256Task,
-} from "../lib/sha256/types";
-import {JobType} from "../contracts";
-import {bytesToHex, hexToBytes, nowMs} from "../lib/utils";
-import type {BaseTask} from "../contracts";
-import {createWorkerRuntime, WorkerRuntimeApi} from "./runtime";
+} from "./types";
+import {JobType} from "../../contracts";
+import {bytesToHex, hexToBytes, nowMs} from "../../lib/utils";
+import type {BaseTask} from "../../contracts";
+import {createWorkerRuntime, WorkerRuntimeApi} from "../../worker/runtime/runtime";
 
 type Sha256WorkerResultPayload = Sha256PowResultPayload | BitcoinSha256ResultPayload;
 

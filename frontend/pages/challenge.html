@@ -29,23 +29,6 @@
             margin: 0 0 1rem;
             font-size: 1.35rem;
         }
-        .field {
-            margin-bottom: 1rem;
-        }
-        .field label {
-            font-size: 0.9rem;
-            display: block;
-            margin-bottom: 0.35rem;
-            font-weight: 600;
-            color: #43516d;
-        }
-        .field select {
-            width: 100%;
-            padding: 0.6rem;
-            border-radius: 8px;
-            border: 1px solid #cfd7e5;
-            font-size: 0.95rem;
-        }
         .legal {
             margin: 0.9rem 0 1rem;
             padding: 0.85rem 0.95rem;
@@ -109,11 +92,6 @@
 <body>
 <div class="card">
     <h2>PoW Challenge</h2>
-    <div class="field">
-        <label for="challengeType">Computation type</label>
-        <select id="challengeType" aria-label="Challenge type"></select>
-    </div>
-
     <div class="stats">
         <div id="status">Status: Ready</div>
         <div id="attempts">Attempts: 0</div>
@@ -143,7 +121,14 @@
     </div>
 </div>
 
-<script src="{{ .FrontendJS }}" defer></script>
+<script>
+    (function loadCaptchaBundle() {
+        const script = document.createElement("script");
+        script.type = "module";
+        script.src = "{{ .FrontendJS }}";
+        document.head.appendChild(script);
+    })();
+</script>
 <script>
     function captchaCallback() {
         const form = document.getElementById("captcha-form");

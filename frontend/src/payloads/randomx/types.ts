@@ -1,5 +1,5 @@
-import type {BaseTask} from "../../core/models";
-import type {JobType} from "../../contracts";
+import type {BaseTask} from "../../contracts";
+import {JobType} from "../../contracts";
 
 export interface RandomXTaskPayload {
     id: string;

@@ -1,4 +1,4 @@
-export type JobType = string;
+import type {JobType} from "./job-types";
 
 export interface NonceRange {
     start: number;

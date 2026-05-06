@@ -1,6 +1,4 @@
-import {BaseTask, ISolver, JobType, Progress, SolveResult, WorkerOutMessage} from "./models";
-
-type WorkerScriptMap = Record<JobType, new () => Worker>;
+import type {BaseTask, ISolver, JobType, Progress, SolveResult, WorkerOutMessage} from "../../contracts";
 
 interface WorkerEntry {
     worker: Worker;
@@ -8,39 +6,33 @@ interface WorkerEntry {
 }
 
 export class WebWorkerSolver<TTask extends BaseTask = BaseTask, TResultPayload = unknown> implements ISolver<TTask, TResultPayload> {
-    private workers = new Map<JobType, WorkerEntry>();
+    private currentWorker: WorkerEntry | null = null;
 
-    private readonly scriptMap: WorkerScriptMap;
+    private readonly WorkerConstructor: new () => Worker;
 
-    constructor(scriptMap: WorkerScriptMap) {
-        this.scriptMap = scriptMap;
+    constructor(WorkerConstructor: new () => Worker) {
+        this.WorkerConstructor = WorkerConstructor;
     }
 
     async start(task: TTask, onProgress?: (stats: Progress) => void): Promise<SolveResult<TResultPayload>> {
-        const jobType = task.jobType;
-        const WorkerConstructor = this.scriptMap[jobType];
-
-        if (!WorkerConstructor) {
-            throw new Error(`No worker script registered for jobType: ${String(jobType)}`);
-        }
-
-        if (this.workers.has(jobType)) {
+        if (this.currentWorker) {
+            const jobType = task.jobType;
             throw new Error(`Worker for jobType ${String(jobType)} is already running`);
         }
 
         return new Promise<SolveResult<TResultPayload>>((resolve, reject) => {
-            const worker = new WorkerConstructor();
+            const worker = new this.WorkerConstructor();
 
             const entry: WorkerEntry = {worker, reject};
-            this.workers.set(jobType, entry);
+            this.currentWorker = entry;
 
             const cleanup = () => {
                 try {
                     entry.worker.onmessage = null;
                     entry.worker.onerror = null;
                 } finally {
-                    if (this.workers.get(jobType) === entry) {
-                        this.workers.delete(jobType);
+                    if (this.currentWorker === entry) {
+                        this.currentWorker = null;
                     }
                 }
             };
@@ -75,29 +67,19 @@ export class WebWorkerSolver<TTask extends BaseTask = BaseTask, TResultPayload =
         });
     }
 
-    cancel(jobType?: JobType): void {
-        if (jobType !== undefined) {
-            const entry = this.workers.get(jobType);
-            if (!entry) {
-                return;
-            }
-
-            entry.worker.postMessage({type: "cancel"});
-            entry.worker.terminate();
-            this.workers.delete(jobType);
-            entry.reject(new Error("Cancelled"));
+    cancel(_jobType?: JobType): void {
+        const entry = this.currentWorker;
+        if (!entry) {
             return;
         }
 
-        for (const [activeJobType, entry] of Array.from(this.workers.entries())) {
-            entry.worker.postMessage({type: "cancel"});
-            entry.worker.terminate();
-            entry.reject(new Error("Cancelled"));
-            this.workers.delete(activeJobType);
-        }
+        entry.worker.postMessage({type: "cancel"});
+        entry.worker.terminate();
+        this.currentWorker = null;
+        entry.reject(new Error("Cancelled"));
     }
 
-    isRunning(jobType: JobType): boolean {
-        return this.workers.has(jobType);
+    isRunning(_jobType: JobType): boolean {
+        return this.currentWorker !== null;
     }
 }

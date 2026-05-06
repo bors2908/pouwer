@@ -1,13 +1,15 @@
-import {BaseTask, ISolver, JobType, ResultMessage, SolveResult} from "./models";
+import type {BaseTask, ISolver, ResultMessage, SolveResult} from "../../contracts";
 import {ChallengeUI} from "./challenge-ui";
 import {NetworkClient} from "./network";
-import {PayloadModule} from "./payload-module";
-import {deliverResultToPlugin} from "./result-delivery";
-import {WebWorkerSolver} from "./solver";
+import type {PayloadBinding} from "./payload-binding";
+import {WebWorkerSolver} from "./browser-worker-solver";
+
+type ResultHandler = (result: ResultMessage<unknown>, ui: ChallengeUI) => Promise<void> | void;
 
 export interface ChallengeWidgetConfig {
-    modules: readonly PayloadModule[];
-    defaultJobType?: JobType;
+    payload: PayloadBinding;
+    onSolved?: ResultHandler;
+    successMessage?: string;
 }
 
 class ChallengeController {
@@ -16,44 +18,24 @@ class ChallengeController {
     private readonly network: NetworkClient<BaseTask>;
     private readonly solver: ISolver<BaseTask, unknown>;
     private readonly ui: ChallengeUI;
-    private readonly modulesByType: Map<JobType, PayloadModule>;
-    private readonly defaultJobType?: JobType;
+    private readonly payload: PayloadBinding;
+    private readonly onSolved?: ResultHandler;
+    private readonly successMessage: string;
 
     constructor(config: ChallengeWidgetConfig) {
-        if (config.modules.length === 0) {
-            throw new Error("At least one payload module must be configured.");
-        }
-
-        this.defaultJobType = config.defaultJobType;
-        this.modulesByType = new Map(
-            config.modules
-                .filter((module) => module.enabled !== false)
-                .map((module) => [module.jobType, module] as const)
-        );
-
-        if (this.modulesByType.size === 0) {
-            throw new Error("All payload modules are disabled.");
-        }
+        this.payload = config.payload;
+        this.onSolved = config.onSolved;
+        this.successMessage = config.successMessage || "Challenge solved";
 
         if (typeof Worker !== "undefined") {
-            this.solver = new WebWorkerSolver(this.createScriptMap());
+            this.solver = new WebWorkerSolver(this.payload.workerFactory);
         } else {
             throw new Error("Workers are not supported in this browser. Main thread solver is not implemented yet.");
         }
 
-        this.ui = new ChallengeUI(this.modulesByType, this.defaultJobType);
+        this.ui = new ChallengeUI();
         this.network = new NetworkClient({challengeUrl: this.ui.challengeUrl});
         this.initEvents();
-    }
-
-    private createScriptMap(): Record<JobType, new () => Worker> {
-        return Array.from(this.modulesByType.values()).reduce(
-            (acc, module) => {
-                acc[module.jobType] = module.workerFactory;
-                return acc;
-            },
-            {} as Record<JobType, new () => Worker>
-        );
     }
 
     private initEvents() {
@@ -61,21 +43,12 @@ class ChallengeController {
         this.ui.onCancel(() => this.cancelSolving());
     }
 
-    private resolveSelectedJobType(): JobType {
-        const selectedType = this.ui.getSelectedJobType();
-        if (!this.modulesByType.has(selectedType)) {
-            throw new Error("No payload module selected.");
-        }
-        return selectedType;
-    }
-
     private async startSolving() {
-        const type = this.resolveSelectedJobType();
         this.ui.clearResult();
         this.ui.setPhase("fetching");
 
         try {
-            this.task = await this.network.getChallenge(type);
+            this.task = await this.network.getChallenge(this.payload.jobType);
 
             if (this.task.expiresAt && this.task.expiresAt < Date.now()) {
                 this.ui.showError("Challenge expired");
@@ -93,12 +66,8 @@ class ChallengeController {
             });
 
             const resultMessage = this.getResultMessage(this.task, result);
-            deliverResultToPlugin({
-                container: this.ui.container,
-                form: this.ui.form,
-                hiddenResponse: this.ui.hiddenResponse,
-            }, resultMessage);
-            this.ui.showSuccess("Result handed back to Traefik");
+            await this.onSolved?.(resultMessage, this.ui);
+            this.ui.showSuccess(this.successMessage);
         } catch (error) {
             if (error instanceof Error && error.message !== "Cancelled") {
                 this.ui.showError(`Error: ${error.message}`);

@@ -14,34 +14,34 @@ const SECURITY_HEADERS = {
 const CHALLENGE_HTML_PATH = resolve(__dirname, './pages/challenge.html');
 const BAN_HTML_PATH = resolve(__dirname, './pages/ban.html');
 
-const CAPTCHA_STANDALONE_ENTRIES = [
+const CAPTCHA_TRAEFIK_ENTRIES = [
   {
-    rollupName: 'captchaStandaloneSha256',
-    requestPath: '/captcha-standalone-sha256.js',
-    sourcePath: '/src/entries/captcha-standalone-sha256.ts',
+    rollupName: 'captchaTraefikSha256',
+    requestPath: '/captcha-traefik-sha256.js',
+    sourcePath: '/src/entries/captcha-traefik-sha256.ts',
   },
   {
-    rollupName: 'captchaStandaloneBitcoin',
-    requestPath: '/captcha-standalone-bitcoin.js',
-    sourcePath: '/src/entries/captcha-standalone-bitcoin.ts',
+    rollupName: 'captchaTraefikBitcoin',
+    requestPath: '/captcha-traefik-bitcoin.js',
+    sourcePath: '/src/entries/captcha-traefik-bitcoin.ts',
   },
   {
-    rollupName: 'captchaStandaloneRandomx',
-    requestPath: '/captcha-standalone-randomx.js',
-    sourcePath: '/src/entries/captcha-standalone-randomx.ts',
+    rollupName: 'captchaTraefikRandomx',
+    requestPath: '/captcha-traefik-randomx.js',
+    sourcePath: '/src/entries/captcha-traefik-randomx.ts',
   },
 ] as const;
 
 const CAPTCHA_ENTRY_BY_REQUEST_PATH = Object.fromEntries(
-  CAPTCHA_STANDALONE_ENTRIES.map((entry) => [entry.requestPath, entry.sourcePath])
+  CAPTCHA_TRAEFIK_ENTRIES.map((entry) => [entry.requestPath, entry.sourcePath])
 );
 
 const CAPTCHA_FILE_BY_ROLLUP_NAME = Object.fromEntries(
-  CAPTCHA_STANDALONE_ENTRIES.map((entry) => [entry.rollupName, entry.requestPath.slice(1)])
+  CAPTCHA_TRAEFIK_ENTRIES.map((entry) => [entry.rollupName, entry.requestPath.slice(1)])
 );
 
 const CAPTCHA_ROLLUP_INPUT = Object.fromEntries(
-  CAPTCHA_STANDALONE_ENTRIES.map((entry) => [entry.rollupName, resolve(__dirname, `.${entry.sourcePath}`)])
+  CAPTCHA_TRAEFIK_ENTRIES.map((entry) => [entry.rollupName, resolve(__dirname, `.${entry.sourcePath}`)])
 );
 
 export default defineConfig({
@@ -76,7 +76,7 @@ export default defineConfig({
   },
   plugins: [
     {
-      name: 'serve-captcha-standalone',
+      name: 'serve-captcha-traefik',
       configureServer(server) {
         server.middlewares.use((req, res, next) => {
           const requestUrl = req.url?.split('?')[0];

@@ -1,8 +1,7 @@
-import { JobType } from "./models";
+import type {JobType} from "../../contracts";
 
-export interface PayloadModule {
+export interface PayloadBinding {
     readonly jobType: JobType;
     readonly label: string;
     readonly workerFactory: new () => Worker;
-    readonly enabled?: boolean;
 }

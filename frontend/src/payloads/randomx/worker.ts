@@ -10,10 +10,10 @@ import type {
     WorkerPong
 } from "randomx.js-shared";
 
-import {JobType} from "../contracts";
-import {RandomXResultPayload, RandomXTask} from "../lib/randomx/types";
-import {nowMs} from "../lib/utils";
-import {createWorkerRuntime, WorkerRuntimeApi} from "./runtime";
+import {JobType} from "../../contracts";
+import {RandomXResultPayload, RandomXTask} from "./types";
+import {nowMs} from "../../lib/utils";
+import {createWorkerRuntime, WorkerRuntimeApi} from "../../worker/runtime/runtime";
 
 createWorkerRuntime<RandomXTask, RandomXResultPayload>(solve);
 

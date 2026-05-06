@@ -1,4 +1,4 @@
-import type {BaseTask, SolveResult, WorkerInMessage, WorkerOutMessage, WorkerProgress} from "../core/models";
+import type {BaseTask, SolveResult, WorkerInMessage, WorkerOutMessage, WorkerProgress} from "../../contracts";
 
 export interface WorkerRuntimeApi<TResultPayload = unknown> {
     isRunning(): boolean;
