@@ -11,74 +11,58 @@ import type {
 } from "randomx.js-shared";
 
 import {JobType} from "../contracts";
-import {WorkerInMessage, WorkerOutMessage} from "../core/models";
 import {RandomXResultPayload, RandomXTask} from "../lib/randomx/types";
 import {nowMs} from "../lib/utils";
+import {createWorkerRuntime, WorkerRuntimeApi} from "./runtime";
 
-let currentTask: RandomXTask | null = null;
-let running = false;
+createWorkerRuntime<RandomXTask, RandomXResultPayload>(solve);
 
-self.onmessage = (e: MessageEvent<WorkerInMessage<RandomXTask>>) => {
-    const msg = e.data;
-    switch (msg.type) {
-        case "init":
-            currentTask = msg.task;
-            break;
-        case "start":
-            if (currentTask) {
-                running = true;
-                solve(currentTask);
-            }
-            break;
-        case "cancel":
-            running = false;
-            break;
-    }
-};
-
-async function solve(task: RandomXTask) {
+async function solve(task: RandomXTask, runtime: WorkerRuntimeApi<RandomXResultPayload>) {
     switch (task.jobType) {
         case JobType.MONERO_RANDOMX:
-            return solveRandomX(task);
+            return solveRandomX(task, runtime);
         default:
-            self.postMessage({type: "stopped", reason: `Unsupported job type: ${task.jobType}`} as WorkerOutMessage<RandomXResultPayload>);
+            runtime.reportStopped(`Unsupported job type: ${task.jobType}`);
     }
 }
 
-async function solveRandomX(task: RandomXTask) {
+async function solveRandomX(task: RandomXTask, runtime: WorkerRuntimeApi<RandomXResultPayload>) {
     const job: Job = {
         blob: task.payload.blob,
         job_id: task.jobId,
         target: task.payload.targetHex,
         height: task.payload.height,
-        seed_hash: task.payload.seedHash
+        seed_hash: task.payload.seedHash,
     };
     const taskPayload = task.payload;
     const startTime = nowMs();
 
     const callbacks: MinerCallbacks = {
         on_cache_initialising: () => {
-            console.log(`Cache Initialising...`)
+            console.log("Cache Initialising...");
         },
         on_cache_initialised: (duration_ms: number) => {
-            console.log(`Cache Initialised in ${duration_ms}ms`)
+            console.log(`Cache Initialised in ${duration_ms}ms`);
         },
         on_worker_ready: (event: WorkerEventWorkerReady) => {
-            console.log(`Worker ${event.miner_id} ready`)
+            console.log(`Worker ${event.miner_id} ready`);
         },
         on_job_started: (event: WorkerEventJobStarted) => {
-            console.log(`Job ${event.job_id} started on worker ${event.miner_id}`)
+            console.log(`Job ${event.job_id} started on worker ${event.miner_id}`);
         },
         on_job_disposed: (event: WorkerEventJobDisposed) => {
-            console.log(`Job disposed on worker ${event.miner_id}`)
+            console.log(`Job disposed on worker ${event.miner_id}`);
         },
-        on_nonce_space_exhausted: (event: WorkerEventNonceSpaceExhausted) => {
-            self.postMessage({type: "stopped", reason: "Exhausted"} as WorkerOutMessage<RandomXResultPayload>);
+        on_nonce_space_exhausted: (_event: WorkerEventNonceSpaceExhausted) => {
+            runtime.reportStopped("Exhausted");
         },
         on_result_found: (event: WorkerEventResultFound) => {
+            if (!runtime.isRunning()) {
+                return;
+            }
             const durationMs = nowMs() - startTime;
 
-            console.log(`Result found: ${toHex(event.result)}`)
+            console.log(`Result found: ${toHex(event.result)}`);
 
             const result: RandomXResultPayload = {
                 taskId: taskPayload.id,
@@ -87,40 +71,39 @@ async function solveRandomX(task: RandomXTask) {
                 jobType: JobType.MONERO_RANDOMX,
             };
 
-            self.postMessage({
-                type: "solved",
+            runtime.reportSolved({
                 attempts: event.hash_count,
                 durationMs: durationMs,
                 payload: result,
-            } as WorkerOutMessage<RandomXResultPayload>);
-
-            running = false;
+            });
             return;
         },
         on_pong: (event: WorkerPong) => {
+            if (!runtime.isRunning()) {
+                return;
+            }
             const elapsedMs = nowMs() - startTime;
 
-            console.log(`Pong: ${event.stats.hashes_total} hashes in ${elapsedMs}ms`)
+            console.log(`Pong: ${event.stats.hashes_total} hashes in ${elapsedMs}ms`);
 
-            self.postMessage({
-                type: "progress",
+            runtime.reportProgress({
                 attempts: event.stats.hashes_total,
                 elapsedMs,
-                //TODO: Fix, combine multiple pongs instead of this.
+                // TODO: combine multiple pongs instead of this multiplier.
                 hashesPerSec: event.stats.hashes_per_second * 12,
-            } as WorkerOutMessage<RandomXResultPayload>)
+            });
         },
-    }
+    };
 
     const config: Config = {
-        callbacks: callbacks
-    }
+        callbacks: callbacks,
+    };
 
-    mine(job, config)
+    mine(job, config);
 
     await new Promise(r => setTimeout(r, 200));
 }
 
 function toHex(u8: Uint8Array): string {
-    return Array.from(u8).map(b => b.toString(16).padStart(2, '0')).join('');
+    return Array.from(u8).map(b => b.toString(16).padStart(2, "0")).join("");
 }

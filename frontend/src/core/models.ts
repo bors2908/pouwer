@@ -1,7 +1,5 @@
 export type JobType = string;
 
-export type ValidateResponse = { ok: true } | { ok: false; reason?: string };
-
 export interface NonceRange {
     start: number;
     end: number;

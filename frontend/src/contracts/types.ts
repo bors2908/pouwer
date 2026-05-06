@@ -4,8 +4,6 @@ export enum JobType {
     MONERO_RANDOMX = "MONERO_RANDOMX",
 }
 
-export type ValidateResponse = { ok: true } | { ok: false; reason?: string };
-
 export type {
     BaseTask,
     ISolver,
@@ -45,7 +43,7 @@ import type {
     BitcoinSha256Task,
     Sha256PowResultPayload,
     Sha256PowTask,
-    Sha256TaskPayload
+    Sha256TaskPayload,
 } from "../lib/sha256/types";
 import type {RandomXResultPayload, RandomXTask, RandomXTaskPayload} from "../lib/randomx/types";
 

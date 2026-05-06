@@ -11,16 +11,38 @@ const SECURITY_HEADERS = {
   [COEP_HEADER]: COEP_VALUE,
 } as const;
 
-const CAPTCHA_ENTRY_BY_REQUEST_PATH = {
-  '/captcha-standalone-sha256.js': '/src/entries/captcha-standalone-sha256.ts',
-  '/captcha-standalone-bitcoin.js': '/src/entries/captcha-standalone-bitcoin.ts',
-  '/captcha-standalone-randomx.js': '/src/entries/captcha-standalone-randomx.ts',
-} as const;
 const CHALLENGE_HTML_PATH = resolve(__dirname, './pages/challenge.html');
 const BAN_HTML_PATH = resolve(__dirname, './pages/ban.html');
-const CAPTCHA_STANDALONE_SHA256_BUILD_PATH = resolve(__dirname, './src/entries/captcha-standalone-sha256.ts');
-const CAPTCHA_STANDALONE_BITCOIN_BUILD_PATH = resolve(__dirname, './src/entries/captcha-standalone-bitcoin.ts');
-const CAPTCHA_STANDALONE_RANDOMX_BUILD_PATH = resolve(__dirname, './src/entries/captcha-standalone-randomx.ts');
+
+const CAPTCHA_STANDALONE_ENTRIES = [
+  {
+    rollupName: 'captchaStandaloneSha256',
+    requestPath: '/captcha-standalone-sha256.js',
+    sourcePath: '/src/entries/captcha-standalone-sha256.ts',
+  },
+  {
+    rollupName: 'captchaStandaloneBitcoin',
+    requestPath: '/captcha-standalone-bitcoin.js',
+    sourcePath: '/src/entries/captcha-standalone-bitcoin.ts',
+  },
+  {
+    rollupName: 'captchaStandaloneRandomx',
+    requestPath: '/captcha-standalone-randomx.js',
+    sourcePath: '/src/entries/captcha-standalone-randomx.ts',
+  },
+] as const;
+
+const CAPTCHA_ENTRY_BY_REQUEST_PATH = Object.fromEntries(
+  CAPTCHA_STANDALONE_ENTRIES.map((entry) => [entry.requestPath, entry.sourcePath])
+);
+
+const CAPTCHA_FILE_BY_ROLLUP_NAME = Object.fromEntries(
+  CAPTCHA_STANDALONE_ENTRIES.map((entry) => [entry.rollupName, entry.requestPath.slice(1)])
+);
+
+const CAPTCHA_ROLLUP_INPUT = Object.fromEntries(
+  CAPTCHA_STANDALONE_ENTRIES.map((entry) => [entry.rollupName, resolve(__dirname, `.${entry.sourcePath}`)])
+);
 
 export default defineConfig({
   server: {
@@ -36,22 +58,15 @@ export default defineConfig({
       input: {
         challenge: CHALLENGE_HTML_PATH,
         ban: BAN_HTML_PATH,
-        captchaStandaloneSha256: CAPTCHA_STANDALONE_SHA256_BUILD_PATH,
-        captchaStandaloneBitcoin: CAPTCHA_STANDALONE_BITCOIN_BUILD_PATH,
-        captchaStandaloneRandomx: CAPTCHA_STANDALONE_RANDOMX_BUILD_PATH,
+        ...CAPTCHA_ROLLUP_INPUT,
       },
       output: {
         entryFileNames: (chunkInfo) => {
-          switch (chunkInfo.name) {
-            case 'captchaStandaloneSha256':
-              return 'captcha-standalone-sha256.js';
-            case 'captchaStandaloneBitcoin':
-              return 'captcha-standalone-bitcoin.js';
-            case 'captchaStandaloneRandomx':
-              return 'captcha-standalone-randomx.js';
-            default:
-              return 'assets/[name]-[hash].js';
+          const fileName = CAPTCHA_FILE_BY_ROLLUP_NAME[chunkInfo.name];
+          if (fileName) {
+            return fileName;
           }
+          return 'assets/[name]-[hash].js';
         },
       },
     },
@@ -65,9 +80,7 @@ export default defineConfig({
       configureServer(server) {
         server.middlewares.use((req, res, next) => {
           const requestUrl = req.url?.split('?')[0];
-          const entryPath = requestUrl
-            ? CAPTCHA_ENTRY_BY_REQUEST_PATH[requestUrl as keyof typeof CAPTCHA_ENTRY_BY_REQUEST_PATH]
-            : undefined;
+          const entryPath = requestUrl ? CAPTCHA_ENTRY_BY_REQUEST_PATH[requestUrl] : undefined;
 
           if (entryPath) {
             res.setHeader('Content-Type', 'application/javascript');

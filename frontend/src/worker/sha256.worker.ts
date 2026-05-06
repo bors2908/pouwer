@@ -1,51 +1,32 @@
 import {sha256} from "js-sha256";
 import {
     BitcoinSha256ResultPayload,
-    Sha256PowResultPayload,
     BitcoinSha256Task,
+    Sha256PowResultPayload,
     Sha256PowTask,
-    Sha256Task
+    Sha256Task,
 } from "../lib/sha256/types";
 import {JobType} from "../contracts";
-import {WorkerInMessage, WorkerOutMessage} from "../core/models";
 import {bytesToHex, hexToBytes, nowMs} from "../lib/utils";
 import type {BaseTask} from "../contracts";
+import {createWorkerRuntime, WorkerRuntimeApi} from "./runtime";
 
 type Sha256WorkerResultPayload = Sha256PowResultPayload | BitcoinSha256ResultPayload;
 
-let currentTask: Sha256Task | null = null;
-let running = false;
+createWorkerRuntime<Sha256Task, Sha256WorkerResultPayload>(solve);
 
-self.onmessage = (e: MessageEvent<WorkerInMessage<Sha256Task>>) => {
-    const msg = e.data;
-    switch (msg.type) {
-        case "init":
-            currentTask = msg.task;
-            break;
-        case "start":
-            if (currentTask) {
-                running = true;
-                solve(currentTask);
-            }
-            break;
-        case "cancel":
-            running = false;
-            break;
-    }
-};
-
-async function solve(task: Sha256Task) {
+async function solve(task: Sha256Task, runtime: WorkerRuntimeApi<Sha256WorkerResultPayload>) {
     switch (task.jobType) {
         case JobType.POW_TEST_SHA256:
         case JobType.BITCOIN_RPC_SHA256:
-            return solveSha256(task);
+            return solveSha256(task, runtime);
         default:
-            self.postMessage({type: "stopped", reason: `Unsupported job type: ${(task as BaseTask).jobType}`} as WorkerOutMessage<Sha256WorkerResultPayload>);
+            runtime.reportStopped(`Unsupported job type: ${(task as BaseTask).jobType}`);
     }
 }
 
-async function solveSha256(task: Sha256PowTask | BitcoinSha256Task) {
-    const payload = task.payload; // Already typed as Sha256PowTaskPayload due to current TaskPayload definition
+async function solveSha256(task: Sha256PowTask | BitcoinSha256Task, runtime: WorkerRuntimeApi<Sha256WorkerResultPayload>) {
+    const payload = task.payload;
     const data = hexToBytes(payload.dataHex);
     const targetBI = BigInt("0x" + payload.targetHex);
     const nonceStart = BigInt(payload.nonceRange.start);
@@ -62,7 +43,7 @@ async function solveSha256(task: Sha256PowTask | BitcoinSha256Task) {
     const buffer = new Uint8Array(Math.max(data.length, offset + 4));
     buffer.set(data);
 
-    while (running && nonce <= nonceEnd) {
+    while (runtime.isRunning() && nonce <= nonceEnd) {
         for (let i = 0; i < batchSize && nonce <= nonceEnd; i++) {
             attempts++;
 
@@ -99,16 +80,14 @@ async function solveSha256(task: Sha256PowTask | BitcoinSha256Task) {
                     dataHex: payload.dataHex,
                     nonce: Number(nonce),
                     hashHex: bytesToHex(reversedHash),
-                    jobType: task.jobType
+                    jobType: task.jobType,
                 };
 
-                self.postMessage({
-                    type: "solved",
+                runtime.reportSolved({
                     attempts: attempts,
                     durationMs: durationMs,
                     payload: resultPayload,
-                } as WorkerOutMessage<Sha256WorkerResultPayload>);
-                running = false;
+                });
                 return;
             }
             nonce++;
@@ -118,12 +97,11 @@ async function solveSha256(task: Sha256PowTask | BitcoinSha256Task) {
         if (currentTime - lastProgressTime >= 500) {
             const elapsedMs = currentTime - startTime;
             const hps = Math.floor((attempts * 1000) / elapsedMs);
-            self.postMessage({
-                type: "progress",
+            runtime.reportProgress({
                 attempts,
                 elapsedMs,
                 hashesPerSec: hps,
-            } as WorkerOutMessage<Sha256WorkerResultPayload>);
+            });
             lastProgressTime = currentTime;
         }
 
@@ -131,8 +109,8 @@ async function solveSha256(task: Sha256PowTask | BitcoinSha256Task) {
     }
 
     if (nonce > nonceEnd) {
-        self.postMessage({type: "stopped", reason: "Range exhausted"} as WorkerOutMessage<Sha256WorkerResultPayload>);
+        runtime.reportStopped("Range exhausted");
     } else {
-        self.postMessage({type: "stopped", reason: "Cancelled"} as WorkerOutMessage<Sha256WorkerResultPayload>);
+        runtime.reportStopped("Cancelled");
     }
 }

@@ -9,8 +9,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM ${NODE_IMAGE} AS frontend-image
-WORKDIR /workspace/frontend
-COPY --from=build /workspace/frontend/ /workspace/frontend/
+FROM nginx:1.27-alpine AS frontend-image
+COPY --from=build /workspace/frontend/dist/ /usr/share/nginx/html/
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 3001
-ENTRYPOINT ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3001"]
