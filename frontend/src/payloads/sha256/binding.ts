@@ -1,6 +1,8 @@
-import sha256Worker from "./worker.ts?worker";
 import {JobType} from "../../contracts";
 import type {PayloadBinding} from "../../widget/base/payload-binding";
+import {createModuleWorkerFactory} from "../../worker/module-worker-factory";
+
+const sha256Worker = createModuleWorkerFactory("/assets/sha256-worker.js");
 
 export const sha256PowBinding: PayloadBinding = {
     jobType: JobType.POW_TEST_SHA256,

@@ -3,8 +3,9 @@ ARG NODE_IMAGE=node:22-bookworm-slim
 FROM ${NODE_IMAGE} AS build
 WORKDIR /workspace/frontend
 COPY docker.npmrc ./.npmrc
-COPY package.json ./
-RUN npm install
+COPY package.json package-lock.json ./
+RUN sed -i 's#http://localhost:9001/#http://host.docker.internal:9001/#g' package-lock.json \
+    && npm ci
 
 COPY . .
 RUN npm run build

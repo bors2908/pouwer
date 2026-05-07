@@ -68,16 +68,16 @@ http:
 
   routers:
     captcha-frontend-assets:
-      rule: "(Host(`localhost`) || Host(`example.com`)) && (Path(`/captcha-traefik-sha256.js`) || Path(`/captcha-traefik-bitcoin.js`) || Path(`/captcha-traefik-randomx.js`) || PathPrefix(`/src/`) || PathPrefix(`/@vite/`) || PathPrefix(`/node_modules/`) || PathPrefix(`/@id/`) || PathPrefix(`/@fs/`))"
+      rule: "(Host(`localhost`) || Host(`example.com`)) && (Path(`/captcha-traefik-sha256.js`) || Path(`/captcha-traefik-bitcoin.js`) || Path(`/captcha-traefik-randomx.js`) || PathPrefix(`/assets/`))"
       entryPoints:
         - web
       middlewares:
         - captcha-isolation-headers
-      service: captcha-frontend-dev
+      service: captcha-frontend-static
       priority: 200
 
   services:
-    captcha-frontend-dev:
+    captcha-frontend-static:
       loadBalancer:
         servers:
           - url: http://pouw-frontend:3001
