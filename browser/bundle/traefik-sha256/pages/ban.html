@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Restricted</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, Arial, sans-serif;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top, #2a0f16, #170a0e 50%, #0f080b);
+      color: #f7f8fa;
+      padding: 1rem;
+    }
+    .card {
+      width: min(560px, 100%);
+      background: linear-gradient(180deg, #231017, #1a0c12);
+      border: 1px solid #4e1d2c;
+      border-radius: 16px;
+      padding: 1.4rem 1.5rem;
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.4);
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #ff9ab8;
+      background: rgba(255, 105, 150, 0.12);
+      border: 1px solid #6c2a3e;
+      border-radius: 999px;
+      padding: 0.25rem 0.6rem;
+      margin-bottom: 0.7rem;
+    }
+    h1 {
+      margin: 0 0 0.7rem;
+      font-size: 1.45rem;
+      color: #ffe6ee;
+    }
+    p {
+      margin: 0.45rem 0;
+      line-height: 1.5;
+      color: #f0d5de;
+    }
+    code {
+      color: #ffd4e3;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 0.15rem 0.35rem;
+      font-size: 0.9em;
+    }
+    .hint {
+      margin-top: 0.85rem;
+      color: #c9a6b5;
+      font-size: 0.86rem;
+    }
+  </style>
+</head>
+<body>
+  <section class="card" role="alert" aria-live="polite">
+    <span class="badge">Security Decision</span>
+    <h1>Access to this resource is blocked</h1>
+    <p>Your IP address has been flagged for suspicious behavior and this request has been denied.</p>
+    <p>Observed IP: <code id="ip-value">{{ .IP }}</code></p>
+    <p>If this is an error, please contact the site owner and include the IP shown above for review.</p>
+    <p class="hint">Protection powered by PoUW Challenge.</p>
+  </section>
+  <script>
+    (function attachIpFallback() {
+      const ipEl = document.getElementById("ip-value");
+      if (!ipEl) return;
+      const raw = ipEl.textContent || "";
+      if (raw.includes("{{") && raw.includes("}}")) {
+        const params = new URLSearchParams(window.location.search);
+        ipEl.textContent = params.get("ip") || "hidden";
+      }
+    })();
+  </script>
+</body>
+</html>

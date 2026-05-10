@@ -1,0 +1,29 @@
+{
+  "name": "browser-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "core-contracts",
+    "worker/runtime",
+    "widget/base",
+    "widget/traefik",
+    "worker/sha256",
+    "worker/randomx",
+    "bundle/traefik-sha256",
+    "bundle/traefik-bitcoin",
+    "bundle/traefik-randomx"
+  ],
+  "scripts": {
+    "start": "node server.js",
+    "build": "npm run build:libs && npm run build:bundles",
+    "build:libs": "npm run build -w @core/contracts && npm run build -w @worker/runtime && npm run build -w @widget/base && npm run build -w @widget/traefik && npm run build -w @worker/sha256 && npm run build -w @worker/randomx",
+    "build:bundles": "npm run build -w @bundle/traefik-sha256 && npm run build -w @bundle/traefik-bitcoin && npm run build -w @bundle/traefik-randomx",
+    "typecheck": "npm run typecheck --workspaces"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "esbuild": "^0.21.5",
+    "typescript": "^5.0.0"
+  }
+}

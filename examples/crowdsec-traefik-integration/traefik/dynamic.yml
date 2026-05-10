@@ -1,0 +1,83 @@
+http:
+  middlewares:
+    crowdsec-remediation-adapter:
+      plugin:
+        bouncer:
+          enabled: true
+          logLevel: DEBUG
+          crowdsecMode: live
+          crowdsecLapiScheme: http
+          crowdsecLapiHost: crowdsec:8080
+          crowdsecLapiPath: /
+          crowdsecLapiKey: replace-with-long-random-key
+          defaultDecisionSeconds: 1
+          metricsUpdateIntervalSeconds: 0
+          captchaProvider: custom
+          captchaCustomKey: pouw-firewall
+          captchaCustomJsURL: http://localhost/captcha-traefik-randomx.js
+          captchaCustomValidateURL: http://pouw-backend:8082/validate-custom-captcha
+          captchaCustomResponse: response
+          captchaHTMLFilePath: /etc/traefik/captcha.html
+          banHTMLFilePath: /etc/traefik/ban.html
+          captchaGracePeriodSeconds: 60
+          remediationHeadersCustomName: X-Crowdsec-Remediation
+
+    api-rate-limit:
+      rateLimit:
+        average: 5
+        burst: 5
+        period: 1s
+
+    browser-page-rate-limit:
+      rateLimit:
+        average: 5
+        burst: 5
+        period: 1s
+
+    browser-auth-rate-limit:
+      rateLimit:
+        average: 2
+        burst: 2
+        period: 10s
+
+    captcha-isolation-headers:
+      headers:
+        customResponseHeaders:
+          Cross-Origin-Opener-Policy: same-origin
+          Cross-Origin-Embedder-Policy: require-corp
+
+    browser-page-enforcement-chain:
+      chain:
+        middlewares:
+          - captcha-isolation-headers
+          - crowdsec-remediation-adapter
+          - browser-page-rate-limit
+
+    browser-auth-enforcement-chain:
+      chain:
+        middlewares:
+          - captcha-isolation-headers
+          - crowdsec-remediation-adapter
+          - browser-auth-rate-limit
+
+    api-enforcement-chain:
+      chain:
+        middlewares:
+          - crowdsec-remediation-adapter
+          - api-rate-limit
+
+  routers:
+    captcha-traefik-randomx-assets:
+      rule: "(Host(`localhost`) || Host(`example.com`)) && (Path(`/captcha-traefik-randomx.js`) || PathPrefix(`/assets/`))"
+      entryPoints:
+        - web
+      middlewares:
+        - captcha-isolation-headers
+      service: captcha-traefik-randomx-static
+      priority: 200
+
+  services:
+    captcha-traefik-randomx-static:
+      loadBalancer:
+        servers:
+          - url: http://captcha-traefik-randomx:3001

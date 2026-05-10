@@ -1,0 +1,14 @@
+{
+  "name": "@bundle/traefik-bitcoin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit && node build.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@widget/traefik": "0.1.0",
+    "@worker/sha256": "0.1.0"
+  }
+}
