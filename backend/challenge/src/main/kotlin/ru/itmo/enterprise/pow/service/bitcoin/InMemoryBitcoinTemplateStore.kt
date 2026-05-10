@@ -1,0 +1,34 @@
+package ru.itmo.enterprise.pow.service.bitcoin
+
+import ru.itmo.enterprise.pow.client.bitcoin.BitcoinBlockTemplate
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+
+class InMemoryBitcoinTemplateStore : BitcoinTemplateStore {
+    private val templates = ConcurrentHashMap<UUID, StoredTemplate>()
+
+    override fun save(jobId: UUID, template: BitcoinBlockTemplate, expiresAt: Long) {
+        cleanupExpired()
+        templates[jobId] = StoredTemplate(template, expiresAt)
+    }
+
+    override fun find(jobId: UUID): BitcoinBlockTemplate? {
+        val now = System.currentTimeMillis()
+        val entry = templates[jobId] ?: return null
+        if (entry.expiresAt <= now) {
+            templates.remove(jobId)
+            return null
+        }
+        return entry.template
+    }
+
+    private fun cleanupExpired() {
+        val now = System.currentTimeMillis()
+        templates.entries.removeIf { it.value.expiresAt <= now }
+    }
+
+    private data class StoredTemplate(
+        val template: BitcoinBlockTemplate,
+        val expiresAt: Long
+    )
+}

@@ -82,6 +82,6 @@ class MoneroRandomXValidator(
     }
 
     companion object {
-        private val log = LoggerFactory.getLogger(javaClass)
+        private val log = LoggerFactory.getLogger(MoneroRandomXValidator::class.java)
     }
 }

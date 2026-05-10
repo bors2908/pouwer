@@ -1,6 +1,7 @@
 package ru.itmo.enterprise.pow.controller
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -44,23 +45,18 @@ class GatewayController(
 
     @PostMapping("/validate")
     fun validate(@RequestBody result: ResultMessage): ResponseEntity<Any> {
-        val jobType = result.payload.jobType
-
-        val resultService = resultServiceByType[jobType]
-            ?: throw IllegalArgumentException("Unknown job type: $jobType")
-
-        val validation = resultService.handleResult(result)
+        val validation = processValidation(result)
 
         return when (validation.status) {
             ValidationStatus.ACCEPTED ->
                 ResponseEntity.ok(mapOf("status" to "accepted"))
 
             ValidationStatus.REJECTED ->
-                ResponseEntity.unprocessableEntity()
+                ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                     .body(mapOf("status" to "rejected", "reason" to validation.reason))
 
             ValidationStatus.CONFLICT ->
-                ResponseEntity.status(409)
+                ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(mapOf("status" to "conflict", "reason" to validation.reason))
         }
     }
@@ -74,24 +70,20 @@ class GatewayController(
         @RequestParam(CAPTCHA_CUSTOM_RESPONSE) response: String
     ): ResponseEntity<Map<String, Boolean>> {
         val result = objectMapper.readValue(response, ResultMessage::class.java)
-
-        val jobType = result.payload.jobType
-
-        val resultService = resultServiceByType[jobType]
-            ?: throw IllegalArgumentException("Unknown job type: $jobType")
-
-        val validation = resultService.handleResult(result)
+        val validation = processValidation(result)
 
         return when (validation.status) {
             ValidationStatus.ACCEPTED ->
                 ResponseEntity.ok(mapOf("success" to true))
 
-            ValidationStatus.REJECTED ->
+            ValidationStatus.REJECTED, ValidationStatus.CONFLICT ->
                 ResponseEntity.ok(mapOf("success" to false))
-
-            else -> throw UnsupportedOperationException("not supported")
         }
     }
+
+    private fun processValidation(result: ResultMessage) =
+        resultServiceByType[result.payload.jobType]?.handleResult(result)
+            ?: throw IllegalArgumentException("Unknown job type: ${result.payload.jobType}")
 
     companion object {
         private val log = KotlinLogging.logger {}

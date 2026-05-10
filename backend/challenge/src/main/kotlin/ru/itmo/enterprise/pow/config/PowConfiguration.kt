@@ -4,6 +4,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ru.itmo.enterprise.pow.service.LeaseManager
 import ru.itmo.enterprise.pow.service.TaskStore
+import ru.itmo.enterprise.pow.service.bitcoin.BitcoinTemplateStore
+import ru.itmo.enterprise.pow.service.bitcoin.InMemoryBitcoinTemplateStore
 import ru.itmo.enterprise.pow.service.lease.SimpleLeaseManager
 import ru.itmo.enterprise.pow.service.store.InMemoryTaskStore
 
@@ -15,4 +17,7 @@ open class PowConfiguration {
 
     @Bean
     open fun leaseManager(): LeaseManager = SimpleLeaseManager()
+
+    @Bean
+    open fun bitcoinTemplateStore(): BitcoinTemplateStore = InMemoryBitcoinTemplateStore()
 }
