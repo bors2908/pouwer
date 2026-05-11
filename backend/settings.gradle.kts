@@ -3,7 +3,12 @@ rootProject.name = "backend"
 include("common")
 include("model")
 
-include("challenge")
+include("core-api")
+include("core-runtime")
+include("payloads")
+include("payloads:payload-sha256")
+include("payloads:payload-bitcoin-rpc")
+include("payloads:payload-monero-randomx")
 
 include("openapi")
 
