@@ -20,6 +20,7 @@ dependencies {
     implementation("org.springframework:spring-context")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.01")
+    compileOnly("org.pf4j:pf4j:3.13.0")
 }
 
 java {

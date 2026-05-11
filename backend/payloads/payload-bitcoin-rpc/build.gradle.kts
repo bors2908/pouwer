@@ -21,6 +21,7 @@ dependencies {
     implementation("org.springframework:spring-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.bitcoinj:bitcoinj-core:0.16.3")
+    compileOnly("org.pf4j:pf4j:3.13.0")
 }
 
 java {

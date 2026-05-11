@@ -23,6 +23,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api")
     implementation("ge.becrin:kt-stratum:0.1.0")
     implementation("org.json:json:20251224")
+    compileOnly("org.pf4j:pf4j:3.13.0")
 }
 
 java {

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 import ru.itmo.enterprise.challenge.api.PayloadBuildRequest
 import ru.itmo.enterprise.challenge.api.PayloadSupportContext
 import ru.itmo.enterprise.challenge.api.ResultMessage
@@ -38,26 +39,44 @@ class GatewayController(
     ): Task {
         val resolvedPluginId = LegacyJobTypeMapper.resolve(jobType = jobType, pluginId = pluginId)
         val plugin = payloadPluginRegistry.get(resolvedPluginId)
-        val supportsRequest = plugin.supports(
-            PayloadSupportContext(
-                requestedPluginId = resolvedPluginId,
-                legacyJobType = jobType,
-                workerId = workerId
+        val supportsRequest = try {
+            plugin.supports(
+                PayloadSupportContext(
+                    requestedPluginId = resolvedPluginId,
+                    legacyJobType = jobType,
+                    workerId = workerId
+                )
             )
-        )
+        } catch (e: Exception) {
+            payloadPluginRegistry.disable(resolvedPluginId, e)
+            throw ResponseStatusException(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "Plugin $resolvedPluginId failed and was disabled",
+                e
+            )
+        }
         require(supportsRequest) {
             "Plugin $resolvedPluginId does not support this request"
         }
 
-        val task = plugin.buildPayload(
-            PayloadBuildRequest(
-                workerId = workerId,
-                nowMillis = System.currentTimeMillis(),
-                taskTtlMillis = powProperties.ttlSeconds * 1000,
-                requestedPluginId = resolvedPluginId,
-                legacyJobType = jobType
+        val task = try {
+            plugin.buildPayload(
+                PayloadBuildRequest(
+                    workerId = workerId,
+                    nowMillis = System.currentTimeMillis(),
+                    taskTtlMillis = powProperties.ttlSeconds * 1000,
+                    requestedPluginId = resolvedPluginId,
+                    legacyJobType = jobType
+                )
             )
-        )
+        } catch (e: Exception) {
+            payloadPluginRegistry.disable(resolvedPluginId, e)
+            throw ResponseStatusException(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "Plugin $resolvedPluginId failed and was disabled",
+                e
+            )
+        }
 
         taskStore.save(task)
         log.info { "Task: " + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(task) }

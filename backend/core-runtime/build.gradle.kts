@@ -29,6 +29,7 @@ dependencyManagement {
 dependencies {
     implementation(project(":common"))
     implementation(project(":core-api"))
+    implementation("org.pf4j:pf4j:3.13.0")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 
     kapt("org.mapstruct:mapstruct-processor:1.6.3")

@@ -1,6 +1,7 @@
 package ru.itmo.enterprise.challenge.api
 
 import com.fasterxml.jackson.databind.JsonNode
+import org.pf4j.ExtensionPoint
 import java.util.UUID
 
 const val CHALLENGE_PLUGIN_CONTRACT_VERSION: String = "1.0"
@@ -48,7 +49,7 @@ enum class ValidationStatus {
     CONFLICT
 }
 
-interface PayloadPlugin {
+interface PayloadPlugin : ExtensionPoint {
     fun id(): String
 
     fun version(): String

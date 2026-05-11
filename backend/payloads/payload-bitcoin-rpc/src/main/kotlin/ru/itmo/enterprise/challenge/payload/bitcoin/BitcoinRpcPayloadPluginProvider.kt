@@ -1,5 +1,6 @@
 package ru.itmo.enterprise.challenge.payload.bitcoin
 
+import org.pf4j.Extension
 import ru.itmo.enterprise.challenge.api.PayloadBuildRequest
 import ru.itmo.enterprise.challenge.api.PayloadPlugin
 import ru.itmo.enterprise.challenge.api.PayloadSupportContext
@@ -7,6 +8,7 @@ import ru.itmo.enterprise.challenge.api.ResultMessage
 import ru.itmo.enterprise.challenge.api.Task
 import ru.itmo.enterprise.challenge.api.ValidationResult
 
+@Extension
 class BitcoinRpcPayloadPluginProvider : PayloadPlugin {
     private val delegate = BitcoinRpcPayloadPlugin()
 

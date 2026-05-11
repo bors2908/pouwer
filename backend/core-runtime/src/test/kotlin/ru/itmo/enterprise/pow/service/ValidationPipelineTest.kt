@@ -99,9 +99,40 @@ class ValidationPipelineTest {
         assertEquals(ValidationStatus.REJECTED, result.status)
     }
 
+    @Test
+    fun `should disable failing plugin during validation`() {
+        val plugin = TestPlugin("pow-test-sha256", ValidationResult(ValidationStatus.ACCEPTED), throwOnValidate = true)
+        val registry = PayloadPluginRegistry(listOf(plugin))
+        val taskStore = InMemoryTaskStore().also {
+            it.save(
+                Task(
+                    jobId = JOB_ID,
+                    pluginId = plugin.id(),
+                    expiresAt = System.currentTimeMillis() + 60_000,
+                    payload = JsonNodeFactory.instance.objectNode()
+                )
+            )
+        }
+        val pipeline = ValidationPipeline(taskStore, registry)
+
+        val result = pipeline.validate(
+            ResultMessage(
+                jobId = JOB_ID,
+                pluginId = null,
+                payload = JsonNodeFactory.instance.objectNode(),
+                durationMs = null,
+                attempts = null
+            )
+        )
+
+        assertEquals(ValidationStatus.REJECTED, result.status)
+        assertEquals(null, registry.find(plugin.id()))
+    }
+
     private data class TestPlugin(
         private val pluginId: String,
-        private val response: ValidationResult
+        private val response: ValidationResult,
+        private val throwOnValidate: Boolean = false
     ) : PayloadPlugin {
         override val contractVersion: String = CHALLENGE_PLUGIN_CONTRACT_VERSION
 
@@ -115,7 +146,10 @@ class ValidationPipelineTest {
             throw UnsupportedOperationException("Not required for this test")
         }
 
-        override fun validateResult(task: Task, result: ResultMessage): ValidationResult = response
+        override fun validateResult(task: Task, result: ResultMessage): ValidationResult {
+            check(!throwOnValidate) { "boom" }
+            return response
+        }
     }
 
     companion object {

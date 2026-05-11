@@ -61,6 +61,35 @@ class PayloadPluginRegistryTest {
         }
     }
 
+    @Test
+    fun `should disable plugin`() {
+        val registry = PayloadPluginRegistry(listOf(TestPlugin("ok")))
+        registry.disable("ok")
+
+        assertThrows(UnsupportedPluginException::class.java) {
+            registry.get("ok")
+        }
+    }
+
+    @Test
+    fun `should call provider disable when plugin is disabled`() {
+        var disabledId: String? = null
+        val provider = object : PayloadPluginProvider {
+            override fun loadPlugins(): List<PayloadPlugin> = listOf(TestPlugin("faulty"))
+            override fun disable(pluginId: String) {
+                disabledId = pluginId
+            }
+        }
+        val registry = PayloadPluginRegistry(provider)
+        
+        registry.disable("faulty")
+        
+        assertEquals("faulty", disabledId)
+        assertThrows(UnsupportedPluginException::class.java) {
+            registry.get("faulty")
+        }
+    }
+
     private data class TestPlugin(
         private val pluginId: String,
         override val contractVersion: String = CHALLENGE_PLUGIN_CONTRACT_VERSION
