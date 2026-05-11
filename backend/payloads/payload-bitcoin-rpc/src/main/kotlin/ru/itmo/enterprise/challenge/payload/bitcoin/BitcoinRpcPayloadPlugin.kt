@@ -3,8 +3,6 @@ package ru.itmo.enterprise.challenge.payload.bitcoin
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.bitcoinj.core.Utils
-import org.springframework.stereotype.Component
-import ru.itmo.enterprise.challenge.api.PayloadPlugin
 import ru.itmo.enterprise.challenge.api.ResultMessage
 import ru.itmo.enterprise.challenge.api.Task
 import ru.itmo.enterprise.challenge.api.ValidationResult
@@ -14,19 +12,18 @@ import java.security.MessageDigest
 import java.util.HexFormat
 import java.util.UUID
 
-@Component
 class BitcoinRpcPayloadPlugin(
-    private val rpcClient: BitcoinRpcClient,
-    private val templateStore: BitcoinTemplateStore,
-    private val blockBuilder: BitcoinBlockBuilder
-) : PayloadPlugin {
+    private val rpcClient: BitcoinRpcClient = BitcoinRpcClient(),
+    private val templateStore: BitcoinTemplateStore = InMemoryBitcoinTemplateStore(),
+    private val blockBuilder: BitcoinBlockBuilder = BitcoinBlockBuilder()
+) {
     private val mapper: ObjectMapper = jacksonObjectMapper()
     private val hex = HexFormat.of()
     private val chunkSize = 500_000L
 
-    override val pluginId: String = PLUGIN_ID
+    val pluginId: String = PLUGIN_ID
 
-    override fun createTask(workerId: String?, nowMillis: Long, taskTtlMillis: Long): Task {
+    fun createTask(workerId: String?, nowMillis: Long, taskTtlMillis: Long): Task {
         val template = rpcClient.getBlockTemplate()
         val jobId = UUID.randomUUID()
         val expiresAt = nowMillis + taskTtlMillis
@@ -45,7 +42,7 @@ class BitcoinRpcPayloadPlugin(
         )
     }
 
-    override fun validate(task: Task, result: ResultMessage): ValidationResult {
+    fun validate(task: Task, result: ResultMessage): ValidationResult {
         if (task.pluginId != pluginId) {
             return ValidationResult(ValidationStatus.REJECTED, "Plugin mismatch")
         }

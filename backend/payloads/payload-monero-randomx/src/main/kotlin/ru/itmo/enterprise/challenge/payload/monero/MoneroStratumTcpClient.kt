@@ -6,19 +6,24 @@ import ge.becrin.kt.stratum.transport.AbstractConnectionState
 import ge.becrin.kt.stratum.transport.tcp.StratumTcpClient
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.json.JSONObject
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.Configuration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
-@Configuration
-open class MoneroStratumTcpClient(
-    @param:Value("\${stratum.host:127.0.0.1}") private val host: String,
-    @param:Value("\${stratum.port:3333}") private val port: Int,
-    @param:Value("\${stratum.worker:worker}") private val worker: String,
-    @param:Value("\${stratum.password:}") private val password: String,
-    private val jobStore: StratumJobStore
+class MoneroStratumTcpClient(
+    private val host: String = System.getProperty("stratum.host")
+        ?: System.getenv("STRATUM_HOST")
+        ?: "127.0.0.1",
+    private val port: Int = (System.getProperty("stratum.port")
+        ?: System.getenv("STRATUM_PORT")
+        ?: "3333").toIntOrNull() ?: 3333,
+    private val worker: String = System.getProperty("stratum.worker")
+        ?: System.getenv("STRATUM_WORKER")
+        ?: "poctest.worker1",
+    private val password: String = System.getProperty("stratum.password")
+        ?: System.getenv("STRATUM_PASSWORD")
+        ?: "",
+    private val jobStore: StratumJobStore = StratumJobStore()
 ) : StratumTcpClient() {
 
     private val pending = ConcurrentHashMap<Long, CompletableFuture<ResponseMessage>>()

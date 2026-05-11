@@ -3,16 +3,14 @@ package ru.itmo.enterprise.challenge.payload.monero
 import ge.becrin.kt.stratum.message.ResponseMessage
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Component
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
-@Component
 class StratumSubmitService(
-    private val client: MoneroStratumTcpClient,
-    @param:Value("\${stratum.worker:poctest.worker1}")
-    private val workerName: String
+    private val client: MoneroStratumTcpClient = MoneroStratumTcpClient(),
+    private val workerName: String = System.getProperty("stratum.worker")
+        ?: System.getenv("STRATUM_WORKER")
+        ?: "poctest.worker1"
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
     private val defaultTimeoutSec = 10L

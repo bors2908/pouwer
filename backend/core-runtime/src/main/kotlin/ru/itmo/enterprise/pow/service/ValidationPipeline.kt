@@ -18,6 +18,6 @@ class ValidationPipeline(
         val plugin = payloadPluginRegistry.find(pluginId)
             ?: return ValidationResult(ValidationStatus.REJECTED, "Unsupported plugin: $pluginId")
 
-        return plugin.validate(task, result)
+        return plugin.validateResult(task, result)
     }
 }

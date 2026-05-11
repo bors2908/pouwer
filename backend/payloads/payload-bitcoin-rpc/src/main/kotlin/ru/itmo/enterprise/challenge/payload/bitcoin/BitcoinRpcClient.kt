@@ -3,11 +3,9 @@ package ru.itmo.enterprise.challenge.payload.bitcoin
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import java.util.Base64
 
-@Component
 class BitcoinRpcClient {
     private val restTemplate = RestTemplate()
     private val rpcUrl = "http://localhost:18443"

@@ -28,6 +28,20 @@ data class ValidationResult(
     val reason: String? = null
 )
 
+data class PayloadSupportContext(
+    val requestedPluginId: String? = null,
+    val legacyJobType: String? = null,
+    val workerId: String? = null
+)
+
+data class PayloadBuildRequest(
+    val workerId: String?,
+    val nowMillis: Long,
+    val taskTtlMillis: Long,
+    val requestedPluginId: String? = null,
+    val legacyJobType: String? = null
+)
+
 enum class ValidationStatus {
     ACCEPTED,
     REJECTED,
@@ -35,13 +49,18 @@ enum class ValidationStatus {
 }
 
 interface PayloadPlugin {
-    val pluginId: String
+    fun id(): String
+
+    fun version(): String
+
     val contractVersion: String
         get() = CHALLENGE_PLUGIN_CONTRACT_VERSION
 
-    fun createTask(workerId: String?, nowMillis: Long, taskTtlMillis: Long): Task
+    fun supports(context: PayloadSupportContext): Boolean
 
-    fun validate(task: Task, result: ResultMessage): ValidationResult
+    fun buildPayload(request: PayloadBuildRequest): Task
+
+    fun validateResult(task: Task, result: ResultMessage): ValidationResult
 }
 
 class DuplicatePluginIdException(pluginId: String) :

@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import ru.itmo.enterprise.challenge.api.PayloadBuildRequest
+import ru.itmo.enterprise.challenge.api.PayloadSupportContext
 import ru.itmo.enterprise.challenge.api.ResultMessage
 import ru.itmo.enterprise.challenge.api.Task
 import ru.itmo.enterprise.challenge.api.ValidationStatus
@@ -36,11 +38,25 @@ class GatewayController(
     ): Task {
         val resolvedPluginId = LegacyJobTypeMapper.resolve(jobType = jobType, pluginId = pluginId)
         val plugin = payloadPluginRegistry.get(resolvedPluginId)
+        val supportsRequest = plugin.supports(
+            PayloadSupportContext(
+                requestedPluginId = resolvedPluginId,
+                legacyJobType = jobType,
+                workerId = workerId
+            )
+        )
+        require(supportsRequest) {
+            "Plugin $resolvedPluginId does not support this request"
+        }
 
-        val task = plugin.createTask(
-            workerId = workerId,
-            nowMillis = System.currentTimeMillis(),
-            taskTtlMillis = powProperties.ttlSeconds * 1000
+        val task = plugin.buildPayload(
+            PayloadBuildRequest(
+                workerId = workerId,
+                nowMillis = System.currentTimeMillis(),
+                taskTtlMillis = powProperties.ttlSeconds * 1000,
+                requestedPluginId = resolvedPluginId,
+                legacyJobType = jobType
+            )
         )
 
         taskStore.save(task)

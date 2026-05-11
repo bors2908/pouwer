@@ -7,7 +7,9 @@ import org.junit.jupiter.api.Test
 import ru.itmo.enterprise.challenge.api.CHALLENGE_PLUGIN_CONTRACT_VERSION
 import ru.itmo.enterprise.challenge.api.ContractMismatchException
 import ru.itmo.enterprise.challenge.api.DuplicatePluginIdException
+import ru.itmo.enterprise.challenge.api.PayloadBuildRequest
 import ru.itmo.enterprise.challenge.api.PayloadPlugin
+import ru.itmo.enterprise.challenge.api.PayloadSupportContext
 import ru.itmo.enterprise.challenge.api.ResultMessage
 import ru.itmo.enterprise.challenge.api.Task
 import ru.itmo.enterprise.challenge.api.UnsupportedPluginException
@@ -44,6 +46,13 @@ class PayloadPluginRegistryTest {
     }
 
     @Test
+    fun `should register plugins in deterministic order`() {
+        val registry = PayloadPluginRegistry(listOf(TestPlugin("z"), TestPlugin("a"), TestPlugin("m")))
+
+        assertEquals(listOf("a", "m", "z"), registry.pluginIds().toList())
+    }
+
+    @Test
     fun `should handle empty plugin registry`() {
         val registry = PayloadPluginRegistry(emptyList())
 
@@ -53,18 +62,24 @@ class PayloadPluginRegistryTest {
     }
 
     private data class TestPlugin(
-        override val pluginId: String,
+        private val pluginId: String,
         override val contractVersion: String = CHALLENGE_PLUGIN_CONTRACT_VERSION
     ) : PayloadPlugin {
-        override fun createTask(workerId: String?, nowMillis: Long, taskTtlMillis: Long): Task =
+        override fun id(): String = pluginId
+
+        override fun version(): String = "test"
+
+        override fun supports(context: PayloadSupportContext): Boolean = true
+
+        override fun buildPayload(request: PayloadBuildRequest): Task =
             Task(
                 jobId = UUID.randomUUID(),
                 pluginId = pluginId,
-                expiresAt = nowMillis + taskTtlMillis,
+                expiresAt = request.nowMillis + request.taskTtlMillis,
                 payload = JsonNodeFactory.instance.objectNode()
             )
 
-        override fun validate(task: Task, result: ResultMessage): ValidationResult =
+        override fun validateResult(task: Task, result: ResultMessage): ValidationResult =
             ValidationResult(ValidationStatus.ACCEPTED)
     }
 }

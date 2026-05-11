@@ -8,12 +8,10 @@ import org.bitcoinj.core.Transaction
 import org.bitcoinj.core.Utils
 import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.script.ScriptBuilder
-import org.springframework.stereotype.Component
 import ru.itmo.enterprise.challenge.api.NonceRange
 import java.math.BigInteger
 import java.util.HexFormat
 
-@Component
 class BitcoinBlockBuilder {
     private val params = RegTestParams.get()
     private val hex = HexFormat.of()

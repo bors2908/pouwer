@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import ru.itmo.enterprise.challenge.api.CHALLENGE_PLUGIN_CONTRACT_VERSION
+import ru.itmo.enterprise.challenge.api.PayloadBuildRequest
 import ru.itmo.enterprise.challenge.api.PayloadPlugin
+import ru.itmo.enterprise.challenge.api.PayloadSupportContext
 import ru.itmo.enterprise.challenge.api.ResultMessage
 import ru.itmo.enterprise.challenge.api.Task
 import ru.itmo.enterprise.challenge.api.ValidationResult
@@ -21,7 +23,7 @@ class ValidationPipelineTest {
             it.save(
                 Task(
                     jobId = JOB_ID,
-                    pluginId = plugin.pluginId,
+                    pluginId = plugin.id(),
                     expiresAt = System.currentTimeMillis() + 60_000,
                     payload = JsonNodeFactory.instance.objectNode()
                 )
@@ -98,16 +100,22 @@ class ValidationPipelineTest {
     }
 
     private data class TestPlugin(
-        override val pluginId: String,
+        private val pluginId: String,
         private val response: ValidationResult
     ) : PayloadPlugin {
         override val contractVersion: String = CHALLENGE_PLUGIN_CONTRACT_VERSION
 
-        override fun createTask(workerId: String?, nowMillis: Long, taskTtlMillis: Long): Task {
+        override fun id(): String = pluginId
+
+        override fun version(): String = "test"
+
+        override fun supports(context: PayloadSupportContext): Boolean = true
+
+        override fun buildPayload(request: PayloadBuildRequest): Task {
             throw UnsupportedOperationException("Not required for this test")
         }
 
-        override fun validate(task: Task, result: ResultMessage): ValidationResult = response
+        override fun validateResult(task: Task, result: ResultMessage): ValidationResult = response
     }
 
     companion object {

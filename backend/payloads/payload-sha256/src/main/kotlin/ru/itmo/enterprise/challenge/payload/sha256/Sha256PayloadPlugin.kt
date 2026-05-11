@@ -2,9 +2,7 @@ package ru.itmo.enterprise.challenge.payload.sha256
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import org.springframework.stereotype.Component
 import ru.itmo.enterprise.challenge.api.NonceRange
-import ru.itmo.enterprise.challenge.api.PayloadPlugin
 import ru.itmo.enterprise.challenge.api.ResultMessage
 import ru.itmo.enterprise.challenge.api.Task
 import ru.itmo.enterprise.challenge.api.ValidationResult
@@ -15,14 +13,13 @@ import java.util.HexFormat
 import java.util.UUID
 import kotlin.random.Random
 
-@Component
-class Sha256PayloadPlugin : PayloadPlugin {
+class Sha256PayloadPlugin {
     private val hex = HexFormat.of()
     private val mapper: ObjectMapper = jacksonObjectMapper()
 
-    override val pluginId: String = PLUGIN_ID
+    val pluginId: String = PLUGIN_ID
 
-    override fun createTask(workerId: String?, nowMillis: Long, taskTtlMillis: Long): Task {
+    fun createTask(workerId: String?, nowMillis: Long, taskTtlMillis: Long): Task {
         val data = ByteArray(32)
         Random.nextBytes(data)
 
@@ -42,7 +39,7 @@ class Sha256PayloadPlugin : PayloadPlugin {
         )
     }
 
-    override fun validate(task: Task, result: ResultMessage): ValidationResult {
+    fun validate(task: Task, result: ResultMessage): ValidationResult {
         if (task.pluginId != pluginId) {
             return ValidationResult(ValidationStatus.REJECTED, "Plugin mismatch")
         }

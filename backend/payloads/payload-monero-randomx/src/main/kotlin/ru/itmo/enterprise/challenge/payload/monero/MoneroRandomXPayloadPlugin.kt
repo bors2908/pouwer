@@ -2,8 +2,6 @@ package ru.itmo.enterprise.challenge.payload.monero
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import org.springframework.stereotype.Component
-import ru.itmo.enterprise.challenge.api.PayloadPlugin
 import ru.itmo.enterprise.challenge.api.ResultMessage
 import ru.itmo.enterprise.challenge.api.Task
 import ru.itmo.enterprise.challenge.api.ValidationResult
@@ -12,18 +10,17 @@ import java.math.BigInteger
 import java.util.HexFormat
 import java.util.UUID
 
-@Component
 class MoneroRandomXPayloadPlugin(
-    private val jobStore: StratumJobStore,
-    private val converter: StratumToMoneroConverter,
-    private val stratumSubmitService: StratumSubmitService
-) : PayloadPlugin {
+    private val jobStore: StratumJobStore = StratumJobStore(),
+    private val converter: StratumToMoneroConverter = StratumToMoneroConverter(),
+    private val stratumSubmitService: StratumSubmitService = StratumSubmitService()
+) {
     private val mapper: ObjectMapper = jacksonObjectMapper()
     private val hex = HexFormat.of()
 
-    override val pluginId: String = PLUGIN_ID
+    val pluginId: String = PLUGIN_ID
 
-    override fun createTask(workerId: String?, nowMillis: Long, taskTtlMillis: Long): Task {
+    fun createTask(workerId: String?, nowMillis: Long, taskTtlMillis: Long): Task {
         val rawJob = jobStore.getLatest()
             ?: throw IllegalStateException("No stratum job available")
 
@@ -37,7 +34,7 @@ class MoneroRandomXPayloadPlugin(
         )
     }
 
-    override fun validate(task: Task, result: ResultMessage): ValidationResult {
+    fun validate(task: Task, result: ResultMessage): ValidationResult {
         if (task.pluginId != pluginId) {
             return ValidationResult(ValidationStatus.REJECTED, "Plugin mismatch")
         }
