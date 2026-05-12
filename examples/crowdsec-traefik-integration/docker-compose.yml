@@ -130,10 +130,10 @@ services:
     networks:
       - app-net
 
-  pouwer-browser-app:
+  browser-app:
     build:
       context: ./browser
-    container_name: pouwer-browser-app
+    container_name: browser-app
     restart: unless-stopped
     labels:
       - "traefik.enable=true"

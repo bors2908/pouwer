@@ -283,5 +283,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(3002, () => {
-  console.log("pouwer-browser-app listening on 3002");
+  console.log("browser-app listening on 3002");
 });
