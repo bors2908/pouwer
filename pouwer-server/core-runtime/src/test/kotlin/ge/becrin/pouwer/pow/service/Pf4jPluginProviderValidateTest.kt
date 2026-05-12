@@ -9,6 +9,7 @@ import org.pf4j.PluginWrapper
 import org.pf4j.PluginDescriptor
 import ge.becrin.pouwer.challenge.api.PayloadPlugin
 import ge.becrin.pouwer.challenge.api.CHALLENGE_PLUGIN_CONTRACT_VERSION
+import ge.becrin.pouwer.pow.config.ChallengePluginsProperties
 import java.nio.file.Files
 
 class Pf4jPluginProviderValidateTest {
@@ -16,7 +17,7 @@ class Pf4jPluginProviderValidateTest {
     @Test
     fun validateMetadata_success() {
         val dir = Files.createTempDirectory("pf4j")
-        val provider = Pf4jPluginProvider(dir)
+        val provider = Pf4jPluginProvider(ChallengePluginsProperties(dir.toString()))
 
         val mockManager = mock<DefaultPluginManager>()
         val plugin = mock<PayloadPlugin>()
@@ -47,7 +48,7 @@ class Pf4jPluginProviderValidateTest {
     @Test
     fun validateMetadata_mismatch_throws() {
         val dir = Files.createTempDirectory("pf4j")
-        val provider = Pf4jPluginProvider(dir)
+        val provider = Pf4jPluginProvider(ChallengePluginsProperties(dir.toString()))
 
         val mockManager = mock<DefaultPluginManager>()
         val plugin = mock<PayloadPlugin>()
