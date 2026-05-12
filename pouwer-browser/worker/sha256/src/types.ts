@@ -17,13 +17,11 @@ export interface BitcoinSha256Task extends BaseTask<Sha256TaskPayload> {
 export type Sha256Task = Sha256PowTask | BitcoinSha256Task;
 
 export interface Sha256PowResultPayload {
-    dataHex: string;
     nonce: number;
     hashHex: string;
 }
 
 export interface BitcoinSha256ResultPayload {
-    dataHex: string;
     nonce: number;
     hashHex: string;
 }

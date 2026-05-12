@@ -55,7 +55,6 @@ async function solveSha256(task: Sha256PowTask | BitcoinSha256Task, runtime: Wor
             if (hashBI <= targetBI) {
                 const durationMs = nowMs() - startTime;
                 const resultPayload: Sha256PowResultPayload | BitcoinSha256ResultPayload = {
-                    dataHex: payload.dataHex,
                     nonce: Number(nonce),
                     hashHex: bytesToHex(reversedHash)
                 };

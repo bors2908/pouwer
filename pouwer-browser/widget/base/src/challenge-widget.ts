@@ -79,6 +79,7 @@ class ChallengeController {
     private getResultMessage(task: BaseTask, result: SolveResult<unknown>): ResultMessage<unknown> {
         return {
             jobId: task.jobId,
+            pluginId: task.pluginId,
             payload: result.payload,
             leaseHmac: task.leaseHmac,
             attempts: result.attempts,

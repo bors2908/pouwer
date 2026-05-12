@@ -20,6 +20,7 @@ export interface BaseTask<TPayload = unknown> {
 
 export interface ResultMessage<TPayload = unknown> {
     jobId: string;
+    pluginId: string;
     meta?: Record<string, string>;
     leaseHmac?: string;
     attempts: number;

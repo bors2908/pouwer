@@ -14,7 +14,11 @@ class ValidationPipeline(
         val task = taskStore.find(result.jobId)
             ?: return ValidationResult(ValidationStatus.CONFLICT, "Unknown job")
 
-        val pluginId = result.pluginId ?: task.pluginId
+        if (result.pluginId != task.pluginId) {
+            return ValidationResult(ValidationStatus.REJECTED, "Plugin mismatch")
+        }
+
+        val pluginId = task.pluginId
         val plugin = payloadPluginRegistry.find(pluginId)
             ?: return ValidationResult(ValidationStatus.REJECTED, "Unsupported plugin: $pluginId")
 
