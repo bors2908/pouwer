@@ -1,4 +1,4 @@
-rootProject.name = "pouwer"
+rootProject.name = "pouwer-server"
 
 include("common")
 include("model")
