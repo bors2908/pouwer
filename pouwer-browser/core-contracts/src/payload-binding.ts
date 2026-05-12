@@ -1,7 +1,5 @@
-import type {JobType} from "./job-types.js";
-
 export interface PayloadBinding {
-    readonly jobType: JobType;
+    readonly pluginId: string;
     readonly label: string;
     readonly workerFactory: new () => Worker;
 }

@@ -31,7 +31,6 @@ data class ValidationResult(
 
 data class PayloadSupportContext(
     val requestedPluginId: String? = null,
-    val legacyJobType: String? = null,
     val workerId: String? = null
 )
 
@@ -39,8 +38,7 @@ data class PayloadBuildRequest(
     val workerId: String?,
     val nowMillis: Long,
     val taskTtlMillis: Long,
-    val requestedPluginId: String? = null,
-    val legacyJobType: String? = null
+    val requestedPluginId: String? = null
 )
 
 enum class ValidationStatus {

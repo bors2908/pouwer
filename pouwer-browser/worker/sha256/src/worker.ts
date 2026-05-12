@@ -1,13 +1,5 @@
 import {sha256} from "js-sha256";
-import {
-    BitcoinSha256ResultPayload,
-    BitcoinSha256Task,
-    Sha256PowResultPayload,
-    Sha256PowTask,
-    Sha256Task,
-} from "./types.js";
-import {JobType} from "@pouwer/core-contracts";
-import type {BaseTask} from "@pouwer/core-contracts";
+import {BitcoinSha256ResultPayload, BitcoinSha256Task, Sha256PowResultPayload, Sha256PowTask, Sha256Task,} from "./types.js";
 import {bytesToHex, createWorkerRuntime, hexToBytes, nowMs, type WorkerRuntimeApi} from "@pouwer/worker-runtime";
 
 type Sha256WorkerResultPayload = Sha256PowResultPayload | BitcoinSha256ResultPayload;
@@ -15,13 +7,7 @@ type Sha256WorkerResultPayload = Sha256PowResultPayload | BitcoinSha256ResultPay
 createWorkerRuntime<Sha256Task, Sha256WorkerResultPayload>(solve);
 
 async function solve(task: Sha256Task, runtime: WorkerRuntimeApi<Sha256WorkerResultPayload>) {
-    switch (task.jobType) {
-        case JobType.POW_TEST_SHA256:
-        case JobType.BITCOIN_RPC_SHA256:
-            return solveSha256(task, runtime);
-        default:
-            runtime.reportStopped(`Unsupported job type: ${(task as BaseTask).jobType}`);
-    }
+    return solveSha256(task, runtime);
 }
 
 async function solveSha256(task: Sha256PowTask | BitcoinSha256Task, runtime: WorkerRuntimeApi<Sha256WorkerResultPayload>) {
@@ -71,8 +57,7 @@ async function solveSha256(task: Sha256PowTask | BitcoinSha256Task, runtime: Wor
                 const resultPayload: Sha256PowResultPayload | BitcoinSha256ResultPayload = {
                     dataHex: payload.dataHex,
                     nonce: Number(nonce),
-                    hashHex: bytesToHex(reversedHash),
-                    jobType: task.jobType,
+                    hashHex: bytesToHex(reversedHash)
                 };
 
                 runtime.reportSolved({

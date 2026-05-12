@@ -1,5 +1,4 @@
 import type {BaseTask} from "@pouwer/core-contracts";
-import {JobType} from "@pouwer/core-contracts";
 
 export interface RandomXTaskPayload {
     id: string;
@@ -9,12 +8,11 @@ export interface RandomXTaskPayload {
     seedHash: string;
 }
 
-export interface RandomXTask extends BaseTask<JobType.MONERO_RANDOMX, RandomXTaskPayload> {
+export interface RandomXTask extends BaseTask<RandomXTaskPayload> {
 }
 
 export interface RandomXResultPayload {
     taskId: string;
     nonce: number;
     hash: string;
-    jobType: JobType.MONERO_RANDOMX;
 }

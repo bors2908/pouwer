@@ -1,4 +1,4 @@
-import type {BaseTask, ISolver, JobType, Progress, SolveResult, WorkerOutMessage} from "@pouwer/core-contracts";
+import type {BaseTask, ISolver, Progress, SolveResult, WorkerOutMessage} from "@pouwer/core-contracts";
 
 interface WorkerEntry {
     worker: Worker;
@@ -16,8 +16,8 @@ export class WebWorkerSolver<TTask extends BaseTask = BaseTask, TResultPayload =
 
     async start(task: TTask, onProgress?: (stats: Progress) => void): Promise<SolveResult<TResultPayload>> {
         if (this.currentWorker) {
-            const jobType = task.jobType;
-            throw new Error(`Worker for jobType ${String(jobType)} is already running`);
+            const pluginId = task.pluginId;
+            throw new Error(`Worker for pluginId ${pluginId} is already running`);
         }
 
         return new Promise<SolveResult<TResultPayload>>((resolve, reject) => {
@@ -67,7 +67,7 @@ export class WebWorkerSolver<TTask extends BaseTask = BaseTask, TResultPayload =
         });
     }
 
-    cancel(_jobType?: JobType): void {
+    cancel(_pluginId?: string): void {
         const entry = this.currentWorker;
         if (!entry) {
             return;
@@ -79,7 +79,7 @@ export class WebWorkerSolver<TTask extends BaseTask = BaseTask, TResultPayload =
         entry.reject(new Error("Cancelled"));
     }
 
-    isRunning(_jobType: JobType): boolean {
+    isRunning(_pluginId: string): boolean {
         return this.currentWorker !== null;
     }
 }

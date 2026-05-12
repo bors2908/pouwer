@@ -1,5 +1,3 @@
-import type {JobType} from "./job-types.js";
-
 export interface NonceRange {
     start: number;
     end: number;
@@ -12,9 +10,9 @@ export interface Progress {
     lastHashHex?: string;
 }
 
-export interface BaseTask<TJobType extends JobType = JobType, TPayload = unknown> {
+export interface BaseTask<TPayload = unknown> {
     jobId: string;
-    jobType: TJobType;
+    pluginId: string;
     expiresAt: number;
     leaseHmac?: string;
     payload: TPayload;
@@ -37,7 +35,7 @@ export interface SolveResult<TPayload = unknown> {
 
 export interface ISolver<TTask extends BaseTask = BaseTask, TResultPayload = unknown> {
     start(challenge: TTask, onProgress?: (stats: Progress) => void): Promise<SolveResult<TResultPayload>>;
-    cancel(jobType?: TTask["jobType"]): void;
+    cancel(pluginId?: TTask["pluginId"]): void;
 }
 
 export type WorkerInit<TTask extends BaseTask = BaseTask> = { type: "init"; task: TTask };

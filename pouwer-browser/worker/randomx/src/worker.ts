@@ -1,5 +1,5 @@
 // @ts-ignore
-import { mine } from "randomx.js-shared/web";
+import {mine} from "randomx.js-shared/web";
 import type {Config, Job, MinerCallbacks} from "randomx.js-shared";
 import type {
     WorkerEventJobDisposed,
@@ -9,20 +9,13 @@ import type {
     WorkerEventWorkerReady,
     WorkerPong
 } from "randomx.js-shared";
-
-import {JobType} from "@pouwer/core-contracts";
 import {createWorkerRuntime, nowMs, type WorkerRuntimeApi} from "@pouwer/worker-runtime";
 import {RandomXResultPayload, RandomXTask} from "./types.js";
 
 createWorkerRuntime<RandomXTask, RandomXResultPayload>(solve);
 
 async function solve(task: RandomXTask, runtime: WorkerRuntimeApi<RandomXResultPayload>) {
-    switch (task.jobType) {
-        case JobType.MONERO_RANDOMX:
-            return solveRandomX(task, runtime);
-        default:
-            runtime.reportStopped(`Unsupported job type: ${task.jobType}`);
-    }
+    return solveRandomX(task, runtime);
 }
 
 async function solveRandomX(task: RandomXTask, runtime: WorkerRuntimeApi<RandomXResultPayload>) {
@@ -66,8 +59,7 @@ async function solveRandomX(task: RandomXTask, runtime: WorkerRuntimeApi<RandomX
             const result: RandomXResultPayload = {
                 taskId: taskPayload.id,
                 nonce: event.nonce,
-                hash: toHex(event.result),
-                jobType: JobType.MONERO_RANDOMX,
+                hash: toHex(event.result)
             };
 
             runtime.reportSolved({

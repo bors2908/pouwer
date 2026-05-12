@@ -47,7 +47,7 @@ class ChallengeController {
         this.ui.setPhase("fetching");
 
         try {
-            this.task = await this.network.getChallenge(this.payload.jobType);
+            this.task = await this.network.getChallenge(this.payload.pluginId);
 
             if (this.task.expiresAt && this.task.expiresAt < Date.now()) {
                 this.ui.showError("Challenge expired");

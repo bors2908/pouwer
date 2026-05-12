@@ -5,12 +5,12 @@ v 4. Extract common contract and interface for scripts. Make it build as a separ
 v 5. Rework server, drop inherited classes for CRUD. Extract common contracts and interface into a separate module. Make a separate module and build for each payload type.
 v 6. Move demo-app to examples module.
 v 7. Build server images with jib. Rework compose
-7.1 Change package names
+v 7.1 Change package names
 7.2 Validate changes, make a complete build
 
 8. Add multiple tasks support for Monero and other payloads.
 9. Implement and integrate Reputation engine and Difficulty engine.
-10. Rename modules and paths
+10. Finalize traefik-plug abstraction and make it modular.
 
 ???
 Move to k8s and helm charts.

@@ -1,4 +1,4 @@
-import type {BaseTask, JobType} from "@pouwer/core-contracts";
+import type {BaseTask} from "@pouwer/core-contracts";
 
 type NetworkClientConfig = {
     challengeUrl?: string;
@@ -20,13 +20,13 @@ export class NetworkClient<TTask extends BaseTask = BaseTask> {
         this.timeoutMs = config.timeoutMs ?? 10000;
     }
 
-    async getChallenge(type: JobType): Promise<TTask> {
+    async getChallenge(pluginId: string): Promise<TTask> {
         const workerId = Math.floor(Math.random() * 100);
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), this.timeoutMs);
         const url = appendQuery(this.challengeUrl, {
             workerId: String(workerId),
-            jobType: type,
+            pluginId: pluginId,
         });
 
         try {

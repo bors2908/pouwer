@@ -19,10 +19,6 @@ const commonOptions = {
 await rm(distDir, {recursive: true, force: true});
 await mkdir(resolve(distDir, "assets"), {recursive: true});
 
-await cp(pagesDir, resolve(distDir, "pages"), {recursive: true});
-await cp(resolve(pagesDir, "challenge.html"), resolve(distDir, "challenge.html"));
-await cp(resolve(pagesDir, "ban.html"), resolve(distDir, "ban.html"));
-
 await Promise.all([
   build({
     ...commonOptions,

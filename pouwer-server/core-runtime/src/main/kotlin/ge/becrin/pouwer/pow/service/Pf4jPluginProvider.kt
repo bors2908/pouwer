@@ -4,12 +4,16 @@ import org.pf4j.DefaultPluginManager
 import org.springframework.beans.factory.DisposableBean
 import ge.becrin.pouwer.challenge.api.CHALLENGE_PLUGIN_CONTRACT_VERSION
 import ge.becrin.pouwer.challenge.api.PayloadPlugin
+import ge.becrin.pouwer.pow.config.ChallengePluginsProperties
+import org.springframework.stereotype.Component
 import java.nio.file.Files
 import java.nio.file.Path
 
+@Component
 class Pf4jPluginProvider(
-    private val pluginsDirectory: Path
+    pluginsProperties: ChallengePluginsProperties
 ) : PayloadPluginProvider, DisposableBean {
+    private val pluginsDirectory: Path = pluginsProperties.pluginDirectoryPath()
 
     private val pluginManager = DefaultPluginManager(pluginsDirectory)
 

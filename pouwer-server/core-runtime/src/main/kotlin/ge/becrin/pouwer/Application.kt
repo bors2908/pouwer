@@ -1,8 +1,8 @@
 package ge.becrin.pouwer
 
-import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
+import org.springframework.boot.runApplication
 import org.springframework.cloud.openfeign.EnableFeignClients
 
 @SpringBootApplication
@@ -11,5 +11,5 @@ import org.springframework.cloud.openfeign.EnableFeignClients
 open class Application
 
 fun main(args: Array<String>) {
-    SpringApplication.run(Application::class.java, *args)
+    runApplication<Application>(*args)
 }
