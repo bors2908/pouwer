@@ -1,4 +1,4 @@
-import type {Progress} from "@core/contracts";
+import type {Progress} from "@pouwer/core-contracts";
 
 type ChallengePhase = "ready" | "fetching" | "solving" | "validating";
 

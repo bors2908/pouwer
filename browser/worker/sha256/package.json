@@ -1,5 +1,5 @@
 {
-  "name": "@worker/sha256",
+  "name": "@pouwer/worker-sha256",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -20,8 +20,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@core/contracts": "0.1.0",
-    "@worker/runtime": "0.1.0",
+    "@pouwer/core-contracts": "0.1.0",
+    "@pouwer/worker-runtime": "0.1.0",
     "js-sha256": "^0.11.1"
   }
 }

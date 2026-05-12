@@ -1,5 +1,5 @@
-import type {BaseTask, ISolver, PayloadBinding, ResultMessage, SolveResult} from "@core/contracts";
-import {WebWorkerSolver} from "@worker/runtime";
+import type {BaseTask, ISolver, PayloadBinding, ResultMessage, SolveResult} from "@pouwer/core-contracts";
+import {WebWorkerSolver} from "@pouwer/worker-runtime";
 import {ChallengeUI} from "./challenge-ui.js";
 import {NetworkClient} from "./network.js";
 

@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-PROJECT_NAME="pouw-bundle-traefik-bitcoin"
+PROJECT_NAME="pouwer-bundle-traefik-bitcoin"
 PROJECT_VERSION="$(node -p "require('./browser/bundle/traefik-bitcoin/package.json').version")"
 
 docker buildx build \

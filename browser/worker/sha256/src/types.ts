@@ -1,5 +1,5 @@
-import type {BaseTask, NonceRange} from "@core/contracts";
-import {JobType} from "@core/contracts";
+import type {BaseTask, NonceRange} from "@pouwer/core-contracts";
+import {JobType} from "@pouwer/core-contracts";
 
 export interface Sha256TaskPayload {
     dataHex: string;

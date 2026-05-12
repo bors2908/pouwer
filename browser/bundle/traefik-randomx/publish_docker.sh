@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-PROJECT_NAME="pouw-bundle-traefik-randomx"
+PROJECT_NAME="pouwer-bundle-traefik-randomx"
 PROJECT_VERSION="$(node -p "require('./browser/bundle/traefik-randomx/package.json').version")"
 
 docker buildx build \

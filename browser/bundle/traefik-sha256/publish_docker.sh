@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-PROJECT_NAME="pouw-bundle-traefik-sha256"
+PROJECT_NAME="pouwer-bundle-traefik-sha256"
 PROJECT_VERSION="$(node -p "require('./browser/bundle/traefik-sha256/package.json').version")"
 
 docker buildx build \

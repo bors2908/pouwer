@@ -1,4 +1,4 @@
-import type {BaseTask, SolveResult, WorkerInMessage, WorkerOutMessage, WorkerProgress} from "@core/contracts";
+import type {BaseTask, SolveResult, WorkerInMessage, WorkerOutMessage, WorkerProgress} from "@pouwer/core-contracts";
 
 export interface WorkerRuntimeApi<TResultPayload = unknown> {
     isRunning(): boolean;

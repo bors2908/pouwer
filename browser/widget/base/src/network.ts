@@ -1,4 +1,4 @@
-import type {BaseTask, JobType} from "@core/contracts";
+import type {BaseTask, JobType} from "@pouwer/core-contracts";
 
 type NetworkClientConfig = {
     challengeUrl?: string;

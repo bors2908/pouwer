@@ -1,5 +1,5 @@
 {
-  "name": "@widget/traefik",
+  "name": "@pouwer/widget-traefik",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -16,7 +16,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@core/contracts": "0.1.0",
-    "@widget/base": "0.1.0"
+    "@pouwer/core-contracts": "0.1.0",
+    "@pouwer/widget-base": "0.1.0"
   }
 }

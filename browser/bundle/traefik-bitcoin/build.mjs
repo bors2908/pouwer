@@ -31,7 +31,7 @@ await Promise.all([
   }),
   build({
     ...commonOptions,
-    entryPoints: ["@worker/sha256/worker"],
+    entryPoints: ["@pouwer/worker-sha256/worker"],
     outfile: resolve(distDir, "assets/sha256-worker.js"),
   }),
 ]);

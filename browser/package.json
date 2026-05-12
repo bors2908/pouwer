@@ -1,5 +1,5 @@
 {
-  "name": "browser-app",
+  "name": "pouwer-browser-app",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -17,8 +17,8 @@
   "scripts": {
     "start": "node server.js",
     "build": "npm run build:libs && npm run build:bundles",
-    "build:libs": "npm run build -w @core/contracts && npm run build -w @worker/runtime && npm run build -w @widget/base && npm run build -w @widget/traefik && npm run build -w @worker/sha256 && npm run build -w @worker/randomx",
-    "build:bundles": "npm run build -w @bundle/traefik-sha256 && npm run build -w @bundle/traefik-bitcoin && npm run build -w @bundle/traefik-randomx",
+    "build:libs": "npm run build -w @pouwer/core-contracts && npm run build -w @pouwer/worker-runtime && npm run build -w @pouwer/widget-base && npm run build -w @pouwer/widget-traefik && npm run build -w @pouwer/worker-sha256 && npm run build -w @pouwer/worker-randomx",
+    "build:bundles": "npm run build -w @pouwer/bundle-traefik-sha256 && npm run build -w @pouwer/bundle-traefik-bitcoin && npm run build -w @pouwer/bundle-traefik-randomx",
     "typecheck": "npm run typecheck --workspaces"
   },
   "devDependencies": {

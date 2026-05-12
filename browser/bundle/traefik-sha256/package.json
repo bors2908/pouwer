@@ -1,5 +1,5 @@
 {
-  "name": "@bundle/traefik-sha256",
+  "name": "@pouwer/bundle-traefik-sha256",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,7 +8,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@widget/traefik": "0.1.0",
-    "@worker/sha256": "0.1.0"
+    "@pouwer/widget-traefik": "0.1.0",
+    "@pouwer/worker-sha256": "0.1.0"
   }
 }

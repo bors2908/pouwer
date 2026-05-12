@@ -31,7 +31,7 @@ await Promise.all([
   }),
   build({
     ...commonOptions,
-    entryPoints: ["@worker/randomx/worker"],
+    entryPoints: ["@pouwer/worker-randomx/worker"],
     outfile: resolve(distDir, "assets/randomx-worker.js"),
   }),
 ]);

@@ -6,9 +6,9 @@ import {
     Sha256PowTask,
     Sha256Task,
 } from "./types.js";
-import {JobType} from "@core/contracts";
-import type {BaseTask} from "@core/contracts";
-import {bytesToHex, createWorkerRuntime, hexToBytes, nowMs, type WorkerRuntimeApi} from "@worker/runtime";
+import {JobType} from "@pouwer/core-contracts";
+import type {BaseTask} from "@pouwer/core-contracts";
+import {bytesToHex, createWorkerRuntime, hexToBytes, nowMs, type WorkerRuntimeApi} from "@pouwer/worker-runtime";
 
 type Sha256WorkerResultPayload = Sha256PowResultPayload | BitcoinSha256ResultPayload;
 

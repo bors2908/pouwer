@@ -1,5 +1,5 @@
-import type {BaseTask} from "@core/contracts";
-import {JobType} from "@core/contracts";
+import type {BaseTask} from "@pouwer/core-contracts";
+import {JobType} from "@pouwer/core-contracts";
 
 export interface RandomXTaskPayload {
     id: string;

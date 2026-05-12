@@ -1,5 +1,5 @@
-import type {PayloadBinding} from "@core/contracts";
-import {bootstrapChallengeWidget} from "@widget/base";
+import type {PayloadBinding} from "@pouwer/core-contracts";
+import {bootstrapChallengeWidget} from "@pouwer/widget-base";
 import {deliverResultToPlugin, getTraefikDeliveryContext} from "./result-delivery.js";
 
 export interface TraefikChallengeConfig {

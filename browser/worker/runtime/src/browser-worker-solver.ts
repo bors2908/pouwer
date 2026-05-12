@@ -1,4 +1,4 @@
-import type {BaseTask, ISolver, JobType, Progress, SolveResult, WorkerOutMessage} from "@core/contracts";
+import type {BaseTask, ISolver, JobType, Progress, SolveResult, WorkerOutMessage} from "@pouwer/core-contracts";
 
 interface WorkerEntry {
     worker: Worker;

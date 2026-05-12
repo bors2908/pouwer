@@ -55,9 +55,9 @@ services:
       - "4"
       - --mini
 
-  backend:
-    image: localhost:9002/pouw-backend:0.1.0
-    container_name: pouw-backend
+  server:
+    image: localhost:9002/pouwer-server:0.1.0
+    container_name: pouwer-server
     restart: unless-stopped
     environment:
       STRATUM_HOST: p2pool
@@ -71,13 +71,13 @@ services:
       - app-net
 
   captcha-traefik-randomx:
-    image: localhost:9002/pouw-bundle-traefik-randomx:0.1.0
-    container_name: pouw-bundle-traefik-randomx
+    image: localhost:9002/pouwer-bundle-traefik-randomx:0.1.0
+    container_name: pouwer-bundle-traefik-randomx
     restart: unless-stopped
     ports:
       - "3001:3001"
     depends_on:
-      backend:
+      server:
         condition: service_started
     networks:
       - app-net
@@ -130,10 +130,10 @@ services:
     networks:
       - app-net
 
-  browser-app:
+  pouwer-browser-app:
     build:
       context: ./browser
-    container_name: browser-app
+    container_name: pouwer-browser-app
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
@@ -181,4 +181,4 @@ volumes:
   monero-testnet-data:
   p2pool-data:
   wallet-data:
-  backend-postgres-data:
+  server-postgres-data:

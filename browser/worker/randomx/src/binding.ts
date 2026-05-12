@@ -1,5 +1,5 @@
-import {JobType, type PayloadBinding} from "@core/contracts";
-import {createModuleWorkerFactory} from "@worker/runtime";
+import {JobType, type PayloadBinding} from "@pouwer/core-contracts";
+import {createModuleWorkerFactory} from "@pouwer/worker-runtime";
 
 const randomxWorker = createModuleWorkerFactory("/assets/randomx-worker.js");
 

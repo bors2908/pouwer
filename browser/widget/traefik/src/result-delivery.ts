@@ -1,4 +1,4 @@
-import type {ResultMessage} from "@core/contracts";
+import type {ResultMessage} from "@pouwer/core-contracts";
 
 export interface TraefikDeliveryContext {
     container: HTMLElement;

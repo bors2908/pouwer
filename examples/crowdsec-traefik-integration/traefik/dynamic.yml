@@ -13,9 +13,9 @@ http:
           defaultDecisionSeconds: 1
           metricsUpdateIntervalSeconds: 0
           captchaProvider: custom
-          captchaCustomKey: pouw-firewall
+          captchaCustomKey: pouwer-firewall
           captchaCustomJsURL: http://localhost/captcha-traefik-randomx.js
-          captchaCustomValidateURL: http://pouw-backend:8082/validate-custom-captcha
+          captchaCustomValidateURL: http://pouwer-server:8082/validate-custom-captcha
           captchaCustomResponse: response
           captchaHTMLFilePath: /etc/traefik/captcha.html
           banHTMLFilePath: /etc/traefik/ban.html
