@@ -49,14 +49,15 @@ tasks.register<Exec>("npmBuildBundle") {
 tasks.register<Copy>("copyBundleDist") {
     dependsOn("npmBuildBundle")
     from(file("${rootProject.projectDir}/pouwer-bitcoin-plugin/browser/traefik-bitcoin/dist")) { into("static/traefik-bitcoin") }
-    into(layout.projectDirectory.dir("src/main/resources"))
+    into(layout.buildDirectory.dir("resources/main"))
 }
 
 tasks.named("processResources") {
-    dependsOn("copyBundleDist")
+    finalizedBy("copyBundleDist")
 }
 
 tasks.named<Jar>("jar") {
+    dependsOn("copyBundleDist")
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     from("src/main/resources") {
         include("plugin.properties")

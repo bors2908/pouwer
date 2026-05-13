@@ -48,14 +48,15 @@ tasks.register<Exec>("npmBuildBundle") {
 tasks.register<Copy>("copyBundleDist") {
     dependsOn("npmBuildBundle")
     from(file("${rootProject.projectDir}/pouwer-sha256-plugin/browser/traefik-sha256/dist")) { into("static/traefik-sha256") }
-    into(layout.projectDirectory.dir("src/main/resources"))
+    into(layout.buildDirectory.dir("resources/main"))
 }
 
 tasks.named("processResources") {
-    dependsOn("copyBundleDist")
+    finalizedBy("copyBundleDist")
 }
 
 tasks.named<Jar>("jar") {
+    dependsOn("copyBundleDist")
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     from("src/main/resources") {
         include("plugin.properties")

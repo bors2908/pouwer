@@ -51,14 +51,15 @@ tasks.register<Exec>("npmBuildBundle") {
 tasks.register<Copy>("copyBundleDist") {
     dependsOn("npmBuildBundle")
     from(file("${rootProject.projectDir}/pouwer-randomx-plugin/browser/traefik-randomx/dist")) { into("static/traefik-randomx") }
-    into(layout.projectDirectory.dir("src/main/resources"))
+    into(layout.buildDirectory.dir("resources/main"))
 }
 
 tasks.named("processResources") {
-    dependsOn("copyBundleDist")
+    finalizedBy("copyBundleDist")
 }
 
 tasks.named<Jar>("jar") {
+    dependsOn("copyBundleDist")
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     from("src/main/resources") {
         include("plugin.properties")
