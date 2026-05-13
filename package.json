@@ -1,0 +1,17 @@
+{
+  "name": "pouwer-root",
+  "private": true,
+  "workspaces": [
+    "pouwer-core/browser/*",
+    "pouwer-sha256-plugin/browser/*",
+    "pouwer-bitcoin-plugin/browser/*",
+    "pouwer-randomx-plugin/browser/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "esbuild": "^0.20.0"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@pouwer/core-browser",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "core-contracts",
+    "runtime",
+    "base",
+    "traefik"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "esbuild": "^0.21.5",
+    "typescript": "^5.0.0"
+  }
+}
