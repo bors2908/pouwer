@@ -1,10 +1,12 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.gradle.api.publish.maven.MavenPublication
 
 plugins {
     `java-library`
     kotlin("jvm")
     id("io.spring.dependency-management")
+    id("maven-publish")
 }
 
 group = "ge.becrin.pouwer"
@@ -62,5 +64,25 @@ tasks.named<Jar>("jar") {
     from("src/main/resources") {
         include("plugin.properties")
         into("")
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            url = uri("http://localhost:9001/repository/maven-hosted/")
+            credentials {
+                username = findProperty("nexusUser") as String?
+                password = findProperty("nexusPass") as String?
+            }
+            isAllowInsecureProtocol = true
+        }
+    }
+
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+            artifactId = project.name
+        }
     }
 }

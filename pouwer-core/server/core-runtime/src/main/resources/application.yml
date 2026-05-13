@@ -9,7 +9,6 @@ spring:
 
 challenge:
   plugins:
-    mode: serviceloader
     directory: plugins
 
 pow:

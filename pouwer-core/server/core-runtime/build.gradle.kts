@@ -72,7 +72,6 @@ tasks.test {
     useJUnitPlatform()
 }
 
-// Global browser build (optional, if core-runtime needs its own static assets or shared libs)
 tasks.register<Exec>("npmBuildBrowser") {
     val browserDir = file("${rootProject.projectDir}")
     workingDir = browserDir

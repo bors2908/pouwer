@@ -1,9 +1,3 @@
-spring:
-  datasource:
-    driver-class-name: org.postgresql.Driver
-  liquibase:
-    change-log: classpath:/db/${spring.application.name}/changelog/master.xml
-
 springdoc:
   api-docs:
     enabled: false

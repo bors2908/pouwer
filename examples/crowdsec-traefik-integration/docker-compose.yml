@@ -55,122 +55,46 @@ services:
       - "4"
       - --mini
 
-  server:
+  pouwer-server:
     image: localhost:9002/pouwer-server:0.1.0
     container_name: pouwer-server
     restart: unless-stopped
     environment:
+      CHALLENGE_PLUGINS_DIRECTORY: /plugins
       STRATUM_HOST: p2pool
     ports:
       - "8082:8082"
     depends_on:
       p2pool:
         condition: service_started
+      plugin-sync:
+        condition: service_completed_successfully
+    volumes:
+      - pouwer-plugin-data:/plugins
     networks:
       - monero-net
       - app-net
 
-  captcha-traefik-randomx:
-    image: localhost:9002/pouwer-bundle-traefik-randomx:0.1.0
-    container_name: pouwer-bundle-traefik-randomx
-    restart: unless-stopped
-    ports:
-      - "3001:3001"
-    depends_on:
-      server:
-        condition: service_started
-    networks:
-      - app-net
-
-  crowdsec:
-    image: crowdsecurity/crowdsec:latest
-    container_name: crowdsec
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD", "cscli", "lapi", "status" ]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 20s
-    environment:
-      PARSERS: "crowdsecurity/docker-logs crowdsecurity/cri-logs crowdsecurity/traefik-logs"
-      BOUNCER_KEY_TRAEFIK: "${CROWDSEC_BOUNCER_KEY}"
-      LOCAL_API_URL: "http://0.0.0.0:8080"
-      DISABLE_ONLINE_API: "true"
-      NO_HUB_UPGRADE: "true"
-    volumes:
-      - ./crowdsec/data:/var/lib/crowdsec/data
-      - ./logs:/var/log
-      - ./crowdsec/config/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
-      - ./crowdsec/config/profiles.yaml:/etc/crowdsec/profiles.yaml:ro
-      - ./crowdsec/config/parsers/s02-enrich/whitelists.yaml:/etc/crowdsec/parsers/s02-enrich/whitelists.yaml:ro
-      - ./crowdsec/config/scenarios:/etc/crowdsec/scenarios:ro
-    networks:
-      - app-net
-
-  traefik:
-    image: traefik:v3.1
-    container_name: traefik
-    restart: unless-stopped
-    depends_on:
-      - crowdsec
-      - captcha-traefik-randomx
-    ports:
-      - "80:80"
-      - "8081:8080"
-    environment:
-      CROWDSEC_BOUNCER_KEY: "${CROWDSEC_BOUNCER_KEY}"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
-      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
-      - ./browser/bundle/traefik-randomx/pages/challenge.html:/etc/traefik/captcha.html:ro
-      - ./browser/bundle/traefik-randomx/pages/ban.html:/etc/traefik/ban.html:ro
-      - ./logs/traefik:/var/log/traefik
-    networks:
-      - app-net
-
-  browser-app:
+  plugin-sync:
     build:
-      context: ./browser
-    container_name: browser-app
-    restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.browser.rule=(Host(`localhost`) || Host(`example.com`)) && Path(`/`)"
-      - "traefik.http.routers.browser.entrypoints=web"
-      - "traefik.http.routers.browser.priority=10"
-      - "traefik.http.routers.browser.middlewares=browser-page-enforcement-chain@file"
-      - "traefik.http.routers.browser-auth.rule=(Host(`localhost`) || Host(`example.com`)) && (Path(`/login`) || Path(`/logout`))"
-      - "traefik.http.routers.browser-auth.entrypoints=web"
-      - "traefik.http.routers.browser-auth.priority=50"
-      - "traefik.http.routers.browser-auth.middlewares=browser-auth-enforcement-chain@file"
-      - "traefik.http.routers.browser-auth.service=browser"
-      - "traefik.http.services.browser.loadbalancer.server.port=3002"
-      - "traefik.http.routers.browser-health.rule=(Host(`localhost`) || Host(`example.com`)) && Path(`/healthz`)"
-      - "traefik.http.routers.browser-health.priority=100"
-      - "traefik.http.routers.browser-health.entrypoints=web"
-      - "traefik.http.routers.browser-health.service=browser"
-    networks:
-      - app-net
-
-  api-app:
-    build:
-      context: example-apps/api
-    container_name: api-app
-    restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`api.example.com`)"
-      - "traefik.http.routers.api.entrypoints=web"
-      - "traefik.http.routers.api.middlewares=api-enforcement-chain@file"
-      - "traefik.http.services.api.loadbalancer.server.port=3003"
-      - "traefik.http.routers.api-health.rule=Host(`api.example.com`) && Path(`/healthz`)"
-      - "traefik.http.routers.api-health.priority=100"
-      - "traefik.http.routers.api-health.entrypoints=web"
-      - "traefik.http.routers.api-health.service=api"
-    networks:
-      - app-net
+      context: ./plugin-sync-container
+    container_name: plugin-sync
+    restart: "no"
+    environment:
+      PLUGIN_REPO_URL: http://host.docker.internal:9001/repository/maven-hosted
+      PLUGIN_TARGET_DIR: /plugins
+    command:
+      - --no-clean
+      - --artifact
+      - ge.becrin.pouwer:payload-bitcoin-rpc:0.1.0
+      - --artifact
+      - ge.becrin.pouwer:payload-sha256:0.1.0
+      - --artifact
+      - ge.becrin.pouwer:payload-monero-randomx:0.1.0
+    volumes:
+      - pouwer-plugin-data:/plugins
+    extra_hosts:
+      - host.docker.internal:host-gateway
 
 networks:
   monero-net:
@@ -182,3 +106,5 @@ volumes:
   p2pool-data:
   wallet-data:
   server-postgres-data:
+  pouwer-plugin-data:
+
