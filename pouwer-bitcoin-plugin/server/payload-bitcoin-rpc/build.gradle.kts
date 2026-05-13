@@ -21,7 +21,7 @@ dependencies {
     implementation("org.springframework:spring-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.bitcoinj:bitcoinj-core:0.16.3")
-    compileOnly("org.pf4j:pf4j:3.13.0")
+    compileOnly("org.pf4j:pf4j:3.14.1")
 }
 
 java {
@@ -36,7 +36,6 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
-// Build frontend bundle and include in plugin resources so Spring serves it statically
 tasks.register<Exec>("npmBuildBundle") {
     val bundleDir = file("${rootProject.projectDir}/pouwer-bitcoin-plugin/browser/traefik-bitcoin")
     workingDir = bundleDir
@@ -57,7 +56,6 @@ tasks.named("processResources") {
     dependsOn("copyBundleDist")
 }
 
-// Ensure plugin.properties is at the root of the plugin JAR for PF4J
 tasks.named<Jar>("jar") {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     from("src/main/resources") {

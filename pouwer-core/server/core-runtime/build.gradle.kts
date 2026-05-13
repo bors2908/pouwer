@@ -10,6 +10,7 @@ plugins {
     kotlin("kapt")
     kotlin("plugin.allopen") apply true
     kotlin("plugin.noarg") apply true
+    kotlin("plugin.spring")
 }
 
 group = "ge.becrin.pouwer"
@@ -29,7 +30,7 @@ dependencyManagement {
 dependencies {
     implementation(project(":pouwer-core:server:common"))
     implementation(project(":pouwer-core:server:core-api"))
-    implementation("org.pf4j:pf4j:3.13.0")
+    implementation("org.pf4j:pf4j:3.14.1")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 
     kapt("org.mapstruct:mapstruct-processor:1.6.3")
@@ -42,6 +43,7 @@ dependencies {
         runtimeOnly(project(":pouwer-bitcoin-plugin:server:payload-bitcoin-rpc"))
         runtimeOnly(project(":pouwer-randomx-plugin:server:payload-monero-randomx"))
     }
+    implementation(kotlin("stdlib"))
 }
 
 java {
@@ -103,4 +105,7 @@ jib {
         ports = listOf("8082")
         creationTime = "USE_CURRENT_TIMESTAMP"
     }
+}
+repositories {
+    mavenCentral()
 }

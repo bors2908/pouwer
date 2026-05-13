@@ -20,7 +20,7 @@ dependencies {
     implementation("org.springframework:spring-context")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.01")
-    compileOnly("org.pf4j:pf4j:3.13.0")
+    compileOnly("org.pf4j:pf4j:3.14.1")
 }
 
 java {
@@ -35,7 +35,6 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
-// Build frontend bundle and include in plugin resources so Spring serves it statically
 tasks.register<Exec>("npmBuildBundle") {
     val bundleDir = file("${rootProject.projectDir}/pouwer-sha256-plugin/browser/traefik-sha256")
     workingDir = bundleDir
@@ -56,7 +55,6 @@ tasks.named("processResources") {
     dependsOn("copyBundleDist")
 }
 
-// Ensure plugin.properties is at the root of the plugin JAR for PF4J
 tasks.named<Jar>("jar") {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     from("src/main/resources") {

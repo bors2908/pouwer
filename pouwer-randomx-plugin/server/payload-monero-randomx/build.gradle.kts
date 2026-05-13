@@ -23,7 +23,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api")
     implementation("ge.becrin:kt-stratum:0.1.0")
     implementation("org.json:json:20251224")
-    compileOnly("org.pf4j:pf4j:3.13.0")
+    compileOnly("org.pf4j:pf4j:3.14.1")
 }
 
 java {
@@ -38,7 +38,6 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
-// Build frontend bundle and include in plugin resources so Spring serves it statically
 tasks.register<Exec>("npmBuildBundle") {
     val bundleDir = file("${rootProject.projectDir}/pouwer-randomx-plugin/browser/traefik-randomx")
     workingDir = bundleDir
@@ -59,7 +58,6 @@ tasks.named("processResources") {
     dependsOn("copyBundleDist")
 }
 
-// Ensure plugin.properties is at the root of the plugin JAR for PF4J
 tasks.named<Jar>("jar") {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     from("src/main/resources") {

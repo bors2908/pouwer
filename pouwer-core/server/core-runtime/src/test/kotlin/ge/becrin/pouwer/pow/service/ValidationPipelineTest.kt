@@ -17,7 +17,7 @@ import java.util.UUID
 class ValidationPipelineTest {
 
     @Test
-    fun `should use task plugin when result plugin id is missing`() {
+    fun testFailOnPluginMismatch() {
         val plugin = TestPlugin("pow-test-sha256", ValidationResult(ValidationStatus.ACCEPTED))
         val taskStore = InMemoryTaskStore().also {
             it.save(
@@ -45,7 +45,7 @@ class ValidationPipelineTest {
             )
         )
 
-        assertEquals(ValidationStatus.ACCEPTED, result.status)
+        assertEquals(ValidationStatus.REJECTED, result.status)
     }
 
     @Test
@@ -118,7 +118,7 @@ class ValidationPipelineTest {
         val result = pipeline.validate(
             ResultMessage(
                 jobId = JOB_ID,
-                pluginId = null,
+                pluginId = plugin.id(),
                 payload = JsonNodeFactory.instance.objectNode(),
                 durationMs = null,
                 attempts = null

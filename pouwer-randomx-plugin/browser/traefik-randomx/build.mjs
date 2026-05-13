@@ -4,7 +4,6 @@ import {build} from "esbuild";
 
 const rootDir = import.meta.dirname;
 const distDir = resolve(rootDir, "dist");
-const pagesDir = resolve(rootDir, "pages");
 
 const commonOptions = {
   absWorkingDir: rootDir,
