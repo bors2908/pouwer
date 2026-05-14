@@ -30,7 +30,7 @@ dependencyManagement {
 dependencies {
     implementation(project(":pouwer-core:server:common"))
     implementation(project(":pouwer-core:server:core-api"))
-    implementation("org.pf4j:pf4j:3.14.1")
+    implementation("org.pf4j:pf4j:3.15.0")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 
     kapt("org.mapstruct:mapstruct-processor:1.6.3")

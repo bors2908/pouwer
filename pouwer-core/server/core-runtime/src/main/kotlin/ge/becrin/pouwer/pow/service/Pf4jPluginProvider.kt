@@ -23,6 +23,8 @@ class Pf4jPluginProvider(
 
     override fun loadPlugins(): List<PayloadPlugin> {
         Files.createDirectories(pluginsDirectory)
+
+
         pluginManager.loadPlugins()
         val unresolved = pluginManager.unresolvedPlugins
         check(unresolved.isEmpty()) {

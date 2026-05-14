@@ -25,7 +25,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api")
     implementation("ge.becrin:kt-stratum:0.1.0")
     implementation("org.json:json:20251224")
-    compileOnly("org.pf4j:pf4j:3.14.1")
+    compileOnly("org.pf4j:pf4j:3.15.0")
 }
 
 java {
@@ -63,10 +63,6 @@ tasks.named("processResources") {
 tasks.named<Jar>("jar") {
     dependsOn("copyBundleDist")
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    from("src/main/resources") {
-        include("plugin.properties")
-        into("")
-    }
 }
 
 publishing {

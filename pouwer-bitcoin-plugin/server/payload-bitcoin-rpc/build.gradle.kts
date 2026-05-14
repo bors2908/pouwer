@@ -23,7 +23,7 @@ dependencies {
     implementation("org.springframework:spring-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.bitcoinj:bitcoinj-core:0.16.3")
-    compileOnly("org.pf4j:pf4j:3.14.1")
+    compileOnly("org.pf4j:pf4j:3.15.0")
 }
 
 java {
@@ -61,10 +61,6 @@ tasks.named("processResources") {
 tasks.named<Jar>("jar") {
     dependsOn("copyBundleDist")
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    from("src/main/resources") {
-        include("plugin.properties")
-        into("")
-    }
 }
 
 publishing {

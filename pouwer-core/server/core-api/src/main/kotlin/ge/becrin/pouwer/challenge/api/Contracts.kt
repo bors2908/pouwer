@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import org.pf4j.ExtensionPoint
 import java.util.UUID
 
-const val CHALLENGE_PLUGIN_CONTRACT_VERSION: String = "1.0"
+const val CHALLENGE_PLUGIN_CONTRACT_VERSION: String = "0.1.0"
 
 data class Task(
     val jobId: UUID,

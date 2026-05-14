@@ -20,7 +20,7 @@ dependencyManagement {
 dependencies {
     api("com.fasterxml.jackson.core:jackson-databind")
     api("com.fasterxml.jackson.module:jackson-module-kotlin")
-    api("org.pf4j:pf4j:3.14.1")
+    api("org.pf4j:pf4j:3.15.0")
     api(kotlin("stdlib-jdk8"))
 }
 
