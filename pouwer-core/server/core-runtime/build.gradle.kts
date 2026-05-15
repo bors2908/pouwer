@@ -1,23 +1,12 @@
-import org.gradle.api.tasks.Exec
-import org.gradle.jvm.toolchain.JavaLanguageVersion
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     java
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.jib)
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.kotlin.spring)
     alias(libs.plugins.kotlin.allopen)
     alias(libs.plugins.kotlin.noarg)
 }
-
-val bundledPayloadsEnabled = providers
-    .gradleProperty("challenge.bundledPayloads")
-    .map(String::toBooleanStrictOrNull)
-    .orElse(false)
 
 val dockerRepoName = providers.gradleProperty("pouwerDockerRepoName").get()
 
@@ -30,34 +19,8 @@ dependencies {
     implementation(libs.pf4j)
     implementation(libs.kotlin.stdlib)
 
-    kapt(libs.mapstruct.processor)
-
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(project(":pouwer-core:server:common-test"))
-
-    if (bundledPayloadsEnabled.get()) {
-        runtimeOnly(project(":pouwer-sha256-plugin:server:payload-sha256"))
-        runtimeOnly(project(":pouwer-bitcoin-plugin:server:payload-bitcoin-rpc"))
-        runtimeOnly(project(":pouwer-randomx-plugin:server:payload-monero-randomx"))
-    }
-}
-
-configurations {
-    compileOnly {
-        extendsFrom(configurations.annotationProcessor.get())
-    }
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
-}
-
-tasks.withType<KotlinCompile>().configureEach {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_21)
-    }
 }
 
 tasks.register<Exec>("npmBuildBrowser") {

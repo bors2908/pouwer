@@ -1,16 +1,11 @@
-import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.Exec
-import org.gradle.api.tasks.bundling.Jar
+import ge.becrin.pouwer.NpmBundleExtension
 import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.jvm.toolchain.JavaLanguageVersion
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `java-library`
     alias(libs.plugins.kotlin.jvm)
     id("maven-publish")
+    id("ge.becrin.pouwer.npm-bundle")
 }
 
 dependencies {
@@ -23,42 +18,9 @@ dependencies {
     compileOnly(libs.pf4j)
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
-}
-
-tasks.withType<KotlinCompile>().configureEach {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_21)
-    }
-}
-
-tasks.register<Exec>("npmBuildBundle") {
-    workingDir = rootProject.layout.projectDirectory.dir("pouwer-bitcoin-plugin/browser/traefik-bitcoin").asFile
-    commandLine = if (System.getProperty("os.name").lowercase().contains("windows")) {
-        listOf("cmd", "/c", "npm run build")
-    } else {
-        listOf("sh", "-c", "npm run build")
-    }
-}
-
-tasks.register<Copy>("copyBundleDist") {
-    dependsOn("npmBuildBundle")
-    from(rootProject.layout.projectDirectory.dir("pouwer-bitcoin-plugin/browser/traefik-bitcoin/dist")) {
-        into("static/traefik-bitcoin")
-    }
-    into(layout.buildDirectory.dir("resources/main"))
-}
-
-tasks.named("processResources") {
-    finalizedBy("copyBundleDist")
-}
-
-tasks.named<Jar>("jar") {
-    dependsOn("copyBundleDist")
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+extensions.configure<NpmBundleExtension>("npmBundle") {
+    sourceDir.set(rootProject.layout.projectDirectory.dir("pouwer-bitcoin-plugin/browser/traefik-bitcoin"))
+    targetPath.set("static/traefik-bitcoin")
 }
 
 publishing {

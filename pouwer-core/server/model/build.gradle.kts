@@ -1,7 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.gradle.jvm.toolchain.JavaLanguageVersion
-
 plugins {
     `java-library`
     alias(libs.plugins.kotlin.jvm)
@@ -17,16 +13,4 @@ dependencies {
     api(libs.jackson.datatype.jsr310)
     api(libs.pf4j)
     api(libs.kotlin.stdlib.jdk8)
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
-}
-
-tasks.withType<KotlinCompile>().configureEach {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_21)
-    }
 }
