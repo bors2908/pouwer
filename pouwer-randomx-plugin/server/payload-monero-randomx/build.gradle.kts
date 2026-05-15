@@ -28,7 +28,7 @@ extensions.configure<NpmBundleExtension>("npmBundle") {
 publishing {
     repositories {
         maven {
-            url = uri(providers.gradleProperty("pouwerMavenHostedRepoUrl").get())
+            url = uri(providers.gradleProperty("repo.url.maven.hosted").get())
             credentials {
                 username = providers.gradleProperty("nexusUser").orNull
                 password = providers.gradleProperty("nexusPass").orNull

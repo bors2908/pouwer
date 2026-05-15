@@ -10,7 +10,7 @@ plugins {
     alias(libs.plugins.kotlin.noarg)
 }
 
-val dockerRepoName: String = providers.gradleProperty("pouwerDockerRepoName").get()
+val dockerRepoName: String = providers.gradleProperty("repo.url.docker.hosted").get()
 
 dependencies {
     implementation(project(":pouwer-core:server:common"))

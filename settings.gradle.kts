@@ -23,7 +23,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         maven {
-            url = uri(providers.gradleProperty("pouwerMavenPublicRepoUrl").get())
+            url = uri(providers.gradleProperty("repo.url.maven.public").get())
             isAllowInsecureProtocol = true
         }
         mavenCentral()
