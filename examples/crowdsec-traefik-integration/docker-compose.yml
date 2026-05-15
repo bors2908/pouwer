@@ -86,8 +86,8 @@ services:
       PLUGIN_TARGET_DIR: /plugins
     command:
       - --no-clean
-      #- --artifact
-      #- ge.becrin.pouwer:payload-bitcoin-rpc:0.1.0
+      - --artifact
+      - ge.becrin.pouwer:payload-bitcoin-rpc:0.1.0
       - --artifact
       - ge.becrin.pouwer:payload-sha256:0.1.0
       - --artifact
