@@ -20,6 +20,12 @@ npmBundle {
     targetPath.set("static/traefik-sha256")
 }
 
+tasks.processResources {
+    filesMatching("plugin.properties") {
+        expand(mapOf("version" to project.version.toString()))
+    }
+}
+
 publishing {
     repositories {
         maven {

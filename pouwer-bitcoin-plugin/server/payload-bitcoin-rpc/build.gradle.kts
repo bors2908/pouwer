@@ -21,6 +21,12 @@ npmBundle {
     targetPath.set("static/traefik-bitcoin")
 }
 
+tasks.processResources {
+    filesMatching("plugin.properties") {
+        expand(mapOf("version" to project.version.toString()))
+    }
+}
+
 publishing {
     repositories {
         maven {
