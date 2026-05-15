@@ -1,50 +1,29 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
 plugins {
-    java
-    id("org.springframework.boot")
-    id("io.spring.dependency-management")
-    kotlin("jvm")
-    kotlin("kapt")
-    kotlin("plugin.allopen") apply true
-    kotlin("plugin.noarg") apply true
-}
-
-group = "ge.becrin.pouwer"
-
-repositories {
-    mavenCentral()
-}
-
-dependencyManagement {
-    imports {
-        mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.1.1")
-        mavenBom("org.springdoc:springdoc-openapi-bom:3.0.1")
-    }
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.allopen)
+    alias(libs.plugins.kotlin.noarg)
+    `java-library`
 }
 
 dependencies {
     api(project(":pouwer-core:server:model"))
+    api(platform(libs.spring.boot.bom))
+    api(libs.spring.boot.starter.web)
+    api(libs.spring.boot.starter.security)
+    api(libs.spring.boot.starter.validation)
+    api(libs.swagger.annotations)
+    api(libs.spring.boot.starter.test)
+    api(libs.spring.boot.starter.webmvc.test)
+    api(libs.spring.security.test)
+    api(libs.mockito.kotlin)
 
-    api(enforcedPlatform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
-    api(enforcedPlatform("org.springframework.cloud:spring-cloud-dependencies:2025.1.1"))
-    api(enforcedPlatform("org.springdoc:springdoc-openapi-bom:3.0.1"))
-    api("org.springframework.boot:spring-boot-starter-security")
-    api("org.springframework.boot:spring-boot-starter-web")
-    api("org.springframework.boot:spring-boot-starter-actuator")
-    api("org.mapstruct:mapstruct:1.6.3")
-    api("org.apache.commons:commons-lang3:3.20.0")
-    api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-    api("com.fasterxml.jackson.module:jackson-module-kotlin")
-
-    api("org.springframework.boot:spring-boot-starter-validation")
-
-    api("io.swagger.core.v3:swagger-annotations:2.2.43")
-    api("io.github.oshai:kotlin-logging-jvm:8.0.01")
-    api(kotlin("stdlib-jdk8"))
-}
-
-noArg {
-    annotation("jakarta.persistence.Entity")
+    api(platform(libs.junit.bom))
+    api(libs.junit.jupiter)
+    implementation(kotlin("stdlib"))
 }
 
 java {
@@ -53,12 +32,8 @@ java {
     }
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        jvmTarget.set(JvmTarget.JVM_21)
     }
-}
-
-tasks.test {
-    useJUnitPlatform()
 }

@@ -1,41 +1,38 @@
+import org.gradle.api.tasks.Exec
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
-    id("org.springframework.boot")
-    id("io.spring.dependency-management")
-    id("com.google.cloud.tools.jib") version "3.4.5"
-    kotlin("jvm")
-    kotlin("kapt")
-    kotlin("plugin.allopen") apply true
-    kotlin("plugin.noarg") apply true
-    kotlin("plugin.spring")
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.jib)
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlin.allopen)
+    alias(libs.plugins.kotlin.noarg)
 }
-
-group = "ge.becrin.pouwer"
 
 val bundledPayloadsEnabled = providers
     .gradleProperty("challenge.bundledPayloads")
     .map(String::toBooleanStrictOrNull)
     .orElse(false)
 
-dependencyManagement {
-    imports {
-        mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.1.1")
-    }
-}
+val dockerRepoName = providers.gradleProperty("pouwerDockerRepoName").get()
 
 dependencies {
     implementation(project(":pouwer-core:server:common"))
     implementation(project(":pouwer-core:server:core-api"))
-    implementation("org.pf4j:pf4j:3.15.0")
-    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+    implementation(platform(libs.spring.boot.bom))
+    implementation(platform(libs.spring.cloud.bom))
+    implementation(libs.spring.cloud.starter.openfeign)
+    implementation(libs.pf4j)
+    implementation(libs.kotlin.stdlib)
 
-    kapt("org.mapstruct:mapstruct-processor:1.6.3")
+    kapt(libs.mapstruct.processor)
 
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(project(":pouwer-core:server:common-test"))
 
     if (bundledPayloadsEnabled.get()) {
@@ -43,7 +40,12 @@ dependencies {
         runtimeOnly(project(":pouwer-bitcoin-plugin:server:payload-bitcoin-rpc"))
         runtimeOnly(project(":pouwer-randomx-plugin:server:payload-monero-randomx"))
     }
-    implementation(kotlin("stdlib"))
+}
+
+configurations {
+    compileOnly {
+        extendsFrom(configurations.annotationProcessor.get())
+    }
 }
 
 java {
@@ -58,23 +60,8 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
-configurations {
-    compileOnly {
-        extendsFrom(configurations.annotationProcessor.get())
-    }
-}
-
-noArg {
-    annotation("jakarta.persistence.Entity")
-}
-
-tasks.test {
-    useJUnitPlatform()
-}
-
 tasks.register<Exec>("npmBuildBrowser") {
-    val browserDir = file("${rootProject.projectDir}")
-    workingDir = browserDir
+    workingDir = rootProject.projectDir
     commandLine = if (System.getProperty("os.name").lowercase().contains("windows")) {
         listOf("cmd", "/c", "npm ci && npm run build")
     } else {
@@ -84,9 +71,8 @@ tasks.register<Exec>("npmBuildBrowser") {
 
 jib {
     val projectName = "pouwer-server"
-    val dockerRepoName = "localhost:9002"
-    val nexusUser = findProperty("nexusUser") as String?
-    val nexusPass = findProperty("nexusPass") as String?
+    val nexusUser = providers.gradleProperty("nexusUser").orNull
+    val nexusPass = providers.gradleProperty("nexusPass").orNull
 
     setAllowInsecureRegistries(true)
     from {
@@ -104,7 +90,4 @@ jib {
         ports = listOf("8082")
         creationTime = "USE_CURRENT_TIMESTAMP"
     }
-}
-repositories {
-    mavenCentral()
 }

@@ -1,31 +1,30 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 
 plugins {
     `java-library`
-    kotlin("jvm")
-    kotlin("plugin.allopen") apply true
-    kotlin("plugin.noarg") apply true
-    id("io.spring.dependency-management")
-}
-
-group = "ge.becrin.pouwer"
-
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.boot:spring-boot-dependencies:4.0.3")
-    }
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.allopen)
+    alias(libs.plugins.kotlin.noarg)
 }
 
 dependencies {
-    api("com.fasterxml.jackson.core:jackson-databind")
-    api("com.fasterxml.jackson.module:jackson-module-kotlin")
-    api("org.pf4j:pf4j:3.15.0")
-    api(kotlin("stdlib-jdk8"))
-}
+    api(project(":pouwer-core:server:model"))
+    api(platform(libs.spring.boot.bom))
+    api(libs.spring.boot.starter.security)
+    api(libs.spring.boot.starter.web)
+    api(libs.spring.boot.starter.actuator)
+    api(libs.mapstruct)
+    api(libs.commons.lang3)
+    api(libs.jackson.datatype.jsr310)
+    api(libs.jackson.module.kotlin)
 
-noArg {
-    annotation("jakarta.persistence.Entity")
+    api(libs.spring.boot.starter.validation)
+
+    api(libs.swagger.annotations)
+    api(libs.kotlin.logging.jvm)
+    api(libs.kotlin.stdlib.jdk8)
 }
 
 java {
@@ -38,14 +37,4 @@ tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_21)
     }
-}
-
-dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
-}
-
-tasks.test {
-    useJUnitPlatform()
 }

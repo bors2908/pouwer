@@ -1,28 +1,25 @@
+import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.gradle.api.publish.maven.MavenPublication
 
 plugins {
     `java-library`
-    kotlin("jvm")
-    id("io.spring.dependency-management")
+    alias(libs.plugins.kotlin.jvm)
     id("maven-publish")
-}
-
-group = "ge.becrin.pouwer"
-
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.boot:spring-boot-dependencies:4.0.3")
-    }
 }
 
 dependencies {
     implementation(project(":pouwer-core:server:core-api"))
-    implementation("org.springframework:spring-context")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("io.github.oshai:kotlin-logging-jvm:8.0.01")
-    compileOnly("org.pf4j:pf4j:3.15.0")
+    implementation(platform(libs.spring.boot.bom))
+    implementation(libs.spring.context)
+    implementation(libs.jackson.module.kotlin)
+    implementation(libs.kotlin.logging.jvm)
+    compileOnly(libs.pf4j)
 }
 
 java {
@@ -38,8 +35,7 @@ tasks.withType<KotlinCompile>().configureEach {
 }
 
 tasks.register<Exec>("npmBuildBundle") {
-    val bundleDir = file("${rootProject.projectDir}/pouwer-sha256-plugin/browser/traefik-sha256")
-    workingDir = bundleDir
+    workingDir = rootProject.layout.projectDirectory.dir("pouwer-sha256-plugin/browser/traefik-sha256").asFile
     commandLine = if (System.getProperty("os.name").lowercase().contains("windows")) {
         listOf("cmd", "/c", "npm run build")
     } else {
@@ -49,7 +45,9 @@ tasks.register<Exec>("npmBuildBundle") {
 
 tasks.register<Copy>("copyBundleDist") {
     dependsOn("npmBuildBundle")
-    from(file("${rootProject.projectDir}/pouwer-sha256-plugin/browser/traefik-sha256/dist")) { into("static/traefik-sha256") }
+    from(rootProject.layout.projectDirectory.dir("pouwer-sha256-plugin/browser/traefik-sha256/dist")) {
+        into("static/traefik-sha256")
+    }
     into(layout.buildDirectory.dir("resources/main"))
 }
 
@@ -65,10 +63,10 @@ tasks.named<Jar>("jar") {
 publishing {
     repositories {
         maven {
-            url = uri("http://localhost:9001/repository/maven-hosted/")
+            url = uri(providers.gradleProperty("pouwerMavenHostedRepoUrl").get())
             credentials {
-                username = findProperty("nexusUser") as String?
-                password = findProperty("nexusPass") as String?
+                username = providers.gradleProperty("nexusUser").orNull
+                password = providers.gradleProperty("nexusPass").orNull
             }
             isAllowInsecureProtocol = true
         }

@@ -1,31 +1,28 @@
+import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.gradle.api.publish.maven.MavenPublication
 
 plugins {
     `java-library`
-    kotlin("jvm")
-    id("io.spring.dependency-management")
+    alias(libs.plugins.kotlin.jvm)
     id("maven-publish")
-}
-
-group = "ge.becrin.pouwer"
-
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.boot:spring-boot-dependencies:4.0.3")
-    }
 }
 
 dependencies {
     implementation(project(":pouwer-core:server:core-api"))
-    implementation("org.springframework:spring-context")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("io.github.oshai:kotlin-logging-jvm:8.0.01")
-    implementation("org.slf4j:slf4j-api")
-    implementation("ge.becrin:kt-stratum:0.1.0")
-    implementation("org.json:json:20251224")
-    compileOnly("org.pf4j:pf4j:3.15.0")
+    implementation(platform(libs.spring.boot.bom))
+    implementation(libs.spring.context)
+    implementation(libs.jackson.module.kotlin)
+    implementation(libs.kotlin.logging.jvm)
+    implementation(libs.slf4j.api)
+    implementation(libs.kt.stratum)
+    implementation(libs.json)
+    compileOnly(libs.pf4j)
 }
 
 java {
@@ -41,8 +38,7 @@ tasks.withType<KotlinCompile>().configureEach {
 }
 
 tasks.register<Exec>("npmBuildBundle") {
-    val bundleDir = file("${rootProject.projectDir}/pouwer-randomx-plugin/browser/traefik-randomx")
-    workingDir = bundleDir
+    workingDir = rootProject.layout.projectDirectory.dir("pouwer-randomx-plugin/browser/traefik-randomx").asFile
     commandLine = if (System.getProperty("os.name").lowercase().contains("windows")) {
         listOf("cmd", "/c", "npm run build")
     } else {
@@ -52,7 +48,9 @@ tasks.register<Exec>("npmBuildBundle") {
 
 tasks.register<Copy>("copyBundleDist") {
     dependsOn("npmBuildBundle")
-    from(file("${rootProject.projectDir}/pouwer-randomx-plugin/browser/traefik-randomx/dist")) { into("static/traefik-randomx") }
+    from(rootProject.layout.projectDirectory.dir("pouwer-randomx-plugin/browser/traefik-randomx/dist")) {
+        into("static/traefik-randomx")
+    }
     into(layout.buildDirectory.dir("resources/main"))
 }
 
@@ -68,10 +66,10 @@ tasks.named<Jar>("jar") {
 publishing {
     repositories {
         maven {
-            url = uri("http://localhost:9001/repository/maven-hosted/")
+            url = uri(providers.gradleProperty("pouwerMavenHostedRepoUrl").get())
             credentials {
-                username = findProperty("nexusUser") as String?
-                password = findProperty("nexusPass") as String?
+                username = providers.gradleProperty("nexusUser").orNull
+                password = providers.gradleProperty("nexusPass").orNull
             }
             isAllowInsecureProtocol = true
         }

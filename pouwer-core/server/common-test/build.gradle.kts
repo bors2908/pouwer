@@ -1,36 +1,34 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
 plugins {
-    java
-    id("org.springframework.boot")
-    id("io.spring.dependency-management")
-    kotlin("jvm")
-    kotlin("plugin.allopen") apply true
-    kotlin("plugin.noarg") apply true
-}
-
-group = "ge.becrin.pouwer"
-
-repositories {
-    mavenCentral()
-}
-
-dependencyManagement {
-    imports {
-        mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2025.1.1")
-    }
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.allopen)
+    alias(libs.plugins.kotlin.noarg)
+    `java-library`
 }
 
 dependencies {
     api(project(":pouwer-core:server:common"))
-    api("org.springframework.boot:spring-boot-starter-test")
-    api("org.springframework.boot:spring-boot-starter-webmvc-test")
-    api("org.springframework.security:spring-security-test")
-    api("org.mockito.kotlin:mockito-kotlin:6.2.3")
+    api(platform(libs.spring.boot.bom))
+    api(libs.spring.boot.starter.test)
+    api(libs.spring.boot.starter.webmvc.test)
+    api(libs.spring.security.test)
+    api(libs.mockito.kotlin)
 
-    api(platform("org.junit:junit-bom:6.0.3"))
-    api("org.junit.jupiter:junit-jupiter")
+    api(platform(libs.junit.bom))
+    api(libs.junit.jupiter)
 }
 
-tasks.test {
-    useJUnitPlatform()
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
+    }
 }

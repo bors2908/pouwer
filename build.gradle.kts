@@ -1,37 +1,22 @@
+import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.testing.Test
+
 plugins {
-    java
-    kotlin("jvm") version "2.3.10" apply false
-    kotlin("kapt") version "2.3.10" apply false
-    kotlin("plugin.allopen") version "2.3.10" apply false
-    kotlin("plugin.noarg") version "2.3.10" apply false
-    id("org.springframework.boot") version "4.0.3" apply false
-    id("io.spring.dependency-management") version "1.1.7" apply false
-    kotlin("plugin.spring") version "2.3.10"
 }
 
 group = "ge.becrin.pouwer"
 
-repositories {
-    maven {
-        url = uri("http://localhost:9001/repository/maven-public/")
-        isAllowInsecureProtocol = true
-    }
-    mavenCentral()
+allprojects {
+    group = rootProject.group
+    version = rootProject.version
 }
 
 subprojects {
-    repositories {
-        maven {
-            url = uri("http://localhost:9001/repository/maven-public/")
-            isAllowInsecureProtocol = true
-        }
-        mavenCentral()
-    }
-
     tasks.withType<Copy>().configureEach {
         duplicatesStrategy = DuplicatesStrategy.WARN
     }
-}
-dependencies {
-    implementation(kotlin("stdlib"))
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
+    }
 }

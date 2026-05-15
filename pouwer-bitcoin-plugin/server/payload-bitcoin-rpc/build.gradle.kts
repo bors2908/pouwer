@@ -1,29 +1,26 @@
+import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.gradle.api.publish.maven.MavenPublication
 
 plugins {
     `java-library`
-    kotlin("jvm")
-    id("io.spring.dependency-management")
+    alias(libs.plugins.kotlin.jvm)
     id("maven-publish")
-}
-
-group = "ge.becrin.pouwer"
-
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.boot:spring-boot-dependencies:4.0.3")
-    }
 }
 
 dependencies {
     implementation(project(":pouwer-core:server:core-api"))
-    implementation("org.springframework:spring-context")
-    implementation("org.springframework:spring-web")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.bitcoinj:bitcoinj-core:0.16.3")
-    compileOnly("org.pf4j:pf4j:3.15.0")
+    implementation(platform(libs.spring.boot.bom))
+    implementation(libs.spring.context)
+    implementation(libs.spring.web)
+    implementation(libs.jackson.module.kotlin)
+    implementation(libs.bitcoinj.core)
+    compileOnly(libs.pf4j)
 }
 
 java {
@@ -39,8 +36,7 @@ tasks.withType<KotlinCompile>().configureEach {
 }
 
 tasks.register<Exec>("npmBuildBundle") {
-    val bundleDir = file("${rootProject.projectDir}/pouwer-bitcoin-plugin/browser/traefik-bitcoin")
-    workingDir = bundleDir
+    workingDir = rootProject.layout.projectDirectory.dir("pouwer-bitcoin-plugin/browser/traefik-bitcoin").asFile
     commandLine = if (System.getProperty("os.name").lowercase().contains("windows")) {
         listOf("cmd", "/c", "npm run build")
     } else {
@@ -50,7 +46,9 @@ tasks.register<Exec>("npmBuildBundle") {
 
 tasks.register<Copy>("copyBundleDist") {
     dependsOn("npmBuildBundle")
-    from(file("${rootProject.projectDir}/pouwer-bitcoin-plugin/browser/traefik-bitcoin/dist")) { into("static/traefik-bitcoin") }
+    from(rootProject.layout.projectDirectory.dir("pouwer-bitcoin-plugin/browser/traefik-bitcoin/dist")) {
+        into("static/traefik-bitcoin")
+    }
     into(layout.buildDirectory.dir("resources/main"))
 }
 
@@ -66,10 +64,10 @@ tasks.named<Jar>("jar") {
 publishing {
     repositories {
         maven {
-            url = uri("http://localhost:9001/repository/maven-hosted/")
+            url = uri(providers.gradleProperty("pouwerMavenHostedRepoUrl").get())
             credentials {
-                username = findProperty("nexusUser") as String?
-                password = findProperty("nexusPass") as String?
+                username = providers.gradleProperty("nexusUser").orNull
+                password = providers.gradleProperty("nexusPass").orNull
             }
             isAllowInsecureProtocol = true
         }
