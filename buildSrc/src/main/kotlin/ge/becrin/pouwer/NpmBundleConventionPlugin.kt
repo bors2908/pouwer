@@ -91,5 +91,21 @@ class NpmBundleConventionPlugin : Plugin<Project> {
             dependsOn(copyBundleDist)
             duplicatesStrategy = DuplicatesStrategy.INCLUDE
         }
+
+        project.plugins.withId("com.gradleup.shadow") {
+            project.tasks.named("shadowJar", Jar::class.java) {
+                dependsOn(copyBundleDist)
+                duplicatesStrategy = DuplicatesStrategy.INCLUDE
+                archiveClassifier.set("")
+            }
+
+            project.tasks.named("jar") {
+                enabled = false
+            }
+
+            project.tasks.named("assemble") {
+                dependsOn("shadowJar")
+            }
+        }
     }
 }

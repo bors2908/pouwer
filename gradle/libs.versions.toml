@@ -4,6 +4,7 @@ spring-boot = "4.0.3"
 spring-cloud = "2025.1.1"
 springdoc = "3.0.1"
 jib = "3.4.5"
+shadow = "9.4.1"
 junit = "6.0.3"
 mockito-kotlin = "6.2.3"
 commons-lang3 = "3.20.0"
@@ -21,6 +22,7 @@ kotlin-noarg = { id = "org.jetbrains.kotlin.plugin.noarg", version.ref = "kotlin
 kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 
 [libraries]
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }

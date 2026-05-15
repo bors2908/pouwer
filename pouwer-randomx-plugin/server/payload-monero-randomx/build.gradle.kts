@@ -4,6 +4,7 @@ import org.gradle.api.publish.maven.MavenPublication
 plugins {
     `java-library`
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.shadow)
     id("maven-publish")
     id("ge.becrin.pouwer.npm-bundle")
 }
@@ -39,7 +40,7 @@ publishing {
 
     publications {
         create<MavenPublication>("mavenJava") {
-            from(components["java"])
+            artifact(tasks.named("shadowJar"))
             artifactId = project.name
         }
     }
