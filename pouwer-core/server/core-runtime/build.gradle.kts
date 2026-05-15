@@ -1,3 +1,5 @@
+import ge.becrin.pouwer.NpmBuildBundleTask
+
 plugins {
     java
     alias(libs.plugins.spring.boot)
@@ -8,7 +10,7 @@ plugins {
     alias(libs.plugins.kotlin.noarg)
 }
 
-val dockerRepoName = providers.gradleProperty("pouwerDockerRepoName").get()
+val dockerRepoName: String = providers.gradleProperty("pouwerDockerRepoName").get()
 
 dependencies {
     implementation(project(":pouwer-core:server:common"))
@@ -23,13 +25,8 @@ dependencies {
     testImplementation(project(":pouwer-core:server:common-test"))
 }
 
-tasks.register<Exec>("npmBuildBrowser") {
-    workingDir = rootProject.projectDir
-    commandLine = if (System.getProperty("os.name").lowercase().contains("windows")) {
-        listOf("cmd", "/c", "npm ci && npm run build")
-    } else {
-        listOf("sh", "-c", "npm ci && npm run build")
-    }
+tasks.register<NpmBuildBundleTask>("npmBuildBrowser") {
+    sourceDir.set(rootProject.layout.projectDirectory)
 }
 
 jib {
