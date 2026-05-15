@@ -1,6 +1,3 @@
-import ge.becrin.pouwer.NpmBundleExtension
-import org.gradle.api.publish.maven.MavenPublication
-
 plugins {
     `java-library`
     alias(libs.plugins.kotlin.jvm)
@@ -19,8 +16,8 @@ dependencies {
     compileOnly(libs.pf4j)
 }
 
-extensions.configure<NpmBundleExtension>("npmBundle") {
-    sourceDir.set(rootProject.layout.projectDirectory.dir("pouwer-bitcoin-plugin/browser/traefik-bitcoin"))
+npmBundle {
+    sourceDir.set(rootProject.file("pouwer-bitcoin-plugin/browser/traefik-bitcoin"))
     targetPath.set("static/traefik-bitcoin")
 }
 

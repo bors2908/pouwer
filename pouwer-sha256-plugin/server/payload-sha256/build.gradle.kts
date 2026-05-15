@@ -1,6 +1,3 @@
-import ge.becrin.pouwer.NpmBundleExtension
-import org.gradle.api.publish.maven.MavenPublication
-
 plugins {
     `java-library`
     alias(libs.plugins.kotlin.jvm)
@@ -18,8 +15,8 @@ dependencies {
     compileOnly(libs.pf4j)
 }
 
-extensions.configure<NpmBundleExtension>("npmBundle") {
-    sourceDir.set(rootProject.layout.projectDirectory.dir("pouwer-sha256-plugin/browser/traefik-sha256"))
+npmBundle {
+    sourceDir.set(rootProject.file("pouwer-sha256-plugin/browser/traefik-sha256"))
     targetPath.set("static/traefik-sha256")
 }
 

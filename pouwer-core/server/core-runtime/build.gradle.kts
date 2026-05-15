@@ -1,5 +1,3 @@
-import ge.becrin.pouwer.NpmBuildBundleTask
-
 plugins {
     java
     alias(libs.plugins.spring.boot)
@@ -8,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.spring)
     alias(libs.plugins.kotlin.allopen)
     alias(libs.plugins.kotlin.noarg)
+    id("ge.becrin.pouwer.npm-bundle")
 }
 
 val dockerRepoName: String = providers.gradleProperty("repo.url.docker.hosted").get()
@@ -25,8 +24,8 @@ dependencies {
     testImplementation(project(":pouwer-core:server:common-test"))
 }
 
-tasks.register<NpmBuildBundleTask>("npmBuildBrowser") {
-    sourceDir.set(rootProject.layout.projectDirectory)
+npmBundle {
+    sourceDir.set(rootProject.file("pouwer-core/browser/pouwer-ui"))
 }
 
 jib {

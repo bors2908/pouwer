@@ -1,6 +1,3 @@
-import ge.becrin.pouwer.NpmBundleExtension
-import org.gradle.api.publish.maven.MavenPublication
-
 plugins {
     `java-library`
     alias(libs.plugins.kotlin.jvm)
@@ -21,8 +18,8 @@ dependencies {
     compileOnly(libs.pf4j)
 }
 
-extensions.configure<NpmBundleExtension>("npmBundle") {
-    sourceDir.set(rootProject.layout.projectDirectory.dir("pouwer-randomx-plugin/browser/traefik-randomx"))
+npmBundle {
+    sourceDir.set(rootProject.file("pouwer-randomx-plugin/browser/traefik-randomx"))
     targetPath.set("static/traefik-randomx")
 }
 

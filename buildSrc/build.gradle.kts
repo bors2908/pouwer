@@ -8,6 +8,10 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    implementation("com.github.node-gradle:gradle-node-plugin:7.1.0")
+}
+
 gradlePlugin {
     plugins {
         create("npmBundleConvention") {
