@@ -5,9 +5,9 @@
   "type": "module",
   "workspaces": [
     "core-contracts",
-    "runtime",
-    "base",
-    "traefik"
+    "worker-runtime",
+    "widget-base",
+    "widget-traefik"
   ],
   "scripts": {
     "build": "npm run build --workspaces"

@@ -25,7 +25,7 @@ dependencies {
 }
 
 npmBundle {
-    sourceDir.set(rootProject.file("pouwer-core/browser/pouwer-ui"))
+    sourceDir.set(rootProject.file("pouwer-core/browser"))
 }
 
 jib {
