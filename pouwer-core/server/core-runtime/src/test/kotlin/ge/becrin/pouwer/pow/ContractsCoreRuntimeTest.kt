@@ -11,7 +11,7 @@ class ContractsCoreRuntimeTest : UnitTestBase() {
 
     @Test
     fun constantAndEnum() {
-        assertEquals("0.1.0", CHALLENGE_PLUGIN_CONTRACT_VERSION)
+        assertEquals("0.1.1", CHALLENGE_PLUGIN_CONTRACT_VERSION)
         assertEquals(ValidationStatus.ACCEPTED, ValidationStatus.valueOf("ACCEPTED"))
     }
 

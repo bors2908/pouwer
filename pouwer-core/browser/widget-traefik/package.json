@@ -1,6 +1,6 @@
 {
   "name": "@pouwer/widget-traefik",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
@@ -16,7 +16,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@pouwer/core-contracts": "0.1.0",
-    "@pouwer/widget-base": "0.1.0"
+    "@pouwer/core-contracts": "0.1.1",
+    "@pouwer/widget-base": "0.1.1"
   }
 }

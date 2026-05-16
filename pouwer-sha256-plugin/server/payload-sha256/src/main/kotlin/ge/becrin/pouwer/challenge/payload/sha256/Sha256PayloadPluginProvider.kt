@@ -14,7 +14,7 @@ class Sha256PayloadPluginProvider : PayloadPlugin {
 
     override fun id(): String = delegate.pluginId
 
-    override fun version(): String = "0.1.0"
+    override fun version(): String = "0.1.1"
 
     override fun supports(context: PayloadSupportContext): Boolean {
         return context.requestedPluginId?.let { it == id() } ?: true

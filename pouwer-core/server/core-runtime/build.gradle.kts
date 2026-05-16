@@ -18,7 +18,6 @@ dependencies {
     implementation(platform(libs.spring.cloud.bom))
     implementation(libs.spring.cloud.starter.openfeign)
     implementation(libs.pf4j)
-    implementation(libs.kotlin.stdlib)
 
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(project(":pouwer-core:server:common-test"))

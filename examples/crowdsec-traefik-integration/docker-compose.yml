@@ -56,13 +56,12 @@ services:
       - --mini
 
   pouwer-server:
-    image: localhost:9002/pouwer-server:0.1.0
+    image: localhost:9002/pouwer-server:0.1.1
     container_name: pouwer-server
     restart: unless-stopped
     environment:
       CHALLENGE_PLUGINS_DIRECTORY: /plugins
       STRATUM_HOST: p2pool
-      LOGGING_LEVEL_ORG_PF4J: TRACE
     ports:
       - "8082:8082"
     depends_on:
@@ -87,11 +86,11 @@ services:
     command:
       - --no-clean
       - --artifact
-      - ge.becrin.pouwer:payload-bitcoin-rpc:0.1.0
+      - ge.becrin.pouwer:payload-bitcoin-rpc:0.1.1
       - --artifact
-      - ge.becrin.pouwer:payload-sha256:0.1.0
+      - ge.becrin.pouwer:payload-sha256:0.1.1
       - --artifact
-      - ge.becrin.pouwer:payload-monero-randomx:0.1.0
+      - ge.becrin.pouwer:payload-monero-randomx:0.1.1
     volumes:
       - pouwer-plugin-data:/plugins
     extra_hosts:

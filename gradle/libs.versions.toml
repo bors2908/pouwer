@@ -1,9 +1,8 @@
 [versions]
-kotlin = "2.3.10"
-spring-boot = "4.0.3"
+kotlin = "2.3.21"
+spring-boot = "4.0.6"
 spring-cloud = "2025.1.1"
-springdoc = "3.0.1"
-jib = "3.4.5"
+jib = "3.5.2"
 shadow = "9.4.1"
 junit = "6.0.3"
 mockito-kotlin = "6.2.3"
@@ -58,6 +57,4 @@ pf4j = { module = "org.pf4j:pf4j", version.ref = "pf4j" }
 bitcoinj-core = { module = "org.bitcoinj:bitcoinj-core", version.ref = "bitcoinj" }
 kt-stratum = { module = "ge.becrin:kt-stratum", version.ref = "kt-stratum" }
 json = { module = "org.json:json", version.ref = "json" }
-h2 = { module = "com.h2database:h2" }
-kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
