@@ -96,6 +96,96 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
 
+  crowdsec:
+    image: crowdsecurity/crowdsec:latest
+    container_name: crowdsec
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "cscli", "lapi", "status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    environment:
+      PARSERS: "crowdsecurity/docker-logs crowdsecurity/cri-logs crowdsecurity/traefik-logs"
+      BOUNCER_KEY_TRAEFIK: "${CROWDSEC_BOUNCER_KEY}"
+      LOCAL_API_URL: "http://0.0.0.0:8080"
+      DISABLE_ONLINE_API: "true"
+      NO_HUB_UPGRADE: "true"
+    volumes:
+      - ./crowdsec/data:/var/lib/crowdsec/data
+      - ./logs:/var/log
+      - ./crowdsec/config/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
+      - ./crowdsec/config/profiles.yaml:/etc/crowdsec/profiles.yaml:ro
+      - ./crowdsec/config/parsers/s02-enrich/whitelists.yaml:/etc/crowdsec/parsers/s02-enrich/whitelists.yaml:ro
+      - ./crowdsec/config/scenarios:/etc/crowdsec/scenarios:ro
+    networks:
+      - app-net
+
+  traefik:
+    image: traefik:v3.1
+    container_name: traefik
+    restart: unless-stopped
+    depends_on:
+      - crowdsec
+      - pouwer-server
+    ports:
+      - "80:80"
+      - "8081:8080"
+    environment:
+      CROWDSEC_BOUNCER_KEY: "${CROWDSEC_BOUNCER_KEY}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./browser/bundle/traefik-randomx/pages/challenge.html:/etc/traefik/captcha.html:ro
+      - ./browser/bundle/traefik-randomx/pages/ban.html:/etc/traefik/ban.html:ro
+      - ./logs/traefik:/var/log/traefik
+    networks:
+      - app-net
+
+  browser-app:
+    build:
+      context: ./browser
+    container_name: browser-app
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.browser.rule=(Host(`localhost`) || Host(`example.com`)) && Path(`/`)"
+      - "traefik.http.routers.browser.entrypoints=web"
+      - "traefik.http.routers.browser.priority=10"
+      - "traefik.http.routers.browser.middlewares=browser-page-enforcement-chain@file"
+      - "traefik.http.routers.browser-auth.rule=(Host(`localhost`) || Host(`example.com`)) && (Path(`/login`) || Path(`/logout`))"
+      - "traefik.http.routers.browser-auth.entrypoints=web"
+      - "traefik.http.routers.browser-auth.priority=50"
+      - "traefik.http.routers.browser-auth.middlewares=browser-auth-enforcement-chain@file"
+      - "traefik.http.routers.browser-auth.service=browser"
+      - "traefik.http.services.browser.loadbalancer.server.port=3002"
+      - "traefik.http.routers.browser-health.rule=(Host(`localhost`) || Host(`example.com`)) && Path(`/healthz`)"
+      - "traefik.http.routers.browser-health.priority=100"
+      - "traefik.http.routers.browser-health.entrypoints=web"
+      - "traefik.http.routers.browser-health.service=browser"
+    networks:
+      - app-net
+
+  api-app:
+    build:
+      context: example-apps/api
+    container_name: api-app
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api.example.com`)"
+      - "traefik.http.routers.api.entrypoints=web"
+      - "traefik.http.routers.api.middlewares=api-enforcement-chain@file"
+      - "traefik.http.services.api.loadbalancer.server.port=3003"
+      - "traefik.http.routers.api-health.rule=Host(`api.example.com`) && Path(`/healthz`)"
+      - "traefik.http.routers.api-health.priority=100"
+      - "traefik.http.routers.api-health.entrypoints=web"
+      - "traefik.http.routers.api-health.service=api"
+    networks:
+      - app-net
+
 networks:
   monero-net:
     name: monero-testnet_default
@@ -105,6 +195,4 @@ volumes:
   monero-testnet-data:
   p2pool-data:
   wallet-data:
-  server-postgres-data:
   pouwer-plugin-data:
-
