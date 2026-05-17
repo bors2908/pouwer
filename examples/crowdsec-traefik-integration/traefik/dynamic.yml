@@ -17,8 +17,8 @@ http:
           captchaCustomJsURL: http://pouwer-server:8082/captcha-traefik-randomx.js
           captchaCustomValidateURL: http://pouwer-server:8082/validate-custom-captcha
           captchaCustomResponse: response
-          captchaHTMLFilePath: /etc/traefik/captcha.html
-          banHTMLFilePath: /etc/traefik/ban.html
+          captchaHTMLFilePath: /pages/captcha.html
+          banHTMLFilePath: /pages/ban.html
           captchaGracePeriodSeconds: 60
           remediationHeadersCustomName: X-Crowdsec-Remediation
 

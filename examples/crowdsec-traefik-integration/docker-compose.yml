@@ -71,13 +71,15 @@ services:
         condition: service_completed_successfully
     volumes:
       - pouwer-plugin-data:/plugins
+      - pouwer-pages-data:/pages
     networks:
       - monero-net
       - app-net
 
   plugin-sync:
     build:
-      context: ./plugin-sync-container
+      context: ../../
+      dockerfile: examples/crowdsec-traefik-integration/plugin-sync-container/Dockerfile
     container_name: plugin-sync
     restart: "no"
     environment:
@@ -93,6 +95,7 @@ services:
       - ge.becrin.pouwer:payload-monero-randomx:0.1.1
     volumes:
       - pouwer-plugin-data:/plugins
+      - pouwer-pages-data:/pages
     extra_hosts:
       - host.docker.internal:host-gateway
 
@@ -138,15 +141,14 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
-      - ./browser/bundle/traefik-randomx/pages/challenge.html:/etc/traefik/captcha.html:ro
-      - ./browser/bundle/traefik-randomx/pages/ban.html:/etc/traefik/ban.html:ro
       - ./logs/traefik:/var/log/traefik
+      - pouwer-pages-data:/pages:ro
     networks:
       - app-net
 
   browser-app:
     build:
-      context: ./browser
+      context: example-apps/browser
     container_name: browser-app
     restart: unless-stopped
     labels:
@@ -196,3 +198,4 @@ volumes:
   p2pool-data:
   wallet-data:
   pouwer-plugin-data:
+  pouwer-pages-data:

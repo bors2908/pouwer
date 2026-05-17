@@ -8,6 +8,7 @@ v 7. Build server images with jib. Rework compose
 v 7.1 Change package names
 v 7.1.1 Fix fat jars for plugins
 7.2 Validate changes, make a complete build
+7.3 NPM Publishing
 
 8. Add multiple tasks support for Monero and other payloads.
 9. Implement and integrate Reputation engine and Difficulty engine.
