@@ -4,7 +4,8 @@ RUN apk add --no-cache ca-certificates curl
 
 WORKDIR /work
 
-COPY pouwer-core/browser/widget-traefik/pages/ ./pages/
+COPY pouwer-core/browser/widget-traefik/pages/ban.html /pages/ban.html
+COPY pouwer-core/browser/widget-traefik/pages/challenge.html /pages/challenge.html
 COPY examples/crowdsec-traefik-integration/plugin-sync-container/plugin-sync.sh /usr/local/bin/plugin-sync.sh
 RUN sed -i 's/\r$//' /usr/local/bin/plugin-sync.sh && chmod +x /usr/local/bin/plugin-sync.sh
 

@@ -129,6 +129,7 @@ services:
     image: traefik:v3.1
     container_name: traefik
     restart: unless-stopped
+    user: "root"
     depends_on:
       - crowdsec
       - pouwer-server
@@ -138,35 +139,20 @@ services:
     environment:
       CROWDSEC_BOUNCER_KEY: "${CROWDSEC_BOUNCER_KEY}"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
       - ./logs/traefik:/var/log/traefik
       - pouwer-pages-data:/pages:ro
     networks:
       - app-net
+    extra_hosts:
+      - host.docker.internal:host-gateway
 
   browser-app:
     build:
       context: example-apps/browser
     container_name: browser-app
     restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.browser.rule=(Host(`localhost`) || Host(`example.com`)) && Path(`/`)"
-      - "traefik.http.routers.browser.entrypoints=web"
-      - "traefik.http.routers.browser.priority=10"
-      - "traefik.http.routers.browser.middlewares=browser-page-enforcement-chain@file"
-      - "traefik.http.routers.browser-auth.rule=(Host(`localhost`) || Host(`example.com`)) && (Path(`/login`) || Path(`/logout`))"
-      - "traefik.http.routers.browser-auth.entrypoints=web"
-      - "traefik.http.routers.browser-auth.priority=50"
-      - "traefik.http.routers.browser-auth.middlewares=browser-auth-enforcement-chain@file"
-      - "traefik.http.routers.browser-auth.service=browser"
-      - "traefik.http.services.browser.loadbalancer.server.port=3002"
-      - "traefik.http.routers.browser-health.rule=(Host(`localhost`) || Host(`example.com`)) && Path(`/healthz`)"
-      - "traefik.http.routers.browser-health.priority=100"
-      - "traefik.http.routers.browser-health.entrypoints=web"
-      - "traefik.http.routers.browser-health.service=browser"
     networks:
       - app-net
 
@@ -175,16 +161,6 @@ services:
       context: example-apps/api
     container_name: api-app
     restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`api.example.com`)"
-      - "traefik.http.routers.api.entrypoints=web"
-      - "traefik.http.routers.api.middlewares=api-enforcement-chain@file"
-      - "traefik.http.services.api.loadbalancer.server.port=3003"
-      - "traefik.http.routers.api-health.rule=Host(`api.example.com`) && Path(`/healthz`)"
-      - "traefik.http.routers.api-health.priority=100"
-      - "traefik.http.routers.api-health.entrypoints=web"
-      - "traefik.http.routers.api-health.service=api"
     networks:
       - app-net
 

@@ -17,7 +17,7 @@ http:
           captchaCustomJsURL: http://pouwer-server:8082/captcha-traefik-randomx.js
           captchaCustomValidateURL: http://pouwer-server:8082/validate-custom-captcha
           captchaCustomResponse: response
-          captchaHTMLFilePath: /pages/captcha.html
+          captchaHTMLFilePath: /pages/challenge.html
           banHTMLFilePath: /pages/ban.html
           captchaGracePeriodSeconds: 60
           remediationHeadersCustomName: X-Crowdsec-Remediation
@@ -67,7 +67,7 @@ http:
           - api-rate-limit
 
   routers:
-    captcha-traefik-randomx-assets:
+    pouwer-server-randomx-assets:
       rule: "(Host(`localhost`) || Host(`example.com`)) && (Path(`/captcha-traefik-randomx.js`) || PathPrefix(`/assets/`))"
       entryPoints:
         - web
@@ -76,8 +76,56 @@ http:
       service: captcha-traefik-randomx-static
       priority: 200
 
+    browser:
+      rule: "(Host(`localhost`) || Host(`example.com`)) && Path(`/`)"
+      entryPoints:
+        - web
+      middlewares:
+        - browser-page-enforcement-chain
+      service: browser
+      priority: 10
+
+    browser-auth:
+      rule: "(Host(`localhost`) || Host(`example.com`)) && (Path(`/login`) || Path(`/logout`))"
+      entryPoints:
+        - web
+      middlewares:
+        - browser-auth-enforcement-chain
+      service: browser
+      priority: 50
+
+    browser-health:
+      rule: "(Host(`localhost`) || Host(`example.com`)) && Path(`/healthz`)"
+      entryPoints:
+        - web
+      service: browser
+      priority: 100
+
+    api:
+      rule: "Host(`api.example.com`)"
+      entryPoints:
+        - web
+      middlewares:
+        - api-enforcement-chain
+      service: api
+
+    api-health:
+      rule: "Host(`api.example.com`) && Path(`/healthz`)"
+      entryPoints:
+        - web
+      service: api
+      priority: 100
+
   services:
     captcha-traefik-randomx-static:
       loadBalancer:
         servers:
           - url: http://captcha-traefik-randomx:3001
+    browser:
+      loadBalancer:
+        servers:
+          - url: http://browser-app:3002
+    api:
+      loadBalancer:
+        servers:
+          - url: http://api-app:3003

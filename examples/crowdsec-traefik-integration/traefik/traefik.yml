@@ -7,8 +7,6 @@ entryPoints:
     address: ":80"
 
 providers:
-  docker:
-    exposedByDefault: false
   file:
     filename: /etc/traefik/dynamic.yml
     watch: true
@@ -17,7 +15,7 @@ experimental:
   plugins:
     bouncer:
       moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
-      version: v1.4.5
+      version: v1.6.0
 
 log:
   level: INFO
