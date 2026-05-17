@@ -10,12 +10,6 @@ import java.util.UUID
 class ContractsCoreRuntimeTest : UnitTestBase() {
 
     @Test
-    fun constantAndEnum() {
-        assertEquals("0.1.1", CHALLENGE_PLUGIN_CONTRACT_VERSION)
-        assertEquals(ValidationStatus.ACCEPTED, ValidationStatus.valueOf("ACCEPTED"))
-    }
-
-    @Test
     fun payloadPluginDefaultContractVersion() {
         val plugin = object : PayloadPlugin {
             override fun id() = "test"

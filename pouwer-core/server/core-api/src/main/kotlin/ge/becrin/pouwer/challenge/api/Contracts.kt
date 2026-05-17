@@ -2,9 +2,11 @@ package ge.becrin.pouwer.challenge.api
 
 import com.fasterxml.jackson.databind.JsonNode
 import org.pf4j.ExtensionPoint
+import java.util.Properties
 import java.util.UUID
 
 const val CHALLENGE_PLUGIN_CONTRACT_VERSION: String = "0.1.1"
+private const val PLUGIN_PROPERTIES_RESOURCE = "/plugin.properties"
 
 data class Task(
     val jobId: UUID,
@@ -47,10 +49,25 @@ enum class ValidationStatus {
     CONFLICT
 }
 
+fun resolvePluginVersion(pluginClass: Class<*>): String {
+    val properties = Properties()
+    val resource = requireNotNull(pluginClass.getResourceAsStream(PLUGIN_PROPERTIES_RESOURCE)) {
+        "Missing $PLUGIN_PROPERTIES_RESOURCE for ${pluginClass.name}"
+    }
+
+    resource.use {
+        properties.load(it)
+    }
+
+    return requireNotNull(properties.getProperty("plugin.version")) {
+        "Missing plugin.version in $PLUGIN_PROPERTIES_RESOURCE for ${pluginClass.name}"
+    }
+}
+
 interface PayloadPlugin : ExtensionPoint {
     fun id(): String
 
-    fun version(): String
+    fun version(): String = resolvePluginVersion(javaClass)
 
     val contractVersion: String
         get() = CHALLENGE_PLUGIN_CONTRACT_VERSION
