@@ -1,6 +1,11 @@
 package ge.becrin.pouwer.pow.service
 
 import org.pf4j.DefaultPluginManager
+import org.pf4j.JarPluginLoader
+import org.pf4j.PluginClassLoader
+import org.pf4j.PluginDescriptor
+import org.pf4j.ClassLoadingStrategy
+import org.pf4j.CompoundPluginLoader
 import org.springframework.beans.factory.DisposableBean
 import ge.becrin.pouwer.challenge.api.CHALLENGE_PLUGIN_CONTRACT_VERSION
 import ge.becrin.pouwer.challenge.api.PayloadPlugin
@@ -15,7 +20,7 @@ class Pf4jPluginProvider(
 ) : PayloadPluginProvider, DisposableBean {
     private val pluginsDirectory: Path = pluginsProperties.pluginDirectoryPath()
 
-    private val pluginManager = DefaultPluginManager(pluginsDirectory)
+    private val pluginManager: org.pf4j.PluginManager = ParentFirstPluginManager(pluginsDirectory)
 
     init {
         pluginManager.setSystemVersion(CHALLENGE_PLUGIN_CONTRACT_VERSION)
@@ -62,5 +67,19 @@ class Pf4jPluginProvider(
         check(descriptor.requires == plugin.contractVersion) {
             "PF4J plugin requires mismatch for ${plugin.id()}: descriptor=${descriptor.requires}, spi=${plugin.contractVersion}"
         }
+    }
+}
+
+private class ParentFirstPluginManager(pluginDir: Path) : DefaultPluginManager(pluginDir) {
+    override fun createPluginLoader(): org.pf4j.PluginLoader {
+        return CompoundPluginLoader()
+            .add(ParentFirstJarPluginLoader(this), this::isNotDevelopment)
+            .add(super.createPluginLoader(), { true })
+    }
+}
+
+private class ParentFirstJarPluginLoader(pluginManager: org.pf4j.PluginManager) : JarPluginLoader(pluginManager) {
+    override fun createPluginClassLoader(pluginPath: Path, pluginDescriptor: PluginDescriptor): PluginClassLoader {
+        return PluginClassLoader(pluginManager, pluginDescriptor, javaClass.classLoader, ClassLoadingStrategy.APD)
     }
 }
