@@ -18,8 +18,11 @@ dependencies {
     compileOnly(libs.pf4j)
 }
 
-npmBundle {
+npmBundleSource {
     sourceDir.set(rootProject.file("pouwer-randomx-plugin/browser/traefik-randomx"))
+}
+
+npmBundleResources {
     targetPath.set("static/traefik-randomx")
 }
 

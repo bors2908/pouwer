@@ -14,15 +14,19 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import javax.inject.Inject
 
-abstract class NpmBundleExtension @Inject constructor(objects: ObjectFactory) {
+abstract class NpmBundleSourceExtension @Inject constructor(objects: ObjectFactory) {
     val sourceDir: DirectoryProperty = objects.directoryProperty()
+}
+
+abstract class NpmBundleResourcesExtension @Inject constructor(objects: ObjectFactory) {
     val targetPath: Property<String> = objects.property(String::class.java)
 }
 
-abstract class NpmCopyBundleTask : DefaultTask() {
+abstract class NpmCopyBundleToResourcesTask : DefaultTask() {
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val sourceDir: DirectoryProperty
@@ -44,63 +48,88 @@ abstract class NpmCopyBundleTask : DefaultTask() {
 
 class NpmBundleConventionPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        project.pluginManager.apply("com.github.node-gradle.node")
+        project.configureNodeExtension()
 
-        val nodeVer = project.findProperty("node.version")?.toString()
-        val npmVer = project.findProperty("npm.version")?.toString()
+        val browserBundle = project.extensions.create("npmBundleSource", NpmBundleSourceExtension::class.java)
+        val resourcesBundle = project.extensions.create("npmBundleResources", NpmBundleResourcesExtension::class.java)
 
-        project.extensions.configure<com.github.gradle.node.NodeExtension>("node") {
-            version.set(nodeVer)
-            npmVersion.set(npmVer)
-            download.set(false)
+        val buildBrowserBundle = project.registerBrowserBundleBuildTask(browserBundle)
+        project.configureResourcePackaging(browserBundle, resourcesBundle, buildBrowserBundle)
+    }
+}
+
+private fun Project.configureNodeExtension() {
+    pluginManager.apply("com.github.node-gradle.node")
+
+    val nodeVer = findProperty("node.version")?.toString()
+    val npmVer = findProperty("npm.version")?.toString()
+
+    extensions.configure<com.github.gradle.node.NodeExtension>("node") {
+        version.set(nodeVer)
+        npmVersion.set(npmVer)
+        download.set(false)
+    }
+}
+
+private fun Project.registerBrowserBundleBuildTask(
+    browserBundle: NpmBundleSourceExtension,
+): TaskProvider<NpmTask> = tasks.register("buildBrowserBundle", NpmTask::class.java) {
+    group = "build"
+    description = "Build the browser bundle."
+    workingDir.set(browserBundle.sourceDir.get().asFile)
+    args.set(listOf("run", "build"))
+    dependsOn("npmInstall")
+}
+
+private fun Project.configureResourcePackaging(
+    browserBundle: NpmBundleSourceExtension,
+    resourcesBundle: NpmBundleResourcesExtension,
+    buildBrowserBundle: TaskProvider<NpmTask>,
+) {
+    afterEvaluate {
+        if (resourcesBundle.targetPath.isPresent) {
+            val copyBundleToResources = registerCopyBundleToResourcesTask(browserBundle, resourcesBundle, buildBrowserBundle)
+            wirePackagingTasks(copyBundleToResources)
+        }
+    }
+}
+
+private fun Project.registerCopyBundleToResourcesTask(
+    browserBundle: NpmBundleSourceExtension,
+    resourcesBundle: NpmBundleResourcesExtension,
+    buildBrowserBundle: TaskProvider<NpmTask>,
+): TaskProvider<NpmCopyBundleToResourcesTask> = tasks.register("copyBundleToResources", NpmCopyBundleToResourcesTask::class.java) {
+    group = "build"
+    description = "Copy the browser bundle to resources."
+    dependsOn(buildBrowserBundle)
+    sourceDir.convention(browserBundle.sourceDir)
+    destinationDir.convention(layout.buildDirectory.dir("resources/main"))
+    targetPath.convention(resourcesBundle.targetPath)
+}
+
+private fun Project.wirePackagingTasks(copyBundleToResources: TaskProvider<NpmCopyBundleToResourcesTask>) {
+    tasks.named("processResources") {
+        finalizedBy(copyBundleToResources)
+    }
+
+    tasks.named("jar", Jar::class.java) {
+        dependsOn(copyBundleToResources)
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
+
+    plugins.withId("com.gradleup.shadow") {
+        tasks.named("shadowJar", Jar::class.java) {
+            dependsOn(copyBundleToResources)
+            duplicatesStrategy = DuplicatesStrategy.INCLUDE
+            archiveClassifier.set("")
         }
 
-        val extension = project.extensions.create("npmBundle", NpmBundleExtension::class.java)
-
-        val npmBuildBrowser = project.tasks.register("npmBuildBrowser", NpmTask::class.java) {
-            group = "build"
-            description = "Build the browser bundle with npm."
-            workingDir.set(extension.sourceDir.get().asFile)
-            args.set(listOf("run", "build"))
-            dependsOn("npmInstall")
+        tasks.named("jar") {
+            enabled = false
         }
 
-        project.afterEvaluate {
-            if (extension.targetPath.isPresent) {
-                val copyBundleDist = project.tasks.register("copyBundleDist", NpmCopyBundleTask::class.java) {
-                    group = "build"
-                    description = "Copy the browser bundle into the module resources."
-                    dependsOn(npmBuildBrowser)
-                    sourceDir.convention(extension.sourceDir)
-                    destinationDir.convention(project.layout.buildDirectory.dir("resources/main"))
-                    targetPath.convention(extension.targetPath)
-                }
-
-                project.tasks.named("processResources") {
-                    finalizedBy(copyBundleDist)
-                }
-
-                project.tasks.named("jar", Jar::class.java) {
-                    dependsOn(copyBundleDist)
-                    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-                }
-
-                project.plugins.withId("com.gradleup.shadow") {
-                    project.tasks.named("shadowJar", Jar::class.java) {
-                        dependsOn(copyBundleDist)
-                        duplicatesStrategy = DuplicatesStrategy.INCLUDE
-                        archiveClassifier.set("")
-                    }
-
-                    project.tasks.named("jar") {
-                        enabled = false
-                    }
-
-                    project.tasks.named("assemble") {
-                        dependsOn("shadowJar")
-                    }
-                }
-            }
+        tasks.named("assemble") {
+            dependsOn("shadowJar")
         }
     }
 }

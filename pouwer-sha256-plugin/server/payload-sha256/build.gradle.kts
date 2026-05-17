@@ -15,8 +15,11 @@ dependencies {
     compileOnly(libs.pf4j)
 }
 
-npmBundle {
+npmBundleSource {
     sourceDir.set(rootProject.file("pouwer-sha256-plugin/browser/traefik-sha256"))
+}
+
+npmBundleResources {
     targetPath.set("static/traefik-sha256")
 }
 

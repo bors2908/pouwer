@@ -16,8 +16,11 @@ dependencies {
     compileOnly(libs.pf4j)
 }
 
-npmBundle {
+npmBundleSource {
     sourceDir.set(rootProject.file("pouwer-bitcoin-plugin/browser/traefik-bitcoin"))
+}
+
+npmBundleResources {
     targetPath.set("static/traefik-bitcoin")
 }
 

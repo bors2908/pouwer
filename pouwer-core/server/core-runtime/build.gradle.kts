@@ -23,7 +23,7 @@ dependencies {
     testImplementation(project(":pouwer-core:server:common-test"))
 }
 
-npmBundle {
+npmBundleSource {
     sourceDir.set(rootProject.file("pouwer-core/browser"))
 }
 
