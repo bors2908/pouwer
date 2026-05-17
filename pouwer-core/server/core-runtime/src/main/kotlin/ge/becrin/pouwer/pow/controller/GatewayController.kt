@@ -42,10 +42,9 @@ class GatewayController(
                 )
             )
         } catch (e: Exception) {
-            payloadPluginRegistry.disable(pluginId, e)
             throw ResponseStatusException(
                 HttpStatus.SERVICE_UNAVAILABLE,
-                "Plugin $pluginId failed and was disabled",
+                "Plugin $pluginId failed",
                 e
             )
         }
@@ -63,10 +62,9 @@ class GatewayController(
                 )
             )
         } catch (e: Exception) {
-            payloadPluginRegistry.disable(pluginId, e)
             throw ResponseStatusException(
                 HttpStatus.SERVICE_UNAVAILABLE,
-                "Plugin $pluginId failed and was disabled",
+                "Plugin $pluginId failed",
                 e
             )
         }

@@ -1,8 +1,6 @@
 package ge.becrin.pouwer.pow.service
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
 import ge.becrin.pouwer.challenge.api.CHALLENGE_PLUGIN_CONTRACT_VERSION
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
 import ge.becrin.pouwer.challenge.api.PayloadPlugin
@@ -12,6 +10,8 @@ import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationResult
 import ge.becrin.pouwer.challenge.api.ValidationStatus
 import ge.becrin.pouwer.pow.service.store.InMemoryTaskStore
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class ValidationPipelineTest {
@@ -97,36 +97,6 @@ class ValidationPipelineTest {
         )
 
         assertEquals(ValidationStatus.REJECTED, result.status)
-    }
-
-    @Test
-    fun `should disable failing plugin during validation`() {
-        val plugin = TestPlugin("pow-test-sha256", ValidationResult(ValidationStatus.ACCEPTED), throwOnValidate = true)
-        val registry = PayloadPluginRegistry(listOf(plugin))
-        val taskStore = InMemoryTaskStore().also {
-            it.save(
-                Task(
-                    jobId = JOB_ID,
-                    pluginId = plugin.id(),
-                    expiresAt = System.currentTimeMillis() + 60_000,
-                    payload = JsonNodeFactory.instance.objectNode()
-                )
-            )
-        }
-        val pipeline = ValidationPipeline(taskStore, registry)
-
-        val result = pipeline.validate(
-            ResultMessage(
-                jobId = JOB_ID,
-                pluginId = plugin.id(),
-                payload = JsonNodeFactory.instance.objectNode(),
-                durationMs = null,
-                attempts = null
-            )
-        )
-
-        assertEquals(ValidationStatus.REJECTED, result.status)
-        assertEquals(null, registry.find(plugin.id()))
     }
 
     private data class TestPlugin(

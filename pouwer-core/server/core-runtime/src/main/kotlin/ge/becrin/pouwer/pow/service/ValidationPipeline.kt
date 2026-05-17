@@ -25,8 +25,7 @@ class ValidationPipeline(
         return try {
             plugin.validateResult(task, result)
         } catch (e: Exception) {
-            payloadPluginRegistry.disable(pluginId, e)
-            ValidationResult(ValidationStatus.REJECTED, "Plugin $pluginId failed and was disabled")
+            ValidationResult(ValidationStatus.REJECTED, "Plugin $pluginId failed: ${e.message}")
         }
     }
 }
