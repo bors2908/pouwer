@@ -5,6 +5,12 @@ plugins {
     alias(libs.plugins.kotlin.noarg)
 }
 
+tasks.processResources {
+    filesMatching("contract.properties") {
+        expand(mapOf("version" to project.version.toString()))
+    }
+}
+
 dependencies {
     api(project(":pouwer-core:server:model"))
     api(platform(libs.spring.boot.bom))

@@ -5,8 +5,26 @@ import org.pf4j.ExtensionPoint
 import java.util.Properties
 import java.util.UUID
 
-const val CHALLENGE_PLUGIN_CONTRACT_VERSION: String = "0.1.1"
+private const val CONTRACT_PROPERTIES_RESOURCE = "contract.properties"
+private const val CONTRACT_VERSION_PROPERTY = "challenge.plugin.contract.version"
 private const val PLUGIN_PROPERTIES_RESOURCE = "/plugin.properties"
+
+val CHALLENGE_PLUGIN_CONTRACT_VERSION: String = loadChallengePluginContractVersion()
+
+private fun loadChallengePluginContractVersion(): String {
+    val properties = Properties()
+    val resource = requireNotNull(Thread.currentThread().contextClassLoader.getResourceAsStream(CONTRACT_PROPERTIES_RESOURCE)) {
+        "Missing $CONTRACT_PROPERTIES_RESOURCE on classpath"
+    }
+
+    resource.use {
+        properties.load(it)
+    }
+
+    return requireNotNull(properties.getProperty(CONTRACT_VERSION_PROPERTY)) {
+        "Missing $CONTRACT_VERSION_PROPERTY in $CONTRACT_PROPERTIES_RESOURCE"
+    }
+}
 
 data class Task(
     val jobId: UUID,
