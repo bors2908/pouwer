@@ -2,7 +2,7 @@ plugins {
     `java-library`
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.shadow)
-    id("maven-publish")
+    id("ge.becrin.pouwer.maven-shadow-publish")
     id("ge.becrin.pouwer.npm-bundle")
 }
 
@@ -29,25 +29,5 @@ npmBundleResources {
 tasks.processResources {
     filesMatching("plugin.properties") {
         expand(mapOf("version" to project.version.toString()))
-    }
-}
-
-publishing {
-    repositories {
-        maven {
-            url = uri(providers.gradleProperty("repo.url.maven.hosted").get())
-            credentials {
-                username = providers.gradleProperty("nexusUser").orNull
-                password = providers.gradleProperty("nexusPass").orNull
-            }
-            isAllowInsecureProtocol = true
-        }
-    }
-
-    publications {
-        create<MavenPublication>("mavenJava") {
-            artifact(tasks.named("shadowJar"))
-            artifactId = project.name
-        }
     }
 }

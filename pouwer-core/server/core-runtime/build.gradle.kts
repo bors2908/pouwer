@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.kotlin.spring)
     alias(libs.plugins.kotlin.allopen)
     alias(libs.plugins.kotlin.noarg)
+    alias(libs.plugins.shadow)
+    id("ge.becrin.pouwer.maven-shadow-publish")
     id("ge.becrin.pouwer.npm-bundle")
 }
 

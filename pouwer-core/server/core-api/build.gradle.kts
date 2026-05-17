@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.allopen)
     alias(libs.plugins.kotlin.noarg)
+    alias(libs.plugins.shadow)
+    id("ge.becrin.pouwer.maven-shadow-publish")
 }
 
 tasks.processResources {

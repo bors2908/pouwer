@@ -1,8 +1,10 @@
 plugins {
     `java-library`
+    alias(libs.plugins.shadow)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.allopen)
     alias(libs.plugins.kotlin.noarg)
+    id("ge.becrin.pouwer.maven-shadow-publish")
 }
 
 dependencies {
