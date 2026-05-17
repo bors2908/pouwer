@@ -1,16 +1,27 @@
 package ge.becrin.pouwer.challenge.payload.monero
 
-import org.pf4j.Extension
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
 import ge.becrin.pouwer.challenge.api.PayloadPlugin
 import ge.becrin.pouwer.challenge.api.PayloadSupportContext
 import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationResult
+import org.pf4j.Extension
 
 @Extension
 class MoneroRandomXPayloadPluginProvider : PayloadPlugin {
-    private val delegate = MoneroRandomXPayloadPlugin()
+    val jobStore: StratumJobStore = StratumJobStore()
+    val converter: StratumToMoneroConverter = StratumToMoneroConverter()
+
+    private val delegate = MoneroRandomXPayloadPlugin(
+        jobStore = jobStore,
+        converter = converter,
+        stratumSubmitService = StratumSubmitService(
+            client = MoneroStratumTcpClient(
+                jobStore = jobStore
+            )
+        )
+    )
 
     override fun id(): String = delegate.pluginId
 

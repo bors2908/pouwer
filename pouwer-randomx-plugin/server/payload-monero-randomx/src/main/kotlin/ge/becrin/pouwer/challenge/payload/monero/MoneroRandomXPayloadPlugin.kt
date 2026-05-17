@@ -11,9 +11,9 @@ import java.util.HexFormat
 import java.util.UUID
 
 class MoneroRandomXPayloadPlugin(
-    private val jobStore: StratumJobStore = StratumJobStore(),
-    private val converter: StratumToMoneroConverter = StratumToMoneroConverter(),
-    private val stratumSubmitService: StratumSubmitService = StratumSubmitService()
+    private val jobStore: StratumJobStore,
+    private val converter: StratumToMoneroConverter,
+    private val stratumSubmitService: StratumSubmitService
 ) {
     private val mapper: ObjectMapper = jacksonObjectMapper()
     private val hex = HexFormat.of()

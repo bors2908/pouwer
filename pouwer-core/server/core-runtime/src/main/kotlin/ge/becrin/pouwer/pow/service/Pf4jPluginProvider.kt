@@ -20,10 +20,10 @@ class Pf4jPluginProvider(
 ) : PayloadPluginProvider, DisposableBean {
     private val pluginsDirectory: Path = pluginsProperties.pluginDirectoryPath()
 
-    private val pluginManager: org.pf4j.PluginManager = ParentFirstPluginManager(pluginsDirectory)
+    private val pluginManager: org.pf4j.PluginManager = PluginFirstPluginManager(pluginsDirectory)
 
     init {
-        pluginManager.setSystemVersion(CHALLENGE_PLUGIN_CONTRACT_VERSION)
+        pluginManager.systemVersion = CHALLENGE_PLUGIN_CONTRACT_VERSION
     }
 
     override fun loadPlugins(): List<PayloadPlugin> {
@@ -70,16 +70,21 @@ class Pf4jPluginProvider(
     }
 }
 
-private class ParentFirstPluginManager(pluginDir: Path) : DefaultPluginManager(pluginDir) {
+private class PluginFirstPluginManager(pluginDir: Path) : DefaultPluginManager(pluginDir) {
     override fun createPluginLoader(): org.pf4j.PluginLoader {
         return CompoundPluginLoader()
-            .add(ParentFirstJarPluginLoader(this), this::isNotDevelopment)
+            .add(PluginFirstJarPluginLoader(this), this::isNotDevelopment)
             .add(super.createPluginLoader(), { true })
     }
 }
 
-private class ParentFirstJarPluginLoader(pluginManager: org.pf4j.PluginManager) : JarPluginLoader(pluginManager) {
+private class PluginFirstJarPluginLoader(pluginManager: org.pf4j.PluginManager) : JarPluginLoader(pluginManager) {
     override fun createPluginClassLoader(pluginPath: Path, pluginDescriptor: PluginDescriptor): PluginClassLoader {
-        return PluginClassLoader(pluginManager, pluginDescriptor, javaClass.classLoader, ClassLoadingStrategy.APD)
+        return object : PluginClassLoader(pluginManager, pluginDescriptor, javaClass.classLoader, ClassLoadingStrategy.PDA) {
+            override fun shouldDelegateToParent(className: String): Boolean {
+                return className.startsWith("ge.becrin.pouwer.challenge.api.")
+                    || super.shouldDelegateToParent(className)
+            }
+        }
     }
 }

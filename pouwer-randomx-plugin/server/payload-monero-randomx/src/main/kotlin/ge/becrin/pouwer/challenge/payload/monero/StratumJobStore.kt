@@ -6,9 +6,17 @@ import java.util.concurrent.atomic.AtomicReference
 class StratumJobStore {
     private val latest = AtomicReference<RawStratumJob?>(null)
 
-    fun set(job: RawStratumJob) = latest.set(job)
+    fun set(job: RawStratumJob) {
+        log.info { "Received new job: $job" }
 
-    fun getLatest(): RawStratumJob? = latest.get()
+        latest.set(job)
+    }
+
+    fun getLatest(): RawStratumJob? {
+        log.info { "Fetching the latest job" }
+
+        return latest.get()
+    }
 
     fun parseJob(params: Map<String, Any?>) {
         if (params.size < 3) {

@@ -23,7 +23,7 @@ class MoneroStratumTcpClient(
     private val password: String = System.getProperty("stratum.password")
         ?: System.getenv("STRATUM_PASSWORD")
         ?: "",
-    private val jobStore: StratumJobStore = StratumJobStore()
+    private val jobStore: StratumJobStore
 ) : StratumTcpClient() {
 
     private val pending = ConcurrentHashMap<Long, CompletableFuture<ResponseMessage>>()
@@ -33,6 +33,7 @@ class MoneroStratumTcpClient(
     init {
         log.info { "Connecting to Monero Stratum Pool $host:$port" }
         connect(host, port)
+        log.info { "Connected to Monero Stratum Pool $host:$port" }
     }
 
     override fun createPostConnectState(): AbstractConnectionState? {
@@ -40,6 +41,7 @@ class MoneroStratumTcpClient(
             override fun start() {
                 assertConnected()
 
+                log.info { "Registering listeners" }
                 registerResponseListener {
                     if (it.id != null) {
                         pending.remove(it.id)?.complete(it)
@@ -52,6 +54,7 @@ class MoneroStratumTcpClient(
                     }
                 }
 
+                log.info { "Logging in" }
                 sendRequest(
                     "login",
                     mapOf(
@@ -61,6 +64,9 @@ class MoneroStratumTcpClient(
                     )
                 ).thenAccept { response ->
                     val result = response.result.toJson() as JSONObject
+
+                    log.info { "Received login response: $result" }
+
                     if (response.error == null && result.optString("status") == "OK") {
                         sessionId = result.optString("id", null)
                     }

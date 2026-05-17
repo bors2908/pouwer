@@ -14,3 +14,7 @@ management:
       enabled: true
     readinessState:
       enabled: true
+
+spring:
+  application:
+    version: ${version}

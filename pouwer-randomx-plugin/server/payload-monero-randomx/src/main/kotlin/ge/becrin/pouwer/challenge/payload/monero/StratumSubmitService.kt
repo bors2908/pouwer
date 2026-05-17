@@ -7,7 +7,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 class StratumSubmitService(
-    private val client: MoneroStratumTcpClient = MoneroStratumTcpClient(),
+    private val client: MoneroStratumTcpClient,
     private val workerName: String = System.getProperty("stratum.worker")
         ?: System.getenv("STRATUM_WORKER")
         ?: "poctest.worker1"

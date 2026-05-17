@@ -23,3 +23,9 @@ dependencies {
     api(libs.junit.jupiter)
     implementation(kotlin("stdlib"))
 }
+
+tasks.processResources {
+    filesMatching("application-common.yml") {
+        expand(mapOf("version" to project.version.toString()))
+    }
+}
