@@ -52,4 +52,5 @@ secrets/
 /crowdsec-dev/crowdsec/data/
 /logs/
 /examples/crowdsec-traefik-integration/crowdsec/data
+/examples/crowdsec-traefik-integration/logs/
 /.junie
