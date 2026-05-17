@@ -1,6 +1,6 @@
 {
   "name": "@pouwer/worker-runtime",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -15,6 +15,6 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@pouwer/core-contracts": "0.1.4"
+    "@pouwer/core-contracts": "0.1.5"
   }
 }

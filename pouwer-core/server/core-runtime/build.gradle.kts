@@ -19,6 +19,7 @@ dependencies {
     implementation(platform(libs.spring.boot.bom))
     implementation(platform(libs.spring.cloud.bom))
     implementation(libs.spring.cloud.starter.openfeign)
+    implementation(libs.json)
     implementation(libs.pf4j)
 
     testRuntimeOnly(libs.junit.platform.launcher)
