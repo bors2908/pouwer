@@ -10,17 +10,6 @@
   "scripts": {
     "build": "npm run build --workspaces"
   },
-  "overrides": {
-    "@pouwer/core-contracts": "0.1.2",
-    "@pouwer/worker-runtime": "0.1.2",
-    "@pouwer/widget-base": "0.1.2",
-    "@pouwer/widget-traefik": "0.1.2",
-    "@pouwer/worker-randomx": "0.1.2",
-    "@pouwer/worker-sha256": "0.1.2",
-    "@pouwer/bundle-traefik-randomx": "0.1.2",
-    "@pouwer/bundle-traefik-sha256": "0.1.2",
-    "@pouwer/bundle-traefik-bitcoin": "0.1.2"
-  },
   "devDependencies": {
     "typescript": "^5.0.0",
     "esbuild": "^0.20.0"

@@ -56,7 +56,7 @@ services:
       - --mini
 
   pouwer-server:
-    image: localhost:9002/pouwer-server:0.1.2
+    image: localhost:9002/pouwer-server:0.1.3
     container_name: pouwer-server
     restart: unless-stopped
     environment:
@@ -88,11 +88,11 @@ services:
     command:
       - --no-clean
       - --artifact
-      - ge.becrin.pouwer:payload-bitcoin-rpc:0.1.2
+      - ge.becrin.pouwer:payload-bitcoin-rpc:0.1.3
       - --artifact
-      - ge.becrin.pouwer:payload-sha256:0.1.2
+      - ge.becrin.pouwer:payload-sha256:0.1.3
       - --artifact
-      - ge.becrin.pouwer:payload-monero-randomx:0.1.2
+      - ge.becrin.pouwer:payload-monero-randomx:0.1.3
     volumes:
       - pouwer-plugin-data:/plugins
       - pouwer-pages-data:/pages
