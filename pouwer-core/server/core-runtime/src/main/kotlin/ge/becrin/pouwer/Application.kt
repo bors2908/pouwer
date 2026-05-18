@@ -12,6 +12,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import java.net.http.HttpClient
 
 @SpringBootApplication
 @EnableFeignClients(basePackages = ["ge.becrin.pouwer"])
@@ -50,6 +51,13 @@ open class Application
 
             log.info { "Extracted static pages to $extractPath" }
         }
+    }
+
+    @Bean
+    fun proxyHttpClient(): HttpClient {
+        return HttpClient.newBuilder()
+            .followRedirects(HttpClient.Redirect.NEVER)
+            .build()
     }
 }
 
