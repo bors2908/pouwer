@@ -69,14 +69,14 @@ services:
       - monero-net
       - app-net
 
-  pouwer-randomx-plugin:
+  pouwer-monero-plugin:
     image: localhost:9002/pouwer-monero-plugin:0.1.9
     container_name: pouwer-monero-plugin
     restart: unless-stopped
     environment:
       STRATUM_HOST: p2pool
       PLUGIN_CORE_URL: http://pouwer-server:8082
-      PLUGIN_HOST: http://pouwer-randomx-plugin
+      PLUGIN_HOST: http://pouwer-monero-plugin
     ports:
       - "8083:8083"
     depends_on:

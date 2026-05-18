@@ -22,11 +22,11 @@ await Promise.all([
   build({
     ...commonOptions,
     entryPoints: [resolve(rootDir, "src/index.ts")],
-    outfile: resolve(distDir, "captcha-traefik-randomx.js"),
+    outfile: resolve(distDir, "challenge-bitcoin.js"),
   }),
   build({
     ...commonOptions,
-    entryPoints: ["@pouwer/worker-randomx/worker"],
-    outfile: resolve(distDir, "assets/randomx-worker.js"),
+    entryPoints: ["@pouwer/worker-sha256/worker"],
+    outfile: resolve(distDir, "assets/sha256-worker.js"),
   }),
 ]);

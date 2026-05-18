@@ -22,7 +22,7 @@ await Promise.all([
   build({
     ...commonOptions,
     entryPoints: [resolve(rootDir, "src/index.ts")],
-    outfile: resolve(distDir, "captcha-traefik-sha256.js"),
+    outfile: resolve(distDir, "challenge-sha256.js"),
   }),
   build({
     ...commonOptions,

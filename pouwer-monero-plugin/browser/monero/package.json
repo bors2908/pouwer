@@ -1,5 +1,5 @@
 {
-  "name": "@pouwer/bundle-traefik-bitcoin",
+  "name": "@pouwer/bundle-monero",
   "version": "0.1.9",
   "private": true,
   "type": "module",
@@ -9,6 +9,6 @@
   },
   "dependencies": {
     "@pouwer/widget-traefik": "0.1.9",
-    "@pouwer/worker-sha256": "0.1.9"
+    "@pouwer/worker-monero": "0.1.9"
   }
 }

@@ -15,17 +15,14 @@ dependencies {
     implementation(libs.spring.boot.starter.actuator)
     implementation(libs.jackson.module.kotlin)
     implementation(libs.kotlin.logging.jvm)
-    implementation(libs.slf4j.api)
-    implementation(libs.kt.stratum)
-    implementation(libs.json)
 }
 
 npmBundleSource {
-    sourceDir.set(rootProject.file("pouwer-randomx-plugin/browser/traefik-randomx"))
+    sourceDir.set(rootProject.file("pouwer-sha256-plugin/browser/traefik-sha256"))
 }
 
 npmBundleResources {
-    targetPath.set("static/traefik-randomx")
+    targetPath.set("static/sha256")
 }
 
 tasks.processResources {
@@ -35,11 +32,11 @@ tasks.processResources {
 }
 
 springBoot {
-    mainClass = "ge.becrin.pouwer.challenge.payload.monero.MoneroPluginApplicationKt"
+    mainClass = "ge.becrin.pouwer.challenge.payload.sha256.Sha256PluginApplicationKt"
 }
 
 jib {
-    val projectName = "pouwer-monero-plugin"
+    val projectName = "pouwer-sha256-plugin"
     val nexusUser = providers.gradleProperty("nexusUser").orNull
     val nexusPass = providers.gradleProperty("nexusPass").orNull
 
@@ -55,8 +52,8 @@ jib {
         }
     }
     container.apply {
-        mainClass = "ge.becrin.pouwer.challenge.payload.monero.MoneroPluginApplicationKt"
-        ports = listOf("8083")
+        mainClass = "ge.becrin.pouwer.challenge.payload.sha256.Sha256PluginApplicationKt"
+        ports = listOf("8081")
         creationTime = "USE_CURRENT_TIMESTAMP"
     }
 }

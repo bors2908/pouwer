@@ -14,15 +14,16 @@ dependencies {
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.actuator)
     implementation(libs.jackson.module.kotlin)
+    implementation(libs.bitcoinj.core)
     implementation(libs.kotlin.logging.jvm)
 }
 
 npmBundleSource {
-    sourceDir.set(rootProject.file("pouwer-sha256-plugin/browser/traefik-sha256"))
+    sourceDir.set(rootProject.file("pouwer-bitcoin-plugin/browser/bitcoin"))
 }
 
 npmBundleResources {
-    targetPath.set("static/traefik-sha256")
+    targetPath.set("static/bitcoin")
 }
 
 tasks.processResources {
@@ -32,11 +33,11 @@ tasks.processResources {
 }
 
 springBoot {
-    mainClass = "ge.becrin.pouwer.challenge.payload.sha256.Sha256PluginApplicationKt"
+    mainClass = "ge.becrin.pouwer.challenge.payload.bitcoin.BitcoinPluginApplicationKt"
 }
 
 jib {
-    val projectName = "pouwer-sha256-plugin"
+    val projectName = "pouwer-bitcoin-plugin"
     val nexusUser = providers.gradleProperty("nexusUser").orNull
     val nexusPass = providers.gradleProperty("nexusPass").orNull
 
@@ -52,8 +53,8 @@ jib {
         }
     }
     container.apply {
-        mainClass = "ge.becrin.pouwer.challenge.payload.sha256.Sha256PluginApplicationKt"
-        ports = listOf("8081")
+        mainClass = "ge.becrin.pouwer.challenge.payload.bitcoin.BitcoinPluginApplicationKt"
+        ports = listOf("8084")
         creationTime = "USE_CURRENT_TIMESTAMP"
     }
 }

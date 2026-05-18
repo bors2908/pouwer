@@ -14,9 +14,9 @@ include("pouwer-core:server:plugin-base")
 include("pouwer-core:server:core-runtime")
 include("pouwer-core:server:common-test")
 
-include("pouwer-sha256-plugin:server:payload-sha256")
-include("pouwer-bitcoin-plugin:server:payload-bitcoin-rpc")
-include("pouwer-randomx-plugin:server:payload-monero-randomx")
+include("pouwer-sha256-plugin:server")
+include("pouwer-bitcoin-plugin:server")
+include("pouwer-monero-plugin:server")
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)

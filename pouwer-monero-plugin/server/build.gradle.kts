@@ -14,16 +14,18 @@ dependencies {
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.actuator)
     implementation(libs.jackson.module.kotlin)
-    implementation(libs.bitcoinj.core)
     implementation(libs.kotlin.logging.jvm)
+    implementation(libs.slf4j.api)
+    implementation(libs.kt.stratum)
+    implementation(libs.json)
 }
 
 npmBundleSource {
-    sourceDir.set(rootProject.file("pouwer-bitcoin-plugin/browser/traefik-bitcoin"))
+    sourceDir.set(rootProject.file("pouwer-monero-plugin/browser/monero"))
 }
 
 npmBundleResources {
-    targetPath.set("static/traefik-bitcoin")
+    targetPath.set("static/monero")
 }
 
 tasks.processResources {
@@ -33,11 +35,11 @@ tasks.processResources {
 }
 
 springBoot {
-    mainClass = "ge.becrin.pouwer.challenge.payload.bitcoin.BitcoinPluginApplicationKt"
+    mainClass = "ge.becrin.pouwer.challenge.payload.monero.MoneroPluginApplicationKt"
 }
 
 jib {
-    val projectName = "pouwer-bitcoin-plugin"
+    val projectName = "pouwer-monero-plugin"
     val nexusUser = providers.gradleProperty("nexusUser").orNull
     val nexusPass = providers.gradleProperty("nexusPass").orNull
 
@@ -53,8 +55,8 @@ jib {
         }
     }
     container.apply {
-        mainClass = "ge.becrin.pouwer.challenge.payload.bitcoin.BitcoinPluginApplicationKt"
-        ports = listOf("8084")
+        mainClass = "ge.becrin.pouwer.challenge.payload.monero.MoneroPluginApplicationKt"
+        ports = listOf("8083")
         creationTime = "USE_CURRENT_TIMESTAMP"
     }
 }

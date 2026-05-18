@@ -1,5 +1,5 @@
 {
-  "name": "@pouwer/bundle-traefik-randomx",
+  "name": "@pouwer/bundle-bitcoin",
   "version": "0.1.9",
   "private": true,
   "type": "module",
@@ -9,6 +9,6 @@
   },
   "dependencies": {
     "@pouwer/widget-traefik": "0.1.9",
-    "@pouwer/worker-randomx": "0.1.9"
+    "@pouwer/worker-sha256": "0.1.9"
   }
 }

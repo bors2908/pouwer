@@ -1,5 +1,5 @@
 {
-  "name": "@pouwer/bundle-traefik-sha256",
+  "name": "@pouwer/bundle-sha256",
   "version": "0.1.9",
   "private": true,
   "type": "module",

@@ -5,7 +5,7 @@
     "pouwer-core/browser/*",
     "pouwer-sha256-plugin/browser/*",
     "pouwer-bitcoin-plugin/browser/*",
-    "pouwer-randomx-plugin/browser/*"
+    "pouwer-monero-plugin/browser/*"
   ],
   "scripts": {
     "build": "npm run build --workspaces"

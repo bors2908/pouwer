@@ -14,7 +14,7 @@ http:
           metricsUpdateIntervalSeconds: 0
           captchaProvider: custom
           captchaCustomKey: pouwer-firewall
-          captchaCustomJsURL: http://pouwer-server:8082/captcha-traefik-randomx.js
+          captchaCustomJsURL: http://pouwer-server:8082/challenge-monero.js
           captchaCustomValidateURL: http://pouwer-server:8082/validate-custom-captcha
           captchaCustomResponse: response
           captchaHTMLFilePath: /pages/challenge.html
@@ -68,12 +68,12 @@ http:
 
   routers:
     pouwer-server-randomx-assets:
-      rule: "(Host(`localhost`) || Host(`example.com`)) && (Path(`/captcha-traefik-randomx.js`) || PathPrefix(`/assets/`))"
+      rule: "(Host(`localhost`) || Host(`example.com`)) && (Path(`/challenge-monero.js`) || PathPrefix(`/assets/`))"
       entryPoints:
         - web
       middlewares:
         - captcha-isolation-headers
-      service: captcha-traefik-randomx-static
+      service: challenge-monero-static
       priority: 200
 
     browser:
@@ -117,10 +117,10 @@ http:
       priority: 100
 
   services:
-    captcha-traefik-randomx-static:
+    challenge-monero-static:
       loadBalancer:
         servers:
-          - url: http://captcha-traefik-randomx:3001
+          - url: http://challenge-monero:3001
     browser:
       loadBalancer:
         servers:

@@ -1,5 +1,5 @@
 {
-  "name": "@pouwer/worker-randomx",
+  "name": "@pouwer/worker-monero",
   "version": "0.1.9",
   "private": true,
   "type": "module",
