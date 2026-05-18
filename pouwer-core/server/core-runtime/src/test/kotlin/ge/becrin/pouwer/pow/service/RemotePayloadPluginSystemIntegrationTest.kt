@@ -212,7 +212,7 @@ class RemotePayloadPluginSystemIntegrationTest {
         return PluginMetadata(
             id = id,
             version = "1.0.0",
-            contractVersion = "0.1.8",
+            contractVersion = "0.1.9",
             baseUrl = baseUrl,
             lastHeartbeat = Instant.now(),
             status = PluginStatus.HEALTHY,
