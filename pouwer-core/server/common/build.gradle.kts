@@ -10,6 +10,7 @@ plugins {
 dependencies {
     api(project(":pouwer-core:server:model"))
     api(platform(libs.spring.boot.bom))
+    api(libs.jackson.databind)
     api(libs.spring.boot.starter.web)
     api(libs.spring.boot.starter.security)
     api(libs.spring.boot.starter.validation)

@@ -1,9 +1,8 @@
 package ge.becrin.pouwer.challenge.api
 
-import com.fasterxml.jackson.databind.JsonNode
-import org.pf4j.ExtensionPoint
 import java.util.Properties
 import java.util.UUID
+import tools.jackson.databind.JsonNode
 
 private const val CONTRACT_PROPERTIES_RESOURCE = "contract.properties"
 private const val CONTRACT_VERSION_PROPERTY = "challenge.plugin.contract.version"
@@ -82,7 +81,7 @@ fun resolvePluginVersion(pluginClass: Class<*>): String {
     }
 }
 
-interface PayloadPlugin : ExtensionPoint {
+interface PayloadPlugin {
     fun id(): String
 
     fun version(): String = resolvePluginVersion(javaClass)

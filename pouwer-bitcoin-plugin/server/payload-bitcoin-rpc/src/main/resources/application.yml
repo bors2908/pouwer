@@ -1,0 +1,8 @@
+spring:
+  config:
+    import: "classpath:application-base.yml"
+  application:
+    name: pouwer-bitcoin-plugin
+
+server:
+  port: 8084

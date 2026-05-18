@@ -1,13 +1,14 @@
 package ge.becrin.pouwer.pow.service
 
-import io.github.oshai.kotlinlogging.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
 import ge.becrin.pouwer.challenge.api.CHALLENGE_PLUGIN_CONTRACT_VERSION
 import ge.becrin.pouwer.challenge.api.ContractMismatchException
 import ge.becrin.pouwer.challenge.api.DuplicatePluginIdException
 import ge.becrin.pouwer.challenge.api.PayloadPlugin
 import ge.becrin.pouwer.challenge.api.UnsupportedPluginException
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
 
 @Component
 class PayloadPluginRegistry @Autowired constructor(
@@ -33,6 +34,14 @@ class PayloadPluginRegistry @Autowired constructor(
     @Synchronized
     fun refresh() {
         byId = buildRegistry(pluginProvider.loadPlugins())
+    }
+
+    @Scheduled(
+        fixedDelayString = $$"${challenge.plugins.refresh-interval:5000}",
+        initialDelayString = $$"${challenge.plugins.refresh-initial-delay:5000}"
+    )
+    fun scheduledRefresh() {
+        refresh()
     }
 
     @Synchronized

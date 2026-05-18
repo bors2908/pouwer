@@ -12,6 +12,7 @@ dependencies {
     api(libs.spring.boot.starter.webmvc.test)
     api(libs.spring.security.test)
     api(libs.mockito.kotlin)
+    api(kotlin("test"))
 
     api(platform(libs.junit.bom))
     api(libs.junit.jupiter)

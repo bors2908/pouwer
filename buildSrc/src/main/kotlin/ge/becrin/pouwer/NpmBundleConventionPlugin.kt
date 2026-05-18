@@ -112,6 +112,10 @@ private fun Project.wirePackagingTasks(copyBundleToResources: TaskProvider<NpmCo
         finalizedBy(copyBundleToResources)
     }
 
+    tasks.named("resolveMainClassName") {
+        dependsOn(copyBundleToResources)
+    }
+
     tasks.named("jar", Jar::class.java) {
         dependsOn(copyBundleToResources)
         duplicatesStrategy = DuplicatesStrategy.INCLUDE

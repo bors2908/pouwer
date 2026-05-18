@@ -1,8 +1,10 @@
 package ge.becrin.pouwer.challenge.payload.monero
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.stereotype.Component
 import java.util.concurrent.atomic.AtomicReference
 
+@Component
 class StratumJobStore {
     private val latest = AtomicReference<RawStratumJob?>(null)
 

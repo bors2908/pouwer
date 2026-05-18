@@ -1,0 +1,14 @@
+spring:
+  config:
+    import: "classpath:application-base.yml"
+  application:
+    name: pouwer-monero-plugin
+
+server:
+  port: 8083
+
+stratum:
+  host: 127.0.0.1
+  port: 3333
+  worker: poctest.worker1
+  password: ""

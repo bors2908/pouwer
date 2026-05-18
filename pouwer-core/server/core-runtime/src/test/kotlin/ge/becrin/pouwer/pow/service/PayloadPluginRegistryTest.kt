@@ -1,6 +1,6 @@
 package ge.becrin.pouwer.pow.service
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory
+import tools.jackson.databind.node.JsonNodeFactory
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test

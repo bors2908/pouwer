@@ -1,23 +1,30 @@
 server:
   port: 8082
 
+pages:
+  extract:
+    path:
+
 spring:
   config:
     import: "classpath:application-common.yml"
   application:
     name: challenge
 
-challenge:
-  plugins:
-    directory: plugins
-
-pow:
-  difficultyBits: 20
-  ttlSeconds: 60
-  hmacSecret: "dGhpcy1pcy1hLXZlcnktc2VjcmV0LWtleS1mb3ItaG1hYy1zaGEyNTY=" # base64 for "this-is-a-very-secret-key-for-hmac-sha256"
-
-stratum:
-  host: 127.0.0.1
-  port: 3333
-  worker: poctest.worker1
-  password:
+resilience4j:
+  circuitbreaker:
+    instances:
+      pluginTransport:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50.0
+        slowCallRateThreshold: 100.0
+        slowCallDurationThreshold: 10000
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 30000
+        recordExceptions:
+          - ge.becrin.pouwer.pow.service.PluginTransportException
+          - java.net.ConnectException
+          - java.net.SocketTimeoutException

@@ -12,7 +12,5 @@ dependencies {
     api(libs.spring.boot.starter)
     api(libs.jackson.databind)
     api(libs.jackson.module.kotlin)
-    api(libs.jackson.datatype.jsr310)
-    api(libs.pf4j)
     api(libs.kotlin.stdlib.jdk8)
 }

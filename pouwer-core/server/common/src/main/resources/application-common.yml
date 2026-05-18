@@ -1,20 +1,3 @@
-springdoc:
-  api-docs:
-    enabled: false
-  swagger-ui:
-    enabled: false
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info
-  health:
-    livenessState:
-      enabled: true
-    readinessState:
-      enabled: true
-
 spring:
   application:
     version: ${version}

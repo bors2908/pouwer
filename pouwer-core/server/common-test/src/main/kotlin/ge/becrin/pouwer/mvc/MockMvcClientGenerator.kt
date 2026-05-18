@@ -1,7 +1,7 @@
 package ge.becrin.pouwer.mvc
 
-import com.fasterxml.jackson.databind.JavaType
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.JavaType
+import tools.jackson.databind.ObjectMapper
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus

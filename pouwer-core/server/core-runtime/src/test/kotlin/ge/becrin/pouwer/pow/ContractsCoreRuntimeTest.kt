@@ -4,7 +4,7 @@ import ge.becrin.pouwer.UnitTestBase
 import ge.becrin.pouwer.challenge.api.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
-import com.fasterxml.jackson.databind.node.JsonNodeFactory
+import tools.jackson.databind.node.JsonNodeFactory
 import java.util.UUID
 
 class ContractsCoreRuntimeTest : UnitTestBase() {

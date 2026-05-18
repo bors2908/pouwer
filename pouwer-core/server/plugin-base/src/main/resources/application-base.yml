@@ -1,0 +1,27 @@
+
+spring:
+  config:
+    import: "classpath:application-common.yml"
+  web:
+    resources:
+      static-locations: classpath:/static/
+
+server:
+  servlet:
+    context-path: /
+
+plugin:
+  core:
+    url: http://localhost:8082
+    heartbeat:
+      interval: 30000
+  host: localhost
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always

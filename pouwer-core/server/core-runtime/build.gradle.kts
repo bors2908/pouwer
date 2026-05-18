@@ -1,3 +1,6 @@
+import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.bundling.Jar
+
 plugins {
     java
     alias(libs.plugins.spring.boot)
@@ -12,6 +15,7 @@ plugins {
 }
 
 val dockerRepoName: String = providers.gradleProperty("repo.url.docker.hosted").get()
+val pagesDir: File = rootProject.file("pouwer-core/browser/widget-traefik/pages")
 
 dependencies {
     implementation(project(":pouwer-core:server:common"))
@@ -19,7 +23,9 @@ dependencies {
     implementation(platform(libs.spring.boot.bom))
     implementation(platform(libs.spring.cloud.bom))
     implementation(libs.spring.cloud.starter.openfeign)
-    implementation(libs.pf4j)
+    implementation(libs.resilience4j.spring.boot3)
+    implementation(libs.resilience4j.circuitbreaker)
+    implementation(libs.kotlinx.coroutines.core)
 
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(project(":pouwer-core:server:common-test"))
@@ -27,6 +33,29 @@ dependencies {
 
 npmBundleSource {
     sourceDir.set(rootProject.file("pouwer-core/browser"))
+}
+
+val copyPages: TaskProvider<Copy> = tasks.register<Copy>("copyPages") {
+    from(pagesDir) {
+        include("ban.html", "challenge.html")
+    }
+    into(layout.buildDirectory.dir("resources/main/static"))
+}
+
+tasks.processResources {
+    finalizedBy(copyPages)
+}
+
+tasks.named("resolveMainClassName") {
+    dependsOn(copyPages)
+}
+
+tasks.named("jar", Jar::class.java) {
+    dependsOn(copyPages)
+}
+
+tasks.named("shadowJar", Jar::class.java) {
+    dependsOn(copyPages)
 }
 
 jib {

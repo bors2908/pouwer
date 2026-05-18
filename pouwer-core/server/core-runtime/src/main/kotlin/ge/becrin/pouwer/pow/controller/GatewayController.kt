@@ -1,12 +1,11 @@
 package ge.becrin.pouwer.pow.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
 import ge.becrin.pouwer.challenge.api.PayloadSupportContext
 import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationStatus
-import ge.becrin.pouwer.pow.config.PowProperties
 import ge.becrin.pouwer.pow.service.PayloadPluginRegistry
 import ge.becrin.pouwer.pow.service.TaskStore
 import ge.becrin.pouwer.pow.service.ValidationPipeline
@@ -25,7 +24,6 @@ class GatewayController(
     private val payloadPluginRegistry: PayloadPluginRegistry,
     private val taskStore: TaskStore,
     private val validationPipeline: ValidationPipeline,
-    private val powProperties: PowProperties,
     private val objectMapper: ObjectMapper
 ) {
     @GetMapping("/challenge")
@@ -57,7 +55,7 @@ class GatewayController(
                 PayloadBuildRequest(
                     workerId = workerId,
                     nowMillis = System.currentTimeMillis(),
-                    taskTtlMillis = powProperties.ttlSeconds * 1000,
+                    taskTtlMillis = 60_000,
                     requestedPluginId = pluginId
                 )
             )

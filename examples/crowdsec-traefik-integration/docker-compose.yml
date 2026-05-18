@@ -60,44 +60,33 @@ services:
     container_name: pouwer-server
     restart: unless-stopped
     environment:
-      CHALLENGE_PLUGINS_DIRECTORY: /plugins
-      STRATUM_HOST: p2pool
+      PAGES_EXTRACTION_PATH: /pages
     ports:
       - "8082:8082"
-    depends_on:
-      p2pool:
-        condition: service_started
-      plugin-sync:
-        condition: service_completed_successfully
     volumes:
-      - pouwer-plugin-data:/plugins
       - pouwer-pages-data:/pages
     networks:
       - monero-net
       - app-net
 
-  plugin-sync:
-    build:
-      context: ../../
-      dockerfile: examples/crowdsec-traefik-integration/plugin-sync-container/Dockerfile
-    container_name: plugin-sync
-    restart: "no"
+  pouwer-randomx-plugin:
+    image: localhost:9002/pouwer-monero-plugin:0.1.8
+    container_name: pouwer-monero-plugin
+    restart: unless-stopped
     environment:
-      PLUGIN_REPO_URL: http://host.docker.internal:9001/repository/maven-hosted
-      PLUGIN_TARGET_DIR: /plugins
-    command:
-      - --no-clean
-      - --artifact
-      - ge.becrin.pouwer:payload-bitcoin-rpc:0.1.8
-      - --artifact
-      - ge.becrin.pouwer:payload-sha256:0.1.8
-      - --artifact
-      - ge.becrin.pouwer:payload-monero-randomx:0.1.8
-    volumes:
-      - pouwer-plugin-data:/plugins
-      - pouwer-pages-data:/pages
-    extra_hosts:
-      - host.docker.internal:host-gateway
+      STRATUM_HOST: p2pool
+      PLUGIN_CORE_URL: http://pouwer-server:8082
+      PLUGIN_HOST: http://pouwer-randomx-plugin
+    ports:
+      - "8083:8083"
+    depends_on:
+      p2pool:
+        condition: service_started
+      pouwer-server:
+        condition: service_started
+    networks:
+      - monero-net
+      - app-net
 
   crowdsec:
     image: crowdsecurity/crowdsec:latest
@@ -173,5 +162,4 @@ volumes:
   monero-testnet-data:
   p2pool-data:
   wallet-data:
-  pouwer-plugin-data:
   pouwer-pages-data:

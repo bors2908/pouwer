@@ -1,0 +1,13 @@
+spring:
+  config:
+    import: "classpath:application-base.yml"
+  application:
+    name: pouwer-sha256-plugin
+
+server:
+  port: 8081
+
+plugin:
+  sha256:
+    target: "0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    nonce-range-size: 1000000

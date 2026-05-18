@@ -1,5 +1,6 @@
 package ge.becrin.pouwer.challenge.payload.bitcoin
 
+import org.springframework.stereotype.Component
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -8,6 +9,7 @@ interface BitcoinTemplateStore {
     fun find(jobId: UUID): BitcoinBlockTemplate?
 }
 
+@Component
 class InMemoryBitcoinTemplateStore : BitcoinTemplateStore {
     private val templates = ConcurrentHashMap<UUID, StoredTemplate>()
 

@@ -1,25 +1,33 @@
 package ge.becrin.pouwer.challenge.payload.sha256
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import ge.becrin.pouwer.challenge.api.NonceRange
 import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationResult
 import ge.becrin.pouwer.challenge.api.ValidationStatus
+import ge.becrin.pouwer.plugin.base.PluginPayloadService
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.util.HexFormat
 import java.util.UUID
 import kotlin.random.Random
 
-class Sha256PayloadPlugin {
+@Component
+class Sha256PayloadPlugin(
+    @field:Value($$"${plugin.sha256.target:0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff}")
+    private val targetHex: String,
+    @param:Value($$"${plugin.sha256.nonce-range-size:1000000}")
+    private val nonceRangeSize: Long
+) : PluginPayloadService {
     private val hex = HexFormat.of()
     private val mapper: ObjectMapper = jacksonObjectMapper()
+    override val pluginId: String = PLUGIN_ID
 
-    val pluginId: String = PLUGIN_ID
-
-    fun createTask(workerId: String?, nowMillis: Long, taskTtlMillis: Long): Task {
+    override fun createTask(workerId: String?, nowMillis: Long, taskTtlMillis: Long): Task {
         val data = ByteArray(32)
         Random.nextBytes(data)
 
@@ -27,8 +35,8 @@ class Sha256PayloadPlugin {
             dataHex = hex.formatHex(data),
             nonceOffset = 0,
             nonceIsLE = false,
-            targetHex = "0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-            nonceRange = NonceRange(0, 1_000_000)
+            targetHex = targetHex,
+            nonceRange = NonceRange(0, nonceRangeSize)
         )
 
         return Task(
@@ -39,7 +47,7 @@ class Sha256PayloadPlugin {
         )
     }
 
-    fun validate(task: Task, result: ResultMessage): ValidationResult {
+    override fun validate(task: Task, result: ResultMessage): ValidationResult {
         if (task.pluginId != pluginId) {
             return ValidationResult(ValidationStatus.REJECTED, "Plugin mismatch")
         }

@@ -1,6 +1,6 @@
 package ge.becrin.pouwer.pow.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.ValidationStatus
 import ge.becrin.pouwer.pow.service.ValidationPipeline

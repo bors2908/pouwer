@@ -7,12 +7,12 @@ import io.swagger.v3.oas.annotations.media.Schema
 data class UnauthorizedErrorResponse(
     @param:Schema(description = "Description of the error", example = "Unauthorized")
     override var message: String? = null
-) : ge.becrin.pouwer.common.exception.handler.response.ErrorResponse {
+) : ErrorResponse {
     @Schema(
         description = "HTTP status code of the error",
-        example = ge.becrin.pouwer.common.exception.handler.response.UnauthorizedErrorResponse.Companion.CODE
+        example = CODE
     )
-    override val code: String = ge.becrin.pouwer.common.exception.handler.response.UnauthorizedErrorResponse.Companion.CODE
+    override val code: String = CODE
 
     companion object {
         @JsonIgnore

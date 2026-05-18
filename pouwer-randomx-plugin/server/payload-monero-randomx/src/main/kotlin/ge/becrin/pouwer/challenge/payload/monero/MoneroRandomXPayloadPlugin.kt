@@ -1,26 +1,29 @@
 package ge.becrin.pouwer.challenge.payload.monero
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationResult
 import ge.becrin.pouwer.challenge.api.ValidationStatus
+import ge.becrin.pouwer.plugin.base.PluginPayloadService
+import org.springframework.stereotype.Component
 import java.math.BigInteger
 import java.util.HexFormat
 import java.util.UUID
 
+@Component
 class MoneroRandomXPayloadPlugin(
     private val jobStore: StratumJobStore,
     private val converter: StratumToMoneroConverter,
     private val stratumSubmitService: StratumSubmitService
-) {
+) : PluginPayloadService {
     private val mapper: ObjectMapper = jacksonObjectMapper()
     private val hex = HexFormat.of()
 
-    val pluginId: String = PLUGIN_ID
+    override val pluginId: String = PLUGIN_ID
 
-    fun createTask(workerId: String?, nowMillis: Long, taskTtlMillis: Long): Task {
+    override fun createTask(workerId: String?, nowMillis: Long, taskTtlMillis: Long): Task {
         val rawJob = jobStore.getLatest()
             ?: throw IllegalStateException("No stratum job available")
 
@@ -34,7 +37,7 @@ class MoneroRandomXPayloadPlugin(
         )
     }
 
-    fun validate(task: Task, result: ResultMessage): ValidationResult {
+    override fun validate(task: Task, result: ResultMessage): ValidationResult {
         if (task.pluginId != pluginId) {
             return ValidationResult(ValidationStatus.REJECTED, "Plugin mismatch")
         }

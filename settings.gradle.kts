@@ -1,5 +1,3 @@
-import org.gradle.api.initialization.resolve.RepositoriesMode
-
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -12,6 +10,7 @@ rootProject.name = "pouwer"
 include("pouwer-core:server:common")
 include("pouwer-core:server:model")
 include("pouwer-core:server:core-api")
+include("pouwer-core:server:plugin-base")
 include("pouwer-core:server:core-runtime")
 include("pouwer-core:server:common-test")
 

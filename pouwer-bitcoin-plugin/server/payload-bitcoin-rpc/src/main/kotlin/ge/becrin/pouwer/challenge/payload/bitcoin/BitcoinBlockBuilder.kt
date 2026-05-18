@@ -1,5 +1,6 @@
 package ge.becrin.pouwer.challenge.payload.bitcoin
 
+import ge.becrin.pouwer.challenge.api.NonceRange
 import org.bitcoinj.core.Block
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.LegacyAddress
@@ -8,10 +9,11 @@ import org.bitcoinj.core.Transaction
 import org.bitcoinj.core.Utils
 import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.script.ScriptBuilder
-import ge.becrin.pouwer.challenge.api.NonceRange
+import org.springframework.stereotype.Component
 import java.math.BigInteger
 import java.util.HexFormat
 
+@Component
 class BitcoinBlockBuilder {
     private val params = RegTestParams.get()
     private val hex = HexFormat.of()
