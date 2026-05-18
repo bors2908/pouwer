@@ -7,10 +7,11 @@ v 6. Move demo-app to examples module.
 v 7. Build server images with jib. Rework compose
 v 7.1 Change package names
 v 7.1.1 Fix fat jars for plugins
-7.3 Repace PF4J plugins with microservices and registration, as ClassLoader BS and spring absence makes life too complicated.
+v 7.3 Repace PF4J plugins with microservices and registration, as ClassLoader BS and spring absence makes life too complicated.
 
-7.4 Validate changes, make a complete build
+v 7.4 Validate changes, make a complete build
 
+7.4. Remove supports call
 7.5 Migrate to gRPC
 7.6 NPM Publishing
 

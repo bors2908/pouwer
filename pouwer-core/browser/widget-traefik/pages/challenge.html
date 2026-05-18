@@ -107,9 +107,9 @@
         class="{{ .FrontendKey }}"
         data-sitekey="{{ .SiteKey }}"
         data-callback="captchaCallback"
-        data-challenge-url="/captcha/api/challenge"
+        data-challenge-url="http://localhost:8082/challenge"
         data-response-field="response"
-    ></div>
+    ></div><!--TODO Make URL Dynamic -->
 
     <form id="captcha-form" method="POST" action="" novalidate>
         <input type="hidden" id="captcha-response" name="response" value="" />
