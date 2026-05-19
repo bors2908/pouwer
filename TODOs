@@ -11,6 +11,7 @@ v 7.3 Repace PF4J plugins with microservices and registration, as ClassLoader BS
 
 v 7.4 Validate changes, make a complete build
 
+7.4. Think through the static forwarding and add differentiation
 7.4. Remove supports call
 7.5 Migrate to gRPC
 7.6 NPM Publishing

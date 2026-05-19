@@ -1,4 +1,4 @@
-import {cp, mkdir, rm} from "node:fs/promises";
+import {mkdir, rm, readFile, writeFile, readdir} from "node:fs/promises";
 import {resolve} from "node:path";
 import {build} from "esbuild";
 
@@ -30,3 +30,24 @@ await Promise.all([
     outfile: resolve(distDir, "assets/sha256-worker.js"),
   }),
 ]);
+
+try {
+  const assetPath = resolve(distDir, "assets/sha256-worker.js");
+  const mainPath = resolve(distDir, "challenge-sha256.js");
+  const workerSource = await readFile(assetPath, "utf8");
+  const prefix = `globalThis.__POUWER_EMBEDDED_SHA256_WORKER = ${JSON.stringify(workerSource)};\n`;
+  const mainContent = await readFile(mainPath, "utf8");
+  await writeFile(mainPath, prefix + mainContent, "utf8");
+  await rm(assetPath, { force: true });
+  try {
+    const assetsDir = resolve(distDir, "assets");
+    const entries = await readdir(assetsDir);
+    if (entries.length === 0) {
+      await rm(assetsDir, { force: true });
+    }
+  } catch (e) {
+    // ignore
+  }
+} catch (e) {
+  console.error("Failed to inline worker:", e);
+}
