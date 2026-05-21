@@ -21,8 +21,8 @@ Middleware -> SecurityEngine: check remediation by source IP
 SecurityEngine --> Middleware: captcha decision
 Middleware --> User: serve challenge.html
 
-User -> WorkerServer: GET /challenge.js
-WorkerServer --> Worker: Worker Engine with challenge JS bundle
+User -> WorkerServer: GET /static/{pluginId}/.../challenge-*.js
+WorkerServer --> Worker: challenge JS bundle
 
 ref over User, WorkerServer : Solve Challenge
 ref over User, Middleware : Validate Challenge

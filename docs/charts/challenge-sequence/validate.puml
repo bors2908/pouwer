@@ -8,7 +8,7 @@ actor User
 participant "Rate Limiter/Load Balancer\n(Traefik)" as RateLimiter
 participant "Remediation Middleware\n(crowdsec-bouncer-traefik-plugin)" as Middleware
 participant "Result Service" as ResultService
-participant "Validation Interface" as ValidationIF
+participant "Payload Plugin" as ValidationIF
 participant "Custom Monero Stratum Adapter" as MoneroAdapter
 participant "P2Pool Monero\n(RandomX Mining Pool)" as P2Pool
 

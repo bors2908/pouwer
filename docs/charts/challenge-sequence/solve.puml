@@ -13,7 +13,7 @@ participant "Task Generator Interface" as TaskIF
 participant "Monero Stratum" as MoneroAdapter
 
 User -> Worker: click "Solve Challenge"
-Worker -> Orchestrator: GET /challenge?jobType=MONERO_RANDOMX
+Worker -> Orchestrator: GET /challenge?pluginId=monero-randomx&workerId=...
 Orchestrator -> TaskIF: build task payload
 TaskIF -> MoneroAdapter: getLatest() stratum job
 MoneroAdapter --> TaskIF: RawStratumJob
