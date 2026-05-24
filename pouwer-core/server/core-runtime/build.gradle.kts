@@ -29,6 +29,7 @@ dependencies {
 
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(project(":pouwer-core:server:common-test"))
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 }
 
 npmBundleSource {

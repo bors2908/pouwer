@@ -5,11 +5,14 @@ import tools.jackson.module.kotlin.jacksonObjectMapper
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
 import ge.becrin.pouwer.challenge.api.PayloadPlugin
 import ge.becrin.pouwer.challenge.api.PayloadSupportContext
+import ge.becrin.pouwer.challenge.api.PluginMetadata
+import ge.becrin.pouwer.challenge.api.PluginStatus
 import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationResult
 import ge.becrin.pouwer.challenge.api.ValidationStatus
 import ge.becrin.pouwer.pow.service.PayloadPluginRegistry
+import ge.becrin.pouwer.pow.service.RemotePluginRegistry
 import ge.becrin.pouwer.pow.service.ValidationPipeline
 import ge.becrin.pouwer.pow.service.store.InMemoryTaskStore
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -18,6 +21,7 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
+import java.time.Instant
 import java.util.UUID
 
 class GatewayControllerTest {
@@ -146,6 +150,111 @@ class GatewayControllerTest {
         assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.statusCode)
     }
 
+    @Test
+    fun testChallengeWithoutPluginIdUsesLifoRegistration() {
+        val pluginA = TestPlugin("plugin-a")
+        val pluginB = TestPlugin("plugin-b")
+        val registry = PayloadPluginRegistry(listOf(pluginA, pluginB))
+        val taskStore = InMemoryTaskStore()
+        val remoteRegistry = RemotePluginRegistry().also {
+            it.register(
+                createRemoteMetadata(
+                    id = "plugin-a",
+                    registeredAt = Instant.parse("2026-01-01T00:00:00Z")
+                )
+            )
+            it.register(
+                createRemoteMetadata(
+                    id = "plugin-b",
+                    registeredAt = Instant.parse("2026-01-02T00:00:00Z")
+                )
+            )
+        }
+        val controller = GatewayController(
+            payloadPluginRegistry = registry,
+            taskStore = taskStore,
+            validationPipeline = ValidationPipeline(taskStore, registry),
+            objectMapper = jacksonObjectMapper(),
+            remotePluginRegistry = remoteRegistry,
+            taskTtlMillis = 60_000,
+            priorityOverrideRaw = ""
+        )
+
+        val task = controller.challenge(workerId = "worker-1", pluginId = null)
+
+        assertEquals("plugin-b", task.pluginId)
+    }
+
+    @Test
+    fun testChallengePriorityOverrideWinsOverLifo() {
+        val pluginA = TestPlugin("plugin-a")
+        val pluginB = TestPlugin("plugin-b")
+        val registry = PayloadPluginRegistry(listOf(pluginA, pluginB))
+        val taskStore = InMemoryTaskStore()
+        val remoteRegistry = RemotePluginRegistry().also {
+            it.register(
+                createRemoteMetadata(
+                    id = "plugin-a",
+                    registeredAt = Instant.parse("2026-01-01T00:00:00Z")
+                )
+            )
+            it.register(
+                createRemoteMetadata(
+                    id = "plugin-b",
+                    registeredAt = Instant.parse("2026-01-02T00:00:00Z")
+                )
+            )
+        }
+        val controller = GatewayController(
+            payloadPluginRegistry = registry,
+            taskStore = taskStore,
+            validationPipeline = ValidationPipeline(taskStore, registry),
+            objectMapper = jacksonObjectMapper(),
+            remotePluginRegistry = remoteRegistry,
+            taskTtlMillis = 60_000,
+            priorityOverrideRaw = "plugin-a,plugin-b"
+        )
+
+        val task = controller.challenge(workerId = "worker-1", pluginId = null)
+
+        assertEquals("plugin-a", task.pluginId)
+    }
+
+    @Test
+    fun testChallengeFallsBackWhenPriorityPluginFails() {
+        val failingTop = TestPlugin("plugin-top", supportsThrows = true)
+        val stableSecond = TestPlugin("plugin-second")
+        val registry = PayloadPluginRegistry(listOf(failingTop, stableSecond))
+        val taskStore = InMemoryTaskStore()
+        val remoteRegistry = RemotePluginRegistry().also {
+            it.register(
+                createRemoteMetadata(
+                    id = "plugin-second",
+                    registeredAt = Instant.parse("2026-01-01T00:00:00Z")
+                )
+            )
+            it.register(
+                createRemoteMetadata(
+                    id = "plugin-top",
+                    registeredAt = Instant.parse("2026-01-02T00:00:00Z")
+                )
+            )
+        }
+        val controller = GatewayController(
+            payloadPluginRegistry = registry,
+            taskStore = taskStore,
+            validationPipeline = ValidationPipeline(taskStore, registry),
+            objectMapper = jacksonObjectMapper(),
+            remotePluginRegistry = remoteRegistry,
+            taskTtlMillis = 60_000,
+            priorityOverrideRaw = ""
+        )
+
+        val task = controller.challenge(workerId = "worker-1", pluginId = null)
+
+        assertEquals("plugin-second", task.pluginId)
+    }
+
     private fun createTask(pluginId: String): Task {
         return Task(
             jobId = JOB_ID,
@@ -189,5 +298,17 @@ class GatewayControllerTest {
 
     companion object {
         private val JOB_ID: UUID = UUID.randomUUID()
+    }
+
+    private fun createRemoteMetadata(id: String, registeredAt: Instant): PluginMetadata {
+        return PluginMetadata(
+            id = id,
+            version = "1.0.0",
+            contractVersion = "0.1.9",
+            baseUrl = "http://localhost",
+            lastHeartbeat = Instant.now(),
+            status = PluginStatus.HEALTHY,
+            registeredAt = registeredAt
+        )
     }
 }

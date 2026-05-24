@@ -38,7 +38,7 @@ class ValidationPipelineTest {
         val result = pipeline.validate(
             ResultMessage(
                 jobId = JOB_ID,
-                pluginId = null,
+                pluginId = "other-plugin",
                 payload = JsonNodeFactory.instance.objectNode(),
                 durationMs = null,
                 attempts = null
@@ -128,6 +128,102 @@ class ValidationPipelineTest {
         )
 
         assertEquals(ValidationStatus.ACCEPTED, result.status)
+    }
+
+    @Test
+    fun testUsesTaskPluginWhenResultPluginIdMissing() {
+        val plugin = TestPlugin("pow-test-sha256", ValidationResult(ValidationStatus.ACCEPTED))
+        val taskStore = InMemoryTaskStore().also {
+            it.save(
+                Task(
+                    jobId = JOB_ID,
+                    pluginId = plugin.id(),
+                    expiresAt = System.currentTimeMillis() + 60_000,
+                    payload = JsonNodeFactory.instance.objectNode()
+                )
+            )
+        }
+        val pipeline = ValidationPipeline(
+            taskStore = taskStore,
+            payloadPluginRegistry = PayloadPluginRegistry(listOf(plugin))
+        )
+
+        val result = pipeline.validate(
+            ResultMessage(
+                jobId = JOB_ID,
+                pluginId = null,
+                payload = JsonNodeFactory.instance.objectNode(),
+                durationMs = null,
+                attempts = null
+            )
+        )
+
+        assertEquals(ValidationStatus.ACCEPTED, result.status)
+    }
+
+    @Test
+    fun testReturnsConflictOnReplayAfterAcceptedValidation() {
+        val plugin = TestPlugin("pow-test-sha256", ValidationResult(ValidationStatus.ACCEPTED))
+        val taskStore = InMemoryTaskStore().also {
+            it.save(
+                Task(
+                    jobId = JOB_ID,
+                    pluginId = plugin.id(),
+                    expiresAt = System.currentTimeMillis() + 60_000,
+                    payload = JsonNodeFactory.instance.objectNode()
+                )
+            )
+        }
+        val pipeline = ValidationPipeline(
+            taskStore = taskStore,
+            payloadPluginRegistry = PayloadPluginRegistry(listOf(plugin))
+        )
+        val resultMessage = ResultMessage(
+            jobId = JOB_ID,
+            pluginId = plugin.id(),
+            payload = JsonNodeFactory.instance.objectNode(),
+            durationMs = null,
+            attempts = null
+        )
+
+        val first = pipeline.validate(resultMessage)
+        val second = pipeline.validate(resultMessage)
+
+        assertEquals(ValidationStatus.ACCEPTED, first.status)
+        assertEquals(ValidationStatus.CONFLICT, second.status)
+    }
+
+    @Test
+    fun testRejectsExpiredTask() {
+        val plugin = TestPlugin("pow-test-sha256", ValidationResult(ValidationStatus.ACCEPTED))
+        val taskStore = InMemoryTaskStore().also {
+            it.save(
+                Task(
+                    jobId = JOB_ID,
+                    pluginId = plugin.id(),
+                    expiresAt = 1000L,
+                    payload = JsonNodeFactory.instance.objectNode()
+                )
+            )
+        }
+        val pipeline = ValidationPipeline(
+            taskStore = taskStore,
+            payloadPluginRegistry = PayloadPluginRegistry(listOf(plugin)),
+            currentTimeMillis = { 2000L }
+        )
+
+        val result = pipeline.validate(
+            ResultMessage(
+                jobId = JOB_ID,
+                pluginId = plugin.id(),
+                payload = JsonNodeFactory.instance.objectNode(),
+                durationMs = null,
+                attempts = null
+            )
+        )
+
+        assertEquals(ValidationStatus.REJECTED, result.status)
+        assertEquals("Task expired", result.reason)
     }
 
     @Test

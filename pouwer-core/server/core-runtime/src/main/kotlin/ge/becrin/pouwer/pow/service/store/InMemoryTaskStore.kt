@@ -13,4 +13,6 @@ class InMemoryTaskStore : TaskStore {
     }
 
     override fun find(jobId: UUID): Task? = tasks[jobId]
+
+    override fun remove(jobId: UUID): Task? = tasks.remove(jobId)
 }

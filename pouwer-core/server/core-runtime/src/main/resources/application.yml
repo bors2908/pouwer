@@ -11,6 +11,12 @@ spring:
   application:
     name: challenge
 
+challenge:
+  task:
+    ttl-ms: 60000
+  plugins:
+    priority-override: ""
+
 resilience4j:
   circuitbreaker:
     instances:
