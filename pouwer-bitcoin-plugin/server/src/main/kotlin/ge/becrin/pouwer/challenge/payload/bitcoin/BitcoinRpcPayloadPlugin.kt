@@ -16,7 +16,7 @@ import java.util.UUID
 
 @Component
 class BitcoinRpcPayloadPlugin(
-    private val rpcClient: BitcoinRpcClient,
+    private val rpcClient: BitcoinNodeClient,
     private val templateStore: BitcoinTemplateStore,
     private val blockBuilder: BitcoinBlockBuilder
 ) : PluginPayloadService {

@@ -3,14 +3,15 @@ package ge.becrin.pouwer.challenge.payload.bitcoin
 import ge.becrin.pouwer.challenge.api.NonceRange
 import org.bitcoinj.core.Block
 import org.bitcoinj.core.Coin
+import org.bitcoinj.core.ECKey
 import org.bitcoinj.core.LegacyAddress
 import org.bitcoinj.core.Sha256Hash
 import org.bitcoinj.core.Transaction
+import org.bitcoinj.core.TransactionInput
+import org.bitcoinj.core.TransactionOutPoint
 import org.bitcoinj.core.Utils
 import org.bitcoinj.params.RegTestParams
-import org.bitcoinj.script.ScriptBuilder
 import org.springframework.stereotype.Component
-import java.math.BigInteger
 import java.util.HexFormat
 
 @Component
@@ -65,11 +66,16 @@ class BitcoinBlockBuilder {
 
     private fun createCoinbaseTx(height: Long, coinbaseValue: Long): Transaction {
         val coinbaseTx = Transaction(params)
-        val inputScript = ScriptBuilder()
-            .data(Utils.encodeMPI(BigInteger.valueOf(height), false))
-            .build()
-        coinbaseTx.addInput(Sha256Hash.ZERO_HASH, -1, inputScript)
-        val dummyAddress = LegacyAddress.fromPubKeyHash(params, ByteArray(20))
+        val inputScript = byteArrayOf(0x01, 0x02, 0x03, 0x04)
+        coinbaseTx.addInput(
+            TransactionInput(
+                params,
+                coinbaseTx,
+                inputScript,
+                TransactionOutPoint(params, -1L, Sha256Hash.ZERO_HASH)
+            )
+        )
+        val dummyAddress = LegacyAddress.fromKey(params, ECKey())
         coinbaseTx.addOutput(Coin.valueOf(coinbaseValue), dummyAddress)
         return coinbaseTx
     }

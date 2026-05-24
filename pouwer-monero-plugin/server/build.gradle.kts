@@ -18,6 +18,9 @@ dependencies {
     implementation(libs.slf4j.api)
     implementation(libs.kt.stratum)
     implementation(libs.json)
+
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(project(":pouwer-core:server:common-test"))
 }
 
 npmBundleSource {

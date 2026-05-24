@@ -15,6 +15,9 @@ dependencies {
     implementation(libs.spring.boot.starter.actuator)
     implementation(libs.jackson.module.kotlin)
     implementation(libs.kotlin.logging.jvm)
+
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(project(":pouwer-core:server:common-test"))
 }
 
 npmBundleSource {

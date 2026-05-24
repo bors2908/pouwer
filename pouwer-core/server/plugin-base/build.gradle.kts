@@ -16,6 +16,9 @@ dependencies {
     implementation(libs.kotlin.logging.jvm)
     implementation(libs.jackson.module.kotlin)
     implementation(libs.spring.boot.starter.validation)
+
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(project(":pouwer-core:server:common-test"))
 }
 
 tasks.bootJar {

@@ -16,7 +16,7 @@ import java.util.UUID
 class MoneroRandomXPayloadPlugin(
     private val jobStore: StratumJobStore,
     private val converter: StratumToMoneroConverter,
-    private val stratumSubmitService: StratumSubmitService
+    private val stratumSubmitService: ShareSubmitter
 ) : PluginPayloadService {
     private val mapper: ObjectMapper = jacksonObjectMapper()
     private val hex = HexFormat.of()

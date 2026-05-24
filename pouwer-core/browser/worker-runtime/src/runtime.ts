@@ -70,7 +70,8 @@ export function createWorkerRuntime<TTask extends BaseTask, TResultPayload>(
                     return;
                 }
                 running = true;
-                Promise.resolve(solve(currentTask, runtime))
+                Promise.resolve()
+                    .then(() => solve(currentTask, runtime))
                     .catch((error: unknown) => {
                         if (running) {
                             runtime.reportStopped(toErrorMessage(error));

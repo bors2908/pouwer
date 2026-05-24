@@ -60,6 +60,85 @@ class StaticPluginProxyServiceTest {
     }
 
     @Test
+    fun testProxyUsesGetWithoutBody() {
+        val seenMethod = AtomicReference<String?>()
+        val seenBody = AtomicReference<String?>()
+
+        val httpServer = startServer { exchange ->
+            seenMethod.set(exchange.requestMethod)
+            seenBody.set(exchange.requestBody.readBytes().decodeToString())
+            exchange.responseHeaders.add("X-Upstream", "yes")
+            exchange.responseHeaders.add("Content-Length", "5")
+            exchange.sendResponseHeaders(200, 5)
+            exchange.responseBody.use { it.write("hello".toByteArray()) }
+        }
+
+        val service = createService(httpServer)
+        val request = MockHttpServletRequest("GET", "/static/test-plugin/assets/app.js").apply {
+            setQueryString("asset=1")
+        }
+
+        val proxy = service.proxy("test-plugin", request)
+        val output = ByteArrayOutputStream()
+        proxy.body.writeTo(output)
+
+        assertEquals("GET", seenMethod.get())
+        assertEquals("", seenBody.get())
+        assertEquals(HttpStatus.OK.value(), proxy.statusCode)
+        assertEquals("yes", proxy.headers.getFirst("X-Upstream"))
+        assertEquals(null, proxy.headers.getFirst("Content-Length"))
+        assertEquals("hello", output.toString(Charsets.UTF_8.name()))
+    }
+
+    @Test
+    fun testProxyFailsWhenPluginIsUnhealthy() {
+        val registry = RemotePluginRegistry()
+        registry.register(
+            PluginMetadata(
+                id = "test-plugin",
+                version = "1.0.0",
+                contractVersion = "1.0.0",
+                baseUrl = "http://localhost:1",
+                lastHeartbeat = Instant.now(),
+                status = PluginStatus.UNHEALTHY,
+                registeredAt = Instant.now()
+            )
+        )
+        val service = StaticPluginProxyService(registry, java.net.http.HttpClient.newHttpClient())
+        val request = MockHttpServletRequest("GET", "/static/test-plugin/app.js")
+
+        val exception = assertFailsWith<ResponseStatusException> {
+            service.proxy("test-plugin", request)
+        }
+
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE.value(), exception.statusCode.value())
+    }
+
+    @Test
+    fun testProxyFailsWhenUpstreamRequestThrows() {
+        val registry = RemotePluginRegistry()
+        registry.register(
+            PluginMetadata(
+                id = "test-plugin",
+                version = "1.0.0",
+                contractVersion = "1.0.0",
+                baseUrl = "http://127.0.0.1:1",
+                lastHeartbeat = Instant.now(),
+                status = PluginStatus.HEALTHY,
+                registeredAt = Instant.now()
+            )
+        )
+        val service = StaticPluginProxyService(registry, java.net.http.HttpClient.newHttpClient())
+        val request = MockHttpServletRequest("GET", "/static/test-plugin/app.js")
+
+        val exception = assertFailsWith<ResponseStatusException> {
+            service.proxy("test-plugin", request)
+        }
+
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE.value(), exception.statusCode.value())
+    }
+
+    @Test
     fun `proxy fails when plugin is missing`() {
         val service = StaticPluginProxyService(RemotePluginRegistry(), java.net.http.HttpClient.newHttpClient())
         val request = MockHttpServletRequest("GET", "/static/missing/app.js")

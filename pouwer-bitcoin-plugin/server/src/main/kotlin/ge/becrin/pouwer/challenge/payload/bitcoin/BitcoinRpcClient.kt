@@ -8,13 +8,13 @@ import org.springframework.web.client.RestTemplate
 import java.util.Base64
 
 @Component
-class BitcoinRpcClient {
+class BitcoinRpcClient : BitcoinNodeClient {
     private val restTemplate = RestTemplate()
     private val rpcUrl = "http://localhost:18443"
     private val rpcUser = "rpcuser"
     private val rpcPassword = "rpcpassword"
 
-    fun getBlockTemplate(): BitcoinBlockTemplate {
+    override fun getBlockTemplate(): BitcoinBlockTemplate {
         val request = createRpcRequest("getblocktemplate", listOf(mapOf("rules" to listOf("segwit"))))
         val response = restTemplate.postForObject(rpcUrl, request, Map::class.java)
         val result = response?.get("result") as? Map<*, *>
@@ -47,7 +47,7 @@ class BitcoinRpcClient {
         )
     }
 
-    fun submitBlock(blockHex: String): String? {
+    override fun submitBlock(blockHex: String): String? {
         val request = createRpcRequest("submitblock", listOf(blockHex))
         val response = restTemplate.postForObject(rpcUrl, request, Map::class.java)
         return response?.get("result") as? String
@@ -68,4 +68,9 @@ class BitcoinRpcClient {
         )
         return HttpEntity(body, headers)
     }
+}
+
+interface BitcoinNodeClient {
+    fun getBlockTemplate(): BitcoinBlockTemplate
+    fun submitBlock(blockHex: String): String?
 }

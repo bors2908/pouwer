@@ -13,11 +13,11 @@ class StratumSubmitService(
     private val client: MoneroStratumTcpClient,
     @param:Value($$"${stratum.worker:poctest.worker1}")
     private val workerName: String
-) {
+) : ShareSubmitter {
     private val log = LoggerFactory.getLogger(javaClass)
     private val defaultTimeoutSec = 10L
 
-    fun submitShare(stratumJobId: String?, nonce: Long, hash: String): Boolean {
+    override fun submitShare(stratumJobId: String?, nonce: Long, hash: String): Boolean {
         val nonceHex = nonceToLEHex(nonce)
         val params = mapOf(
             "id" to (client.sessionId ?: workerName),
@@ -50,4 +50,8 @@ class StratumSubmitService(
         val b3 = (n shr 24) and 0xff
         return String.format("%02x%02x%02x%02x", b0, b1, b2, b3)
     }
+}
+
+interface ShareSubmitter {
+    fun submitShare(stratumJobId: String?, nonce: Long, hash: String): Boolean
 }

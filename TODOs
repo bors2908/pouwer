@@ -15,6 +15,7 @@ v 7.4 Validate changes, make a complete build
 7.4. Remove supports call
 7.5 Migrate to gRPC
 7.6 NPM Publishing
+7.7 Add custom headers for statics for each plugin
 
 8. Add multiple tasks support for Monero and other payloads.
 9. Implement and integrate Reputation engine and Difficulty engine.

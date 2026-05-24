@@ -5,6 +5,9 @@ import ge.becrin.pouwer.challenge.api.PluginStatus
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Instant
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -95,6 +98,13 @@ class RemotePluginRegistryTest {
     }
 
     @Test
+    fun testMarkUnhealthyMissingPluginReturnsFalse() {
+        val success = registry.markUnhealthy("missing")
+
+        assertFalse(success)
+    }
+
+    @Test
     fun testUnregister() {
         val metadata = createTestMetadata("plugin1", "http://localhost:8081")
         registry.register(metadata)
@@ -136,6 +146,17 @@ class RemotePluginRegistryTest {
     }
 
     @Test
+    fun testEvictStaleReturnsZeroWhenNothingIsStale() {
+        val metadata = createTestMetadata("plugin1", "http://localhost:8081")
+        registry.register(metadata)
+
+        val evicted = registry.evictStale()
+
+        assertEquals(0, evicted)
+        assertNotNull(registry.get("plugin1"))
+    }
+
+    @Test
     fun testGetHealthy() {
         registry.register(createTestMetadata("plugin1", "http://localhost:8081"))
         registry.register(createTestMetadata("plugin2", "http://localhost:8082"))
@@ -170,6 +191,36 @@ class RemotePluginRegistryTest {
 
         assertEquals(1, registry.getAll().size)
         assertEquals(registered1.registeredAt, registered2.registeredAt)
+    }
+
+    @Test
+    fun testConcurrentRegisterAndEvictKeepsRegistryConsistent() {
+        val executor = Executors.newFixedThreadPool(2)
+        val startLatch = CountDownLatch(1)
+        val doneLatch = CountDownLatch(2)
+
+        executor.submit {
+            startLatch.await(2, TimeUnit.SECONDS)
+            repeat(200) { i ->
+                registry.register(createTestMetadata("plugin-$i", "http://localhost:${8081 + i}"))
+            }
+            doneLatch.countDown()
+        }
+
+        executor.submit {
+            startLatch.await(2, TimeUnit.SECONDS)
+            repeat(200) {
+                registry.evictStale()
+            }
+            doneLatch.countDown()
+        }
+
+        startLatch.countDown()
+        val completed = doneLatch.await(5, TimeUnit.SECONDS)
+        executor.shutdownNow()
+
+        assertTrue(completed)
+        assertTrue(registry.getAll().size in 0..200)
     }
 
     private fun createTestMetadata(id: String, baseUrl: String): PluginMetadata {

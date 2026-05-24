@@ -72,6 +72,15 @@ class PayloadPluginRegistryTest {
     }
 
     @Test
+    fun testIgnoreDisablingUnknownPlugin() {
+        val registry = PayloadPluginRegistry(listOf(TestPlugin("ok")))
+
+        registry.disable("missing")
+
+        assertEquals(listOf("ok"), registry.pluginIds().toList())
+    }
+
+    @Test
     fun `should call provider disable when plugin is disabled`() {
         var disabledId: String? = null
         val provider = object : PayloadPluginProvider {
@@ -88,6 +97,44 @@ class PayloadPluginRegistryTest {
         assertThrows(UnsupportedPluginException::class.java) {
             registry.get("faulty")
         }
+    }
+
+    @Test
+    fun testRefreshReloadsPluginsFromProvider() {
+        var phase = 0
+        val provider = object : PayloadPluginProvider {
+            override fun loadPlugins(): List<PayloadPlugin> {
+                return if (phase == 0) listOf(TestPlugin("a")) else listOf(TestPlugin("b"))
+            }
+
+            override fun disable(pluginId: String) = Unit
+        }
+        val registry = PayloadPluginRegistry(provider)
+        assertEquals(setOf("a"), registry.pluginIds())
+
+        phase = 1
+        registry.refresh()
+
+        assertEquals(setOf("b"), registry.pluginIds())
+    }
+
+    @Test
+    fun testScheduledRefreshDelegatesToRefresh() {
+        var phase = 0
+        val provider = object : PayloadPluginProvider {
+            override fun loadPlugins(): List<PayloadPlugin> {
+                return if (phase == 0) listOf(TestPlugin("x")) else listOf(TestPlugin("y"))
+            }
+
+            override fun disable(pluginId: String) = Unit
+        }
+        val registry = PayloadPluginRegistry(provider)
+        assertEquals(setOf("x"), registry.pluginIds())
+
+        phase = 1
+        registry.scheduledRefresh()
+
+        assertEquals(setOf("y"), registry.pluginIds())
     }
 
     private data class TestPlugin(
