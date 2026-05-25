@@ -40,6 +40,12 @@ http:
         burst: 2
         period: 10s
 
+    challenge-rate-limit:
+      rateLimit:
+        average: 5
+        burst: 5
+        period: 1s
+
     captcha-isolation-headers:
       headers:
         customResponseHeaders:
@@ -74,6 +80,16 @@ http:
       middlewares:
         - captcha-isolation-headers
       service: pouwer-server-static
+      priority: 200
+
+    pouwer-server-challenge:
+      rule: "(Host(`localhost`) || Host(`example.com`)) && (Path(`/challenge`) || PathPrefix(`/challenge/`))"
+      entryPoints:
+        - web
+      middlewares:
+        - captcha-isolation-headers
+        - challenge-rate-limit
+      service: pouwer-server
       priority: 200
 
     browser:
@@ -130,6 +146,11 @@ http:
         servers:
           - url: http://api-app:3003
     pouwer-server-static:
+      loadBalancer:
+        servers:
+          - url: http://pouwer-server:8082
+
+    pouwer-server:
       loadBalancer:
         servers:
           - url: http://pouwer-server:8082
