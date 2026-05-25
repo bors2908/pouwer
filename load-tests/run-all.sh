@@ -26,7 +26,7 @@ SCENARIOS_DIR="${SCRIPT_DIR}/k6/scenarios"
 RESULTS_DIR="${SCRIPT_DIR}/results"
 
 TARGET_HOST="${TARGET_HOST:-http://localhost:80}"
-CORE_HOST="${CORE_HOST:-http://localhost:80}"
+CORE_HOST="${CORE_HOST:-http://localhost:8082}"
 PLUGIN_ID="${PLUGIN_ID:-pow-test-sha256}"
 ENV_FILE=""
 SKIP_TESTS=""

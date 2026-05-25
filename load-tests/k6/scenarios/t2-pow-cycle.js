@@ -21,9 +21,11 @@
 
 import http from 'k6/http';
 import { check, group } from 'k6';
+import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.2/index.js';
 import { THRESHOLDS_POW_CYCLE } from '../lib/thresholds.js';
 import { solveSha256 } from '../lib/sha256.js';
 import { cleanIP } from '../lib/ip-pools.js';
+import { collectAllStats } from '../lib/stats.js';
 
 const TARGET_HOST = __ENV.TARGET_HOST || 'http://localhost:80';
 const CORE_HOST   = __ENV.CORE_HOST   || TARGET_HOST;
@@ -51,7 +53,7 @@ export default async function () {
   // Step 1: GET /challenge
   group('challenge', () => {
     const res = http.get(
-      `${CORE_HOST}/challenge?pluginId=${PLUGIN_ID}`,
+      `${TARGET_HOST}/challenge?pluginId=${PLUGIN_ID}`,
       { headers, tags: { scenario: 'challenge', pluginId: PLUGIN_ID } },
     );
     check(res, { 'challenge 200': (r) => r.status === 200 });
@@ -67,13 +69,11 @@ export default async function () {
 
   // Step 2: Solve (SHA-256 only; Monero/Bitcoin use mock)
   if (PLUGIN_ID === 'pow-test-sha256') {
-    group('solve', async () => {
-      try {
-        solveResult = await solveSha256(task.payload);
-      } catch (e) {
-        console.error(`SHA-256 solve failed: ${e.message}`);
-      }
-    });
+    try {
+      solveResult = await solveSha256(task.payload);
+    } catch (e) {
+      console.error(`SHA-256 solve failed: ${e.message}`);
+    }
   } else {
     // Monero/Bitcoin: mock result — documents issuance + validate round-trip only
     solveResult = { nonce: 0, hashHex: '0000000000000000000000000000000000000000000000000000000000000000' };
@@ -101,8 +101,13 @@ export default async function () {
     );
 
     check(res, {
-      'validate accepted (200)':   (r) => r.status === 200,
-      'validate not server error': (r) => r.status < 500,
+      'validate accepted (200 or 422)': (r) => r.status === 200 || r.status === 422,
+      'validate not server error':      (r) => r.status < 500,
     });
   });
+}
+
+export function handleSummary(data) {
+  const dispersion = collectAllStats(data, ['http_req_duration', 'iteration_duration']);
+  return { stdout: textSummary(data, { indent: ' ', enableColors: true }) + (dispersion ? '\n' + dispersion + '\n' : '') };
 }

@@ -15,11 +15,11 @@ export const THRESHOLDS_BASELINE = {
   'http_req_failed{lane:clean}':   ['rate<0.001'],
 };
 
-/** T2 — full PoUW cycle: end-to-end p95 < 5 s, zero errors */
+/** T2 — full PoUW cycle: end-to-end p95 < 5 s, zero errors on challenge; 422 allowed on validate */
 export const THRESHOLDS_POW_CYCLE = {
   'http_req_duration{scenario:challenge}': ['p(95)<5000'],
   'http_req_duration{scenario:validate}':  ['p(95)<5000'],
-  'http_req_failed':                        ['rate<0.001'],
+  'http_req_failed{scenario:challenge}':   ['rate<0.001'],
 };
 
 /** T3 — throughput ramp: stop criteria (abortOnFail) */

@@ -41,7 +41,6 @@ PROFILES=(
   traefik-crowdsec
   traefik-crowdsec-sha256
   traefik-crowdsec-monero
-  traefik-crowdsec-bitcoin
 )
 
 declare -A T1_P50

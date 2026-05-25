@@ -21,8 +21,10 @@
 
 import http from 'k6/http';
 import { check } from 'k6';
+import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.2/index.js';
 import { THRESHOLDS_SOAK } from '../lib/thresholds.js';
 import { cleanIP, suspiciousIP } from '../lib/ip-pools.js';
+import { collectAllStats } from '../lib/stats.js';
 
 const TARGET_HOST   = __ENV.TARGET_HOST    || 'http://localhost:80';
 const PLUGIN_ID     = __ENV.PLUGIN_ID      || 'pow-test-sha256';
@@ -64,4 +66,9 @@ export default function () {
   check(res, {
     'status not 5xx': (r) => r.status < 500,
   });
+}
+
+export function handleSummary(data) {
+  const dispersion = collectAllStats(data, ['http_req_duration']);
+  return { stdout: textSummary(data, { indent: ' ', enableColors: true }) + (dispersion ? '\n' + dispersion + '\n' : '') };
 }

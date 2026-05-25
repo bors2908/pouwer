@@ -14,8 +14,10 @@
 
 import http from 'k6/http';
 import { check } from 'k6';
+import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.2/index.js';
 import { THRESHOLDS_BASELINE } from '../lib/thresholds.js';
 import { cleanIP } from '../lib/ip-pools.js';
+import { collectAllStats } from '../lib/stats.js';
 
 const TARGET_HOST   = __ENV.TARGET_HOST   || 'http://localhost:80';
 const PROFILE       = __ENV.PROFILE       || 'traefik-only';
@@ -44,4 +46,9 @@ export default function () {
   check(res, {
     'status is 2xx or 3xx': (r) => r.status >= 200 && r.status < 400,
   });
+}
+
+export function handleSummary(data) {
+  const dispersion = collectAllStats(data, ['http_req_duration']);
+  return { stdout: textSummary(data, { indent: ' ', enableColors: true }) + (dispersion ? '\n' + dispersion + '\n' : '') };
 }

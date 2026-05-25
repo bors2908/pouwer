@@ -18,7 +18,7 @@ v 7.4 Validate changes, make a complete build
 7.7 Add custom headers for statics for each plugin
 7.8 Bundle challenge with the script (header maybe or asset)
 7.9 Evict records from task cache
-8.0
+8.0 Integration and load test improvements
 
 8. Add multiple tasks support for Monero and other payloads.
 9. Implement and integrate Reputation engine and Difficulty engine.

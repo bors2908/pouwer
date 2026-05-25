@@ -6,14 +6,14 @@
  *   - nonceOffset: byte offset where the 4-byte nonce is written
  *   - nonceIsLE:   true → little-endian nonce, false → big-endian
  *   - targetHex:   hex-encoded 32-byte target (hash must be ≤ target)
- *   - nonceRange:  { min, max } inclusive nonce search range
+ *   - nonceRange:  { start, end } inclusive nonce search range
  *
  * Returns { nonce, hashHex } or throws if no solution found in range.
  */
 export async function solveSha256(payload) {
   const data = hexToBytes(payload.dataHex);
   const target = hexToBytes(payload.targetHex);
-  const { min, max } = payload.nonceRange;
+  const { start: min, end: max } = payload.nonceRange;
   const offset = payload.nonceOffset;
   const le = payload.nonceIsLE;
 

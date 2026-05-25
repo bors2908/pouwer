@@ -20,8 +20,10 @@
 
 import http from 'k6/http';
 import { check } from 'k6';
+import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.2/index.js';
 import { THRESHOLDS_RAMP } from '../lib/thresholds.js';
 import { suspiciousIP } from '../lib/ip-pools.js';
+import { collectAllStats } from '../lib/stats.js';
 
 const TARGET_HOST    = __ENV.TARGET_HOST     || 'http://localhost:80';
 const CORE_HOST      = __ENV.CORE_HOST       || TARGET_HOST;
@@ -75,5 +77,7 @@ export function handleSummary(data) {
   if (reqs) {
     console.log(`Peak RPS (rate): ${reqs.values.rate.toFixed(2)} req/s`);
   }
-  return {};
+  const dispersion = collectAllStats(data, ['http_req_duration']);
+  // Always output full stats to stdout, even when the test was aborted by a threshold
+  return { stdout: textSummary(data, { indent: ' ', enableColors: true }) + (dispersion ? '\n' + dispersion + '\n' : '') };
 }
