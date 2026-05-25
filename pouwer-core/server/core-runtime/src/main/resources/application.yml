@@ -15,7 +15,7 @@ challenge:
   task:
     ttl-ms: 60000
   plugins:
-    priority-override: ""
+    priority-override: "monero-randomx,pow-test-sha256,bitcoin-rpc-sha256"
 
 resilience4j:
   circuitbreaker:

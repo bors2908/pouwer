@@ -16,8 +16,13 @@
 const CLEAN_BASE      = '192.0.2.';      // TEST-NET-1 — RFC 5737
 const SUSPICIOUS_BASE = '198.51.100.';   // TEST-NET-2 — RFC 5737
 
-let _cleanIdx      = 0;
-let _suspiciousIdx = 0;
+// Each VU gets its own JS runtime in k6, so module-level state is per-VU.
+// Seed the starting offset from __VU (1-based) so that concurrent VUs begin
+// at different positions in the pool and never all send the same IP at once.
+const _vuOffset = (typeof __VU !== 'undefined' ? __VU - 1 : 0);
+
+let _cleanIdx      = _vuOffset % 254;
+let _suspiciousIdx = _vuOffset % 254;
 
 /** Returns the next clean IP in round-robin order (.1 – .254). */
 export function cleanIP() {

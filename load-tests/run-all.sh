@@ -12,7 +12,7 @@
 # Options:
 #   --target-host URL     Base URL of the stack (default: http://localhost:80)
 #   --core-host   URL     Base URL for /challenge and /validate (default: http://localhost:8082)
-#   --plugin-id   ID      Plugin to use for PoUW tests (default: sha256)
+#   --plugin-id   ID      Plugin to use for PoUW tests (default: pow-test-sha256)
 #   --env-file    PATH    Source additional env vars from file before each test
 #   --skip        T1,T4   Comma-separated list of test IDs to skip
 #   --only        T1,T2   Run only these test IDs
@@ -27,7 +27,7 @@ RESULTS_DIR="${SCRIPT_DIR}/results"
 
 TARGET_HOST="${TARGET_HOST:-http://localhost:80}"
 CORE_HOST="${CORE_HOST:-http://localhost:80}"
-PLUGIN_ID="${PLUGIN_ID:-sha256}"
+PLUGIN_ID="${PLUGIN_ID:-pow-test-sha256}"
 ENV_FILE=""
 SKIP_TESTS=""
 ONLY_TESTS=""

@@ -7,13 +7,13 @@
  *   - clean lane:   clean IP pool at a fixed moderate rate
  *
  * Run with:
- *   k6 run -e TARGET_HOST=http://localhost:80 -e PLUGIN_ID=sha256 \
+ *   k6 run -e TARGET_HOST=http://localhost:80 -e PLUGIN_ID=pow-test-sha256 \
  *          -e CAPTCHA_VUS=50 -e CLEAN_VUS=20 \
  *          --out json=results/t4.json scenarios/t4-soak.js
  *
  * Env vars:
  *   TARGET_HOST    — base URL (default: http://localhost:80)
- *   PLUGIN_ID      — sha256 | monero | bitcoin (default: sha256)
+ *   PLUGIN_ID      — pow-test-sha256 | monero-randomx | bitcoin-rpc-sha256 (default: pow-test-sha256)
  *   CAPTCHA_VUS    — VUs for captcha/suspicious lane (default: 50)
  *   CLEAN_VUS      — VUs for clean lane (default: 20)
  *   SOAK_DURATION  — total soak duration (default: 60m)
@@ -25,7 +25,7 @@ import { THRESHOLDS_SOAK } from '../lib/thresholds.js';
 import { cleanIP, suspiciousIP } from '../lib/ip-pools.js';
 
 const TARGET_HOST   = __ENV.TARGET_HOST    || 'http://localhost:80';
-const PLUGIN_ID     = __ENV.PLUGIN_ID      || 'sha256';
+const PLUGIN_ID     = __ENV.PLUGIN_ID      || 'pow-test-sha256';
 const CAPTCHA_VUS   = parseInt(__ENV.CAPTCHA_VUS   || '50', 10);
 const CLEAN_VUS     = parseInt(__ENV.CLEAN_VUS     || '20', 10);
 const SOAK_DURATION = __ENV.SOAK_DURATION          || '60m';

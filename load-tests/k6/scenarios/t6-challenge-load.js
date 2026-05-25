@@ -6,7 +6,7 @@
  *
  * Run with:
  *   k6 run -e TARGET_HOST=http://localhost:80 -e CORE_HOST=http://localhost:8082 \
- *          -e VU_COUNT=20 -e TARGET_RPS=50 -e PLUGIN_ID=sha256 \
+ *          -e VU_COUNT=20 -e TARGET_RPS=50 -e PLUGIN_ID=pow-test-sha256 \
  *          --out json=results/t6.json scenarios/t6-challenge-load.js
  *
  * Env vars:
@@ -14,7 +14,7 @@
  *   CORE_HOST   — base URL for /challenge (default: TARGET_HOST)
  *   VU_COUNT    — number of virtual users (default: 20)
  *   TARGET_RPS  — target requests per second (default: 50)
- *   PLUGIN_ID   — pluginId query param (default: sha256)
+ *   PLUGIN_ID   — pluginId query param (default: pow-test-sha256)
  */
 
 import http from 'k6/http';
@@ -26,7 +26,7 @@ const TARGET_HOST = __ENV.TARGET_HOST || 'http://localhost:80';
 const CORE_HOST   = __ENV.CORE_HOST   || TARGET_HOST;
 const VU_COUNT    = parseInt(__ENV.VU_COUNT   || '20', 10);
 const TARGET_RPS  = parseInt(__ENV.TARGET_RPS || '50', 10);
-const PLUGIN_ID   = __ENV.PLUGIN_ID   || 'sha256';
+const PLUGIN_ID   = __ENV.PLUGIN_ID   || 'pow-test-sha256';
 
 // Pace each VU so the aggregate approaches TARGET_RPS
 const SLEEP_S = VU_COUNT / TARGET_RPS;

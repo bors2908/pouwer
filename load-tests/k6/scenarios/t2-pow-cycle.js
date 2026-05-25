@@ -9,13 +9,13 @@
  *
  * Run with:
  *   k6 run -e TARGET_HOST=http://localhost:80 -e CORE_HOST=http://localhost:8082 \
- *          -e PLUGIN_ID=sha256 \
+ *          -e PLUGIN_ID=pow-test-sha256 \
  *          --out json=results/t2.json scenarios/t2-pow-cycle.js
  *
  * Env vars:
  *   TARGET_HOST — base URL for static/browser endpoints (default: http://localhost:80)
  *   CORE_HOST   — base URL for /challenge and /validate (default: TARGET_HOST)
- *   PLUGIN_ID   — sha256 | monero | bitcoin (default: sha256)
+ *   PLUGIN_ID   — pow-test-sha256 | monero-randomx | bitcoin-rpc-sha256 (default: pow-test-sha256)
  *   ITERATIONS  — iterations per VU (default: 100)
  */
 
@@ -27,7 +27,7 @@ import { cleanIP } from '../lib/ip-pools.js';
 
 const TARGET_HOST = __ENV.TARGET_HOST || 'http://localhost:80';
 const CORE_HOST   = __ENV.CORE_HOST   || TARGET_HOST;
-const PLUGIN_ID   = __ENV.PLUGIN_ID   || 'sha256';
+const PLUGIN_ID   = __ENV.PLUGIN_ID   || 'pow-test-sha256';
 const ITERATIONS  = parseInt(__ENV.ITERATIONS || '100', 10);
 
 export const options = {
@@ -66,7 +66,7 @@ export default async function () {
   let solveResult = null;
 
   // Step 2: Solve (SHA-256 only; Monero/Bitcoin use mock)
-  if (PLUGIN_ID === 'sha256') {
+  if (PLUGIN_ID === 'pow-test-sha256') {
     group('solve', async () => {
       try {
         solveResult = await solveSha256(task.payload);

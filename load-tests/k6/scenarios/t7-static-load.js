@@ -5,12 +5,12 @@
  *       served via /static/{pluginId}/**.
  *
  * Run with:
- *   k6 run -e TARGET_HOST=http://localhost:80 -e PLUGIN_ID=sha256 \
+ *   k6 run -e TARGET_HOST=http://localhost:80 -e PLUGIN_ID=pow-test-sha256 \
  *          -e VU_COUNT=20 --out json=results/t7.json scenarios/t7-static-load.js
  *
  * Env vars:
  *   TARGET_HOST  — base URL (default: http://localhost:80)
- *   PLUGIN_ID    — plugin whose static assets to fetch (default: sha256)
+ *   PLUGIN_ID    — plugin whose static assets to fetch (default: pow-test-sha256)
  *   VU_COUNT     — concurrent VUs per scenario (default: 20)
  *   ASSET_PATHS  — comma-separated asset paths relative to /static/{pluginId}/
  *                  (default: index.js,worker.js)
@@ -23,7 +23,7 @@ import { THRESHOLDS_STATIC } from '../lib/thresholds.js';
 import { cleanIP } from '../lib/ip-pools.js';
 
 const TARGET_HOST  = __ENV.TARGET_HOST  || 'http://localhost:80';
-const PLUGIN_ID    = __ENV.PLUGIN_ID    || 'sha256';
+const PLUGIN_ID    = __ENV.PLUGIN_ID    || 'pow-test-sha256';
 const VU_COUNT     = parseInt(__ENV.VU_COUNT || '20', 10);
 const ASSET_PATHS  = (__ENV.ASSET_PATHS || 'index.js,worker.js').split(',');
 

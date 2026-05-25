@@ -6,13 +6,13 @@
  *
  * Run with:
  *   k6 run -e TARGET_HOST=http://localhost:80 -e CORE_HOST=http://localhost:8082 \
- *          -e PLUGIN_ID=sha256 \
+ *          -e PLUGIN_ID=pow-test-sha256 \
  *          --out json=results/t3.json scenarios/t3-throughput-ramp.js
  *
  * Env vars:
  *   TARGET_HOST  — base URL for static/browser endpoints (default: http://localhost:80)
  *   CORE_HOST    — base URL for /challenge (default: TARGET_HOST)
- *   PLUGIN_ID    — sha256 | monero | bitcoin (default: sha256)
+ *   PLUGIN_ID    — pow-test-sha256 | monero-randomx | bitcoin-rpc-sha256 (default: pow-test-sha256)
  *   MAX_VUS      — maximum VUs to ramp to (default: 200)
  *   STEP_VUS     — VU increment per stage (default: 20)
  *   STEP_DURATION — duration of each stage (default: 30s)
@@ -25,7 +25,7 @@ import { suspiciousIP } from '../lib/ip-pools.js';
 
 const TARGET_HOST    = __ENV.TARGET_HOST     || 'http://localhost:80';
 const CORE_HOST      = __ENV.CORE_HOST       || TARGET_HOST;
-const PLUGIN_ID      = __ENV.PLUGIN_ID       || 'sha256';
+const PLUGIN_ID      = __ENV.PLUGIN_ID       || 'pow-test-sha256';
 const MAX_VUS        = parseInt(__ENV.MAX_VUS        || '200', 10);
 const STEP_VUS       = parseInt(__ENV.STEP_VUS       || '20',  10);
 const STEP_DURATION  = __ENV.STEP_DURATION           || '30s';

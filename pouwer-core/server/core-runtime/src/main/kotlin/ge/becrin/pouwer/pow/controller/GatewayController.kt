@@ -7,7 +7,6 @@ import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationStatus
 import ge.becrin.pouwer.pow.service.PayloadPluginRegistry
-import ge.becrin.pouwer.pow.service.RemotePluginRegistry
 import ge.becrin.pouwer.pow.service.TaskStore
 import ge.becrin.pouwer.pow.service.ValidationPipeline
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -27,70 +26,47 @@ class GatewayController(
     private val taskStore: TaskStore,
     private val validationPipeline: ValidationPipeline,
     private val objectMapper: ObjectMapper,
-    private val remotePluginRegistry: RemotePluginRegistry? = null,
     @param:Value($$"${challenge.task.ttl-ms:60000}")
     private val taskTtlMillis: Long = 60_000,
-    @param:Value($$"${challenge.plugins.priority-override:}")
-    private val priorityOverrideRaw: String = ""
 ) {
     @GetMapping("/challenge")
     fun challenge(
         @RequestParam(required = false) workerId: String?,
         @RequestParam(required = false) pluginId: String?
     ): Task {
-        val candidates = resolveCandidatePluginIds(pluginId)
-        var lastError: Exception? = null
-
-        for (candidatePluginId in candidates) {
-            val plugin = try {
-                payloadPluginRegistry.get(candidatePluginId)
-            } catch (_: Exception) {
-                continue
-            }
-            val supportsRequest = try {
-                plugin.supports(
-                    PayloadSupportContext(
-                        requestedPluginId = pluginId,
-                        workerId = workerId
-                    )
-                )
-            } catch (e: Exception) {
-                payloadPluginRegistry.disable(candidatePluginId, e)
-                lastError = e
-                continue
-            }
-            if (!supportsRequest) {
-                continue
-            }
-
-            val task = try {
-                plugin.buildPayload(
-                    PayloadBuildRequest(
-                        workerId = workerId,
-                        nowMillis = System.currentTimeMillis(),
-                        taskTtlMillis = taskTtlMillis,
-                        requestedPluginId = pluginId ?: candidatePluginId
-                    )
-                )
-            } catch (e: Exception) {
-                payloadPluginRegistry.disable(candidatePluginId, e)
-                lastError = e
-                continue
-            }
-
-            taskStore.save(task)
-            log.info { "Task: " + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(task) }
-            return task
+        if (pluginId.isNullOrBlank()) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "pluginId is required")
         }
-
-        if (pluginId != null && lastError == null) {
+        val plugin = try {
+            payloadPluginRegistry.get(pluginId)
+        } catch (_: Exception) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Plugin not found: $pluginId")
+        }
+        val supportsRequest = try {
+            plugin.supports(PayloadSupportContext(requestedPluginId = pluginId, workerId = workerId))
+        } catch (e: Exception) {
+            payloadPluginRegistry.disable(pluginId, e)
+            throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Plugin $pluginId failed", e)
+        }
+        if (!supportsRequest) {
             throw IllegalArgumentException("Plugin $pluginId does not support this request")
         }
-        throw ResponseStatusException(
-            HttpStatus.SERVICE_UNAVAILABLE,
-            "No available plugin could build challenge",
-            lastError
-        )
+        val task = try {
+            plugin.buildPayload(
+                PayloadBuildRequest(
+                    workerId = workerId,
+                    nowMillis = System.currentTimeMillis(),
+                    taskTtlMillis = taskTtlMillis,
+                    requestedPluginId = pluginId
+                )
+            )
+        } catch (e: Exception) {
+            payloadPluginRegistry.disable(pluginId, e)
+            throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Plugin $pluginId failed", e)
+        }
+        taskStore.save(task)
+        log.info { "Task: " + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(task) }
+        return task
     }
 
     @PostMapping("/validate")
@@ -114,39 +90,5 @@ class GatewayController(
 
     companion object {
         private val log = KotlinLogging.logger {}
-    }
-
-    private fun resolveCandidatePluginIds(requestedPluginId: String?): List<String> {
-        if (!requestedPluginId.isNullOrBlank()) {
-            return listOf(requestedPluginId)
-        }
-
-        val available = payloadPluginRegistry.pluginIds()
-        if (available.isEmpty()) {
-            return emptyList()
-        }
-
-        val ordered = linkedSetOf<String>()
-        val priorityOverride = priorityOverrideRaw
-            .split(',')
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-
-        priorityOverride
-            .filter { available.contains(it) }
-            .forEach { ordered.add(it) }
-
-        remotePluginRegistry
-            ?.getHealthy()
-            ?.sortedByDescending { it.registeredAt }
-            ?.map { it.id }
-            ?.filter { available.contains(it) }
-            ?.forEach { ordered.add(it) }
-
-        available
-            .filterNot { ordered.contains(it) }
-            .forEach { ordered.add(it) }
-
-        return ordered.toList()
     }
 }
