@@ -27,6 +27,12 @@ services:
     image: ghcr.io/sethforprivacy/p2pool:v4.15
     container_name: p2pool
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 3333 || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
     depends_on:
       monero-testnet:
         condition: service_started
@@ -95,7 +101,7 @@ services:
       - "8083:8083"
     depends_on:
       p2pool:
-        condition: service_started
+        condition: service_healthy
       pouwer-server:
         condition: service_healthy
     networks:
