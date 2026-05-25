@@ -12,7 +12,7 @@ describe("workerRuntime", () => {
         expect(posted[0]).toEqual({type: "stopped", reason: "Task was not initialized"});
     });
 
-    test("testStartReportsProgressAndSolved", () => {
+    test("testStartReportsProgressAndSolved", async () => {
         const {selfMock, posted} = setupSelf();
         createWorkerRuntime((_task, runtime) => {
             runtime.reportProgress({attempts: 1, elapsedMs: 10, hashesPerSec: 100});
@@ -23,6 +23,8 @@ describe("workerRuntime", () => {
             data: {type: "init", task: {jobId: "1", pluginId: "plugin", expiresAt: 10, payload: {}}}
         } as MessageEvent);
         selfMock.onmessage?.({data: {type: "start"}} as MessageEvent);
+
+        await Promise.resolve();
 
         expect(posted[0]).toEqual({type: "progress", attempts: 1, elapsedMs: 10, hashesPerSec: 100});
         expect(posted[1]).toEqual({type: "solved", attempts: 2, durationMs: 20, payload: {ok: true}});
@@ -39,6 +41,7 @@ describe("workerRuntime", () => {
         } as MessageEvent);
         selfMock.onmessage?.({data: {type: "start"}} as MessageEvent);
 
+        await Promise.resolve();
         await Promise.resolve();
 
         expect(posted[0]).toEqual({type: "stopped", reason: "boom"});
@@ -84,6 +87,7 @@ describe("workerRuntime", () => {
         } as MessageEvent);
         selfMock.onmessage?.({data: {type: "start"}} as MessageEvent);
 
+        await Promise.resolve();
         await Promise.resolve();
 
         expect(posted[0]).toEqual({type: "stopped", reason: "boom"});

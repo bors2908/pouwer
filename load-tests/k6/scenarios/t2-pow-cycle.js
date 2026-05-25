@@ -8,11 +8,13 @@
  *   (real solve is infeasible in k6; documents network round-trip latency only).
  *
  * Run with:
- *   k6 run -e TARGET_HOST=http://localhost:80 -e PLUGIN_ID=sha256 \
+ *   k6 run -e TARGET_HOST=http://localhost:80 -e CORE_HOST=http://localhost:8082 \
+ *          -e PLUGIN_ID=sha256 \
  *          --out json=results/t2.json scenarios/t2-pow-cycle.js
  *
  * Env vars:
- *   TARGET_HOST — base URL (default: http://localhost:80)
+ *   TARGET_HOST — base URL for static/browser endpoints (default: http://localhost:80)
+ *   CORE_HOST   — base URL for /challenge and /validate (default: TARGET_HOST)
  *   PLUGIN_ID   — sha256 | monero | bitcoin (default: sha256)
  *   ITERATIONS  — iterations per VU (default: 100)
  */
@@ -24,6 +26,7 @@ import { solveSha256 } from '../lib/sha256.js';
 import { cleanIP } from '../lib/ip-pools.js';
 
 const TARGET_HOST = __ENV.TARGET_HOST || 'http://localhost:80';
+const CORE_HOST   = __ENV.CORE_HOST   || TARGET_HOST;
 const PLUGIN_ID   = __ENV.PLUGIN_ID   || 'sha256';
 const ITERATIONS  = parseInt(__ENV.ITERATIONS || '100', 10);
 
@@ -48,7 +51,7 @@ export default async function () {
   // Step 1: GET /challenge
   group('challenge', () => {
     const res = http.get(
-      `${TARGET_HOST}/challenge?pluginId=${PLUGIN_ID}`,
+      `${CORE_HOST}/challenge?pluginId=${PLUGIN_ID}`,
       { headers, tags: { scenario: 'challenge', pluginId: PLUGIN_ID } },
     );
     check(res, { 'challenge 200': (r) => r.status === 200 });
@@ -92,7 +95,7 @@ export default async function () {
     });
 
     const res = http.post(
-      `${TARGET_HOST}/validate`,
+      `${CORE_HOST}/validate`,
       body,
       { headers, tags: { scenario: 'validate', pluginId: PLUGIN_ID } },
     );

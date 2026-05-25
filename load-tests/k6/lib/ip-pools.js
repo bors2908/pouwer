@@ -2,7 +2,9 @@
  * IP pool helpers for k6 load tests.
  *
  * Clean pool  — RFC 5737 TEST-NET-1 (192.0.2.x): never routed, safe for
- *               X-Forwarded-For injection; CrowdSec should not ban these.
+ *               X-Forwarded-For injection. Whitelisted in CrowdSec's parser
+ *               stage (whitelists.yaml) so no captcha/ban decisions are ever
+ *               issued against these IPs.
  * Suspicious pool — RFC 5737 TEST-NET-2 (198.51.100.x): used to simulate
  *               traffic that CrowdSec may flag / challenge.
  *

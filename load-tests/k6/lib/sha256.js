@@ -1,5 +1,3 @@
-import { crypto } from 'k6/experimental/webcrypto';
-
 /**
  * SHA-256 PoW solver for k6.
  *

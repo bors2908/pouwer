@@ -69,9 +69,10 @@ export function createWorkerRuntime<TTask extends BaseTask, TResultPayload>(
                     self.postMessage({type: "stopped", reason: "Task was not initialized"} as WorkerOutMessage<TResultPayload>);
                     return;
                 }
+                const task = currentTask;
                 running = true;
                 Promise.resolve()
-                    .then(() => solve(currentTask, runtime))
+                    .then(() => solve(task, runtime))
                     .catch((error: unknown) => {
                         if (running) {
                             runtime.reportStopped(toErrorMessage(error));

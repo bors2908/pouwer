@@ -1,8 +1,9 @@
 name: crowdsecurity/whitelists
-description: "Local dev override: do not whitelist Docker bridge addresses"
+description: "Local dev override: whitelist loopback and load-test clean-lane IPs"
 whitelist:
-  reason: "loopback ip"
+  reason: "loopback and load-test clean lane (RFC 5737 TEST-NET-1)"
   ip:
     - "::1"
   cidr:
     - "127.0.0.0/8"
+    - "192.0.2.0/24"
