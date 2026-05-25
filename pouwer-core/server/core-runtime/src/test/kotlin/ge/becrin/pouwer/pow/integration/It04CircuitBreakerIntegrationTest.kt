@@ -96,7 +96,7 @@ class It04CircuitBreakerIntegrationTest : IntegrationTestBase() {
     fun opensCircuitBreakerAndStopsCallingPluginValidate() {
         registerPlugin("it04-failing", failingPlugin.url("/").toString().removeSuffix("/"))
         payloadPluginRegistry.refresh()
-        val task = challenge()
+        val task = challenge("it04-failing")
         assertEquals("it04-failing", task.get("pluginId").asText())
 
         val attempts = 6
@@ -150,10 +150,10 @@ class It04CircuitBreakerIntegrationTest : IntegrationTestBase() {
         assertEquals(200, response.statusCode())
     }
 
-    private fun challenge(): tools.jackson.databind.JsonNode {
+    private fun challenge(pluginId: String): tools.jackson.databind.JsonNode {
         val response = httpClient().send(
             HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:$port/challenge"))
+                .uri(URI.create("http://localhost:$port/challenge?pluginId=${pluginId}"))
                 .header("Accept", "application/json")
                 .GET()
                 .build(),

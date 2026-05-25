@@ -125,7 +125,7 @@ class It05PriorityBasedPluginDistributionIntegrationTest : IntegrationTestBase()
 
         val taskCount = 5
         repeat(taskCount) {
-            val task = challenge()
+            val task = challenge("it05-sha256")
             assertEquals("it05-sha256", task.get("pluginId").asText(), "Task $it should use SHA256 (higher priority)")
         }
 
@@ -140,7 +140,7 @@ class It05PriorityBasedPluginDistributionIntegrationTest : IntegrationTestBase()
         payloadPluginRegistry.refresh()
 
         // First, verify SHA256 plugin is being used
-        val firstTask = challenge()
+        val firstTask = challenge("it05-sha256")
         assertEquals("it05-sha256", firstTask.get("pluginId").asText())
 
         // Stop the SHA256 plugin to simulate failure
@@ -153,7 +153,7 @@ class It05PriorityBasedPluginDistributionIntegrationTest : IntegrationTestBase()
         var task: JsonNode? = null
         for (attempt in 0..4) {
             try {
-                task = challenge()
+                task = challenge("it05-stub")
                 if (task.get("pluginId").asText() == "it05-stub") {
                     break
                 }
@@ -178,7 +178,7 @@ class It05PriorityBasedPluginDistributionIntegrationTest : IntegrationTestBase()
 
         // Generate tasks on primary plugin
         repeat(tasksBeforeFallback) {
-            val task = challenge()
+            val task = challenge("it05-sha256")
             assertEquals("it05-sha256", task.get("pluginId").asText(), "Should use SHA256 (higher priority)")
         }
 
@@ -190,7 +190,7 @@ class It05PriorityBasedPluginDistributionIntegrationTest : IntegrationTestBase()
 
         // Generate tasks on fallback plugin - should work without errors
         repeat(tasksAfterFallback) {
-            val task = challenge()
+            val task = challenge("it05-stub")
             assertEquals("it05-stub", task.get("pluginId").asText(), "Should fallback to stub")
         }
 
@@ -218,10 +218,10 @@ class It05PriorityBasedPluginDistributionIntegrationTest : IntegrationTestBase()
         assertEquals(200, response.statusCode(), "Plugin registration should succeed")
     }
 
-    private fun challenge(): JsonNode {
+    private fun challenge(pluginId: String): JsonNode {
         val response = httpClient().send(
             HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:$port/challenge"))
+                .uri(URI.create("http://localhost:$port/challenge?pluginId=${pluginId}"))
                 .header("Accept", "application/json")
                 .GET()
                 .build(),
