@@ -59,6 +59,12 @@ services:
     image: localhost:9002/pouwer-server:0.2.0
     container_name: pouwer-server
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8082/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
     environment:
       PAGES_EXTRACT_PATH: /pages
       CHALLENGE_PLUGINS_PRIORITY_OVERRIDE: monero-randomx,pow-test-sha256
@@ -74,6 +80,12 @@ services:
     image: localhost:9002/pouwer-monero-plugin:0.2.0
     container_name: pouwer-monero-plugin
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8083/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
     environment:
       SERVER_PORT: 8083
       STRATUM_HOST: p2pool
@@ -85,7 +97,7 @@ services:
       p2pool:
         condition: service_started
       pouwer-server:
-        condition: service_started
+        condition: service_healthy
     networks:
       - monero-net
       - app-net
@@ -94,6 +106,12 @@ services:
     image: localhost:9002/pouwer-sha256-plugin:0.2.0
     container_name: pouwer-sha256-plugin
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8085/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
     environment:
       SERVER_PORT: 8085
       STRATUM_HOST: p2pool
@@ -103,7 +121,7 @@ services:
       - "8085:8085"
     depends_on:
       pouwer-server:
-        condition: service_started
+        condition: service_healthy
     networks:
       - monero-net
       - app-net
@@ -143,7 +161,7 @@ services:
       crowdsec:
         condition: service_started
       pouwer-server:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "80:80"
       - "8081:8080"

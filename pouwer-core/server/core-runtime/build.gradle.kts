@@ -23,6 +23,7 @@ dependencies {
     implementation(platform(libs.spring.boot.bom))
     implementation(platform(libs.spring.cloud.bom))
     implementation(libs.spring.cloud.starter.openfeign)
+    implementation(libs.spring.boot.starter.actuator)
     implementation(libs.resilience4j.spring.boot3)
     implementation(libs.resilience4j.circuitbreaker)
     implementation(libs.kotlinx.coroutines.core)

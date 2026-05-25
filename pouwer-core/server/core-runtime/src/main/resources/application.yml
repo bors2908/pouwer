@@ -17,6 +17,15 @@ challenge:
   plugins:
     priority-override: "monero-randomx,pow-test-sha256,bitcoin-rpc-sha256"
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
 resilience4j:
   circuitbreaker:
     instances:
