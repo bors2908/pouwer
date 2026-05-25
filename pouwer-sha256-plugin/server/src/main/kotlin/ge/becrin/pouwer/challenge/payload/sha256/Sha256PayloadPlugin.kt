@@ -18,7 +18,7 @@ import kotlin.random.Random
 
 @Component
 class Sha256PayloadPlugin(
-    @field:Value($$"${plugin.sha256.target:0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff}")
+    @param:Value($$"${plugin.sha256.target:0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff}")
     private val targetHex: String,
     @param:Value($$"${plugin.sha256.nonce-range-size:1000000}")
     private val nonceRangeSize: Long
