@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: pouwer-server
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['pouwer-server:8082']
+
+  - job_name: k6
+    static_configs:
+      - targets: ['host.docker.internal:9091']

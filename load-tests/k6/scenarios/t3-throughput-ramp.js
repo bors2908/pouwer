@@ -1,0 +1,76 @@
+/**
+ * T3 — Throughput Ramp
+ *
+ * Goal: find the saturation point (max stable RPS) before p95 > 10 s or
+ *       error rate > 1 %.  Uses suspicious IP pool only.
+ *
+ * Run with:
+ *   k6 run -e TARGET_HOST=http://localhost:80 -e PLUGIN_ID=sha256 \
+ *          --out json=results/t3.json scenarios/t3-throughput-ramp.js
+ *
+ * Env vars:
+ *   TARGET_HOST  — base URL (default: http://localhost:80)
+ *   PLUGIN_ID    — sha256 | monero | bitcoin (default: sha256)
+ *   MAX_VUS      — maximum VUs to ramp to (default: 200)
+ *   STEP_VUS     — VU increment per stage (default: 20)
+ *   STEP_DURATION — duration of each stage (default: 30s)
+ */
+
+import http from 'k6/http';
+import { check } from 'k6';
+import { THRESHOLDS_RAMP } from '../lib/thresholds.js';
+import { suspiciousIP } from '../lib/ip-pools.js';
+
+const TARGET_HOST    = __ENV.TARGET_HOST     || 'http://localhost:80';
+const PLUGIN_ID      = __ENV.PLUGIN_ID       || 'sha256';
+const MAX_VUS        = parseInt(__ENV.MAX_VUS        || '200', 10);
+const STEP_VUS       = parseInt(__ENV.STEP_VUS       || '20',  10);
+const STEP_DURATION  = __ENV.STEP_DURATION           || '30s';
+
+// Build ramping-vus stages: 0→20, 20→40, …, up to MAX_VUS, then back to 0
+function buildStages() {
+  const stages = [];
+  for (let vus = STEP_VUS; vus <= MAX_VUS; vus += STEP_VUS) {
+    stages.push({ duration: STEP_DURATION, target: vus });
+  }
+  // Hold at peak for one extra stage then ramp down
+  stages.push({ duration: STEP_DURATION, target: MAX_VUS });
+  stages.push({ duration: '10s', target: 0 });
+  return stages;
+}
+
+export const options = {
+  scenarios: {
+    ramp: {
+      executor: 'ramping-vus',
+      startVUs: 0,
+      stages: buildStages(),
+      gracefulRampDown: '10s',
+      tags: { lane: 'suspicious' },
+    },
+  },
+  thresholds: THRESHOLDS_RAMP,
+};
+
+export default function () {
+  const res = http.get(
+    `${TARGET_HOST}/challenge?pluginId=${PLUGIN_ID}`,
+    {
+      headers: { 'X-Forwarded-For': suspiciousIP() },
+      tags: { lane: 'suspicious', pluginId: PLUGIN_ID },
+    },
+  );
+
+  check(res, {
+    'status not 5xx': (r) => r.status < 500,
+  });
+}
+
+export function handleSummary(data) {
+  // Report the peak RPS observed during the run
+  const reqs = data.metrics['http_reqs'];
+  if (reqs) {
+    console.log(`Peak RPS (rate): ${reqs.values.rate.toFixed(2)} req/s`);
+  }
+  return {};
+}
