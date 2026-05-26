@@ -5,13 +5,13 @@ skinparam shadowing false
 
 top to bottom direction
 
-package "Browser Client" as Browser {
+package "Browser Client" as Browser #lightblue {
   actor User
   collections "PoUW Scripts\nRandomX.js/BTC Regtest\n(JS/WASM)" as Miner
   component "Worker Engine" as Worker
 }
 
-package "API Client" as APIClient {
+package "API Client" as APIClient #lightblue {
   actor "API User" as APIUser
   collections "Miner\n(XMRig)" as StandaloneMiner
   component "Standalone Worker Engine" as StandaloneWorker
@@ -22,30 +22,30 @@ package "Resource" {
     component "Web Resource" as WebResource
 }
 
-package "Edge" {
+package "Edge" #lightyellow {
     component "Rate Limiter/Load Balancer\n(Traefik)" as RateLimiter
     component "Security Engine\n(CrowdSec)" as SecurityEngine
     component "Remediation Middleware\n(crowdsec-bouncer-traefik-plugin)" as Middleware
 }
 
-package "Reputation Engine" {
+package "Reputation Engine" #pink {
     component "Reputation Service" as ReputationService
     component "Difficulty Controller" as DifficultyController
 }
 
-package "Framework Core" {
+package "Framework Core" #pink {
   component "Worker Server" as WorkerServer
   component "Task Orchestrator" as Orchestrator
   component "Result Service" as ResultService
 }
 
-package "Abstraction Layer" {
+package "Abstraction Layer" #lightgreen {
   component "Custom Monero Stratum Adapter" as MoneroAdapter
   component "Custom BTC Regtest Client" as BTCRegtestClient
   collections "Other Payload Adapters" as OtherPayload
 }
 
-package "External Providers" {
+package "External Providers" #lightgreen {
   component "P2Pool Monero\n(RandomX Mining Pool)" as P2Pool
   component "Monero Node" as XMRNode
   component "BTC Regtest Node" as BTCRegtest
