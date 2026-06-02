@@ -4,10 +4,6 @@ Pouwer is a Proof-of-Work / Proof-of-Useful-Work web protection framework. It si
 
 The useful part is the main design point. The core runtime does not know whether a payload is a toy SHA-256 challenge, Bitcoin block work, Monero RandomX mining, or something else. It stores and routes opaque task payloads; plugin services own payload construction, validation, and any external provider integration.
 
-## Current Architecture
-
-The implemented code path is HTTP/JSON between core and plugins. Some older design material in external thesis notes mentions gRPC, reputation engines, and difficulty engines; those are target-design ideas, not the current runtime contract in this repository.
-
 Runtime flow:
 
 1. A challenge page loads a plugin-specific browser bundle.
@@ -40,8 +36,6 @@ Runtime flow:
 - Optional local Maven/Docker registries if you keep the default repository properties:
   - Maven public: `http://localhost:9001/repository/maven-public/`
   - Docker hosted: `localhost:9002`
-
-On Windows, use `gradlew.bat`. The command examples below use both Unix and Windows forms where it matters.
 
 ## Build And Test
 
@@ -109,8 +103,6 @@ Jib image names:
 | `:pouwer-monero-plugin:server` | `localhost:9002/pouwer-monero-plugin:0.2.0` | `8083` |
 | `:pouwer-bitcoin-plugin:server` | `localhost:9002/pouwer-bitcoin-plugin:0.2.0` | `8084` |
 
-The SHA-256 port mismatch is real in the current files: `application.yml` defaults to `8085`, while the Jib container metadata lists `8081`. The integration compose overrides `SERVER_PORT=8085`.
-
 ## Docker Compose Examples
 
 Full edge integration stack:
@@ -130,8 +122,6 @@ This stack starts:
 - sample browser and API apps
 - Monero testnet + P2Pool inside the same compose file
 
-It does not start the Bitcoin plugin.
-
 External Monero-only stacks:
 
 ```bash
@@ -144,16 +134,12 @@ cd examples/third-party/docker/monero-mainnet
 docker compose up -d
 ```
 
-Both Monero compose files use bind mounts under `D:/docker/...`. Change those paths on non-Windows hosts or on machines where that drive does not exist.
-
 Bitcoin regtest stack:
 
 ```bash
 cd examples/third-party/docker/bitcoin-regtest
 docker compose up -d
 ```
-
-Current caveat: `bitcoin-regtest/docker-compose.yml` uses `build: .`, but this checkout does not contain a Dockerfile in that directory. Treat it as an incomplete example until the image build context is restored or replaced with a concrete image.
 
 ## Load Tests
 
@@ -221,7 +207,5 @@ Plugin services:
 ## Notes For Maintainers
 
 - Payload JSON is intentionally opaque to core. Do not add plugin-specific payload parsing to `core-runtime`.
-- `core-runtime` uses an in-memory task store. Restarting core invalidates outstanding challenges.
-- Static plugin assets are proxied through core and get `Cross-Origin-Opener-Policy: same-origin` plus `Cross-Origin-Embedder-Policy: require-corp`, which is relevant for worker/WASM use cases.
-- Plugins self-register on Spring `ApplicationReadyEvent` and send heartbeats every 30 seconds by default.
+- - Plugins self-register on Spring `ApplicationReadyEvent` and send heartbeats every 30 seconds by default.
 - `RemotePluginRegistry` evicts stale plugins after 120 seconds without heartbeat.
