@@ -53,6 +53,4 @@ secrets/
 /logs/
 /examples/crowdsec-traefik-integration/crowdsec/data
 /examples/crowdsec-traefik-integration/logs/
-/.junie
-/.claude/
 /load-tests/results/

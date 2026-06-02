@@ -56,7 +56,7 @@ jib {
     }
     container.apply {
         mainClass = "ge.becrin.pouwer.challenge.payload.sha256.Sha256PluginApplicationKt"
-        ports = listOf("8081")
+        ports = listOf("8085")
         creationTime = "USE_CURRENT_TIMESTAMP"
     }
 }
