@@ -9,7 +9,6 @@ import ge.becrin.pouwer.challenge.api.ContractMismatchException
 import ge.becrin.pouwer.challenge.api.DuplicatePluginIdException
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
 import ge.becrin.pouwer.challenge.api.PayloadPlugin
-import ge.becrin.pouwer.challenge.api.PayloadSupportContext
 import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.UnsupportedPluginException
@@ -144,8 +143,6 @@ class PayloadPluginRegistryTest {
         override fun id(): String = pluginId
 
         override fun version(): String = "test"
-
-        override fun supports(context: PayloadSupportContext): Boolean = true
 
         override fun buildPayload(request: PayloadBuildRequest): Task =
             Task(

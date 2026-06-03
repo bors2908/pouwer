@@ -4,7 +4,6 @@ import tools.jackson.databind.node.JsonNodeFactory
 import tools.jackson.module.kotlin.jacksonObjectMapper
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
 import ge.becrin.pouwer.challenge.api.PayloadPlugin
-import ge.becrin.pouwer.challenge.api.PayloadSupportContext
 import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationResult
@@ -110,7 +109,7 @@ class GatewayControllerTest {
 
     @Test
     fun testChallengeThrowsWhenSupportsFalse() {
-        val plugin = TestPlugin("plugin-ok", supportsResult = false)
+        val plugin = TestPlugin("plugin-ok")
         val registry = PayloadPluginRegistry(listOf(plugin))
         val taskStore = InMemoryTaskStore()
         val controller = GatewayController(registry, taskStore, ValidationPipeline(taskStore, registry), jacksonObjectMapper())
@@ -122,7 +121,7 @@ class GatewayControllerTest {
 
     @Test
     fun testChallengeThrowsWhenSupportsFails() {
-        val plugin = TestPlugin("plugin-ok", supportsThrows = true)
+        val plugin = TestPlugin("plugin-ok")
         val registry = PayloadPluginRegistry(listOf(plugin))
         val taskStore = InMemoryTaskStore()
         val controller = GatewayController(registry, taskStore, ValidationPipeline(taskStore, registry), jacksonObjectMapper())
@@ -169,19 +168,10 @@ class GatewayControllerTest {
 
     private class TestPlugin(
         private val pluginId: String,
-        private val supportsResult: Boolean = true,
-        private val supportsThrows: Boolean = false,
         private val buildPayloadResult: Task? = null,
         private val buildPayloadThrows: Boolean = false
     ) : PayloadPlugin {
         override fun id(): String = pluginId
-
-        override fun supports(context: PayloadSupportContext): Boolean {
-            if (supportsThrows) {
-                throw IllegalStateException("Support check failed")
-            }
-            return supportsResult
-        }
 
         override fun buildPayload(request: PayloadBuildRequest): Task {
             if (buildPayloadThrows) {

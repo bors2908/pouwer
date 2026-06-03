@@ -1,7 +1,6 @@
 package ge.becrin.pouwer.pow.service
 
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
-import ge.becrin.pouwer.challenge.api.PayloadSupportContext
 import ge.becrin.pouwer.challenge.api.PluginMetadata
 import ge.becrin.pouwer.challenge.api.PluginStatus
 import ge.becrin.pouwer.challenge.api.PluginTransport
@@ -153,23 +152,6 @@ class RemotePayloadPluginSystemIntegrationTest {
     }
 
     @Test
-    fun testSupportsContextCheck() {
-        val metadata = createTestMetadata("test-plugin", "http://localhost:8081")
-        registry.register(metadata)
-
-        val plugins = provider.loadPlugins()
-        val plugin = plugins[0]
-
-        val context = PayloadSupportContext(
-            requestedPluginId = "test-plugin",
-            workerId = "worker1"
-        )
-
-        val supports = plugin.supports(context)
-        assertTrue(supports)
-    }
-
-    @Test
     fun testDisabledPluginMarkingUnhealthy() {
         registry.register(createTestMetadata("test-plugin", "http://localhost:8081"))
 
@@ -235,10 +217,6 @@ class MockPluginTransport : PluginTransport {
         return ValidationResult(ValidationStatus.ACCEPTED)
     }
 
-    override suspend fun supports(plugin: PluginMetadata, context: PayloadSupportContext): Boolean {
-        return true
-    }
-
     override suspend fun health(plugin: PluginMetadata): Boolean {
         return true
     }
@@ -252,10 +230,6 @@ class FailingPluginTransport : PluginTransport {
     }
 
     override suspend fun validateResult(plugin: PluginMetadata, task: Task, result: ResultMessage): ValidationResult {
-        throw RuntimeException("Simulated failure")
-    }
-
-    override suspend fun supports(plugin: PluginMetadata, context: PayloadSupportContext): Boolean {
         throw RuntimeException("Simulated failure")
     }
 

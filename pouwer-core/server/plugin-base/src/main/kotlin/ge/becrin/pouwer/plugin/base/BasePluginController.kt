@@ -1,7 +1,6 @@
 package ge.becrin.pouwer.plugin.base
 
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
-import ge.becrin.pouwer.challenge.api.PayloadSupportContext
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationResult
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -30,16 +29,6 @@ abstract class BasePluginController(
         } catch (e: Exception) {
             log.error(e) { "Error validating result for ${payloadPlugin.pluginId}" }
             ResponseEntity.status(500).build()
-        }
-    }
-
-    @PostMapping("/supports")
-    fun supports(@RequestBody context: PayloadSupportContext): ResponseEntity<Boolean> {
-        return try {
-            ResponseEntity.ok(payloadPlugin.supports(context))
-        } catch (e: Exception) {
-            log.error(e) { "Error checking supports for ${payloadPlugin.pluginId}" }
-            ResponseEntity.ok(false)
         }
     }
 

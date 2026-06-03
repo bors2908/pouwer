@@ -3,7 +3,6 @@ package ge.becrin.pouwer.pow.service
 import tools.jackson.databind.node.JsonNodeFactory
 import ge.becrin.pouwer.challenge.api.CHALLENGE_PLUGIN_CONTRACT_VERSION
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
-import ge.becrin.pouwer.challenge.api.PayloadSupportContext
 import ge.becrin.pouwer.challenge.api.PluginMetadata
 import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.Task
@@ -80,24 +79,6 @@ class RestPluginTransportTest {
                 transport.validateResult(testMetadata(), createTask(), createResult())
             }
         }
-    }
-
-    @Test
-    fun testSupportsReturnsFalseOnNullResponse() = runBlocking {
-        val transport = RestPluginTransport(StubRestTemplate(null))
-
-        val result = transport.supports(testMetadata(), PayloadSupportContext(requestedPluginId = "plugin-1"))
-
-        assertFalse(result)
-    }
-
-    @Test
-    fun testSupportsReturnsFalseOnException() = runBlocking {
-        val transport = RestPluginTransport(StubRestTemplate(RuntimeException("boom")))
-
-        val result = transport.supports(testMetadata(), PayloadSupportContext(requestedPluginId = "plugin-1"))
-
-        assertFalse(result)
     }
 
     @Test

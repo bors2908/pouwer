@@ -4,7 +4,6 @@ import tools.jackson.databind.node.JsonNodeFactory
 import ge.becrin.pouwer.challenge.api.CHALLENGE_PLUGIN_CONTRACT_VERSION
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
 import ge.becrin.pouwer.challenge.api.PayloadPlugin
-import ge.becrin.pouwer.challenge.api.PayloadSupportContext
 import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationResult
@@ -271,8 +270,6 @@ class ValidationPipelineTest {
         override fun id(): String = pluginId
 
         override fun version(): String = "test"
-
-        override fun supports(context: PayloadSupportContext): Boolean = true
 
         override fun buildPayload(request: PayloadBuildRequest): Task {
             throw UnsupportedOperationException("Not required for this test")

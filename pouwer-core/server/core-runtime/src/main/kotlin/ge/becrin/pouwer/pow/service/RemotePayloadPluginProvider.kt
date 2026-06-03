@@ -2,7 +2,6 @@ package ge.becrin.pouwer.pow.service
 
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
 import ge.becrin.pouwer.challenge.api.PayloadPlugin
-import ge.becrin.pouwer.challenge.api.PayloadSupportContext
 import ge.becrin.pouwer.challenge.api.PluginMetadata
 import ge.becrin.pouwer.challenge.api.PluginTransport
 import ge.becrin.pouwer.challenge.api.ResultMessage
@@ -20,20 +19,6 @@ class RemotePayloadPluginAdapter(
 
     override val contractVersion: String
         get() = metadata.contractVersion
-
-    //TODO Do we need this?
-    override fun supports(context: PayloadSupportContext): Boolean {
-        return try {
-            // Convert to blocking call
-            val result = runBlocking {
-                transport.supports(metadata, context)
-            }
-            result
-        } catch (e: Exception) {
-            log.warn(e) { "Error checking plugin support: ${metadata.id}" }
-            false
-        }
-    }
 
     override fun buildPayload(request: PayloadBuildRequest): Task {
         return try {

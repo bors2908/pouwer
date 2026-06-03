@@ -38,6 +38,7 @@ class StaticPluginProxyController(
     ): ResponseEntity<StreamingResponseBody> {
         val resolved = resolveCandidatePluginIds(pluginId).firstOrNull()
             ?: throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "No available plugin")
+
         return doProxy(resolved, request)
     }
 

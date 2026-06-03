@@ -1,7 +1,6 @@
 package ge.becrin.pouwer.pow.service
 
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
-import ge.becrin.pouwer.challenge.api.PayloadSupportContext
 import ge.becrin.pouwer.challenge.api.PluginMetadata
 import ge.becrin.pouwer.challenge.api.PluginTransport
 import ge.becrin.pouwer.challenge.api.ResultMessage
@@ -27,16 +26,6 @@ class CircuitBreakerPluginTransport(
     override suspend fun validateResult(plugin: PluginMetadata, task: Task, result: ResultMessage): ValidationResult {
         return executeWithCircuitBreaker(plugin, "validateResult") {
             delegate.validateResult(plugin, task, result)
-        }
-    }
-
-    override suspend fun supports(plugin: PluginMetadata, context: PayloadSupportContext): Boolean {
-        return try {
-            executeWithCircuitBreaker(plugin, "supports") {
-                delegate.supports(plugin, context)
-            }
-        } catch (e: Exception) {
-            false
         }
     }
 

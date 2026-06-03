@@ -48,11 +48,6 @@ data class ValidationResult(
     val reason: String? = null
 )
 
-data class PayloadSupportContext(
-    val requestedPluginId: String? = null,
-    val workerId: String? = null
-)
-
 data class PayloadBuildRequest(
     val workerId: String?,
     val nowMillis: Long,
@@ -88,8 +83,6 @@ interface PayloadPlugin {
 
     val contractVersion: String
         get() = CHALLENGE_PLUGIN_CONTRACT_VERSION
-
-    fun supports(context: PayloadSupportContext): Boolean
 
     fun buildPayload(request: PayloadBuildRequest): Task
 

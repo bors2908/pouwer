@@ -3,7 +3,6 @@ package ge.becrin.pouwer.pow.service
 import tools.jackson.databind.node.JsonNodeFactory
 import ge.becrin.pouwer.challenge.api.CHALLENGE_PLUGIN_CONTRACT_VERSION
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
-import ge.becrin.pouwer.challenge.api.PayloadSupportContext
 import ge.becrin.pouwer.challenge.api.PluginMetadata
 import ge.becrin.pouwer.challenge.api.PluginTransport
 import ge.becrin.pouwer.challenge.api.ResultMessage
@@ -18,27 +17,6 @@ import java.time.Instant
 import java.util.UUID
 
 class RemotePayloadPluginAdapterTest {
-
-    @Test
-    fun testSupportsReturnsTrueFromTransport() {
-        val transport = TestTransport(supportsResult = true)
-        val adapter = RemotePayloadPluginAdapter(testMetadata(), transport)
-
-        val result = adapter.supports(PayloadSupportContext(requestedPluginId = "plugin-1"))
-
-        assertEquals(true, result)
-    }
-
-    @Test
-    fun testSupportsReturnsFalseOnTransportFailure() {
-        val transport = TestTransport(supportsThrows = true)
-        val adapter = RemotePayloadPluginAdapter(testMetadata(), transport)
-
-        val result = adapter.supports(PayloadSupportContext(requestedPluginId = "plugin-1"))
-
-        assertFalse(result)
-    }
-
     @Test
     fun testBuildPayloadDelegatesToTransport() {
         val expectedTask = createTask()
@@ -145,13 +123,6 @@ class RemotePayloadPluginAdapterTest {
                 throw IllegalStateException("validate failure")
             }
             return validateResultResult ?: ValidationResult(ValidationStatus.ACCEPTED)
-        }
-
-        override suspend fun supports(plugin: PluginMetadata, context: PayloadSupportContext): Boolean {
-            if (supportsThrows) {
-                throw IllegalStateException("supports failure")
-            }
-            return supportsResult
         }
 
         override suspend fun health(plugin: PluginMetadata): Boolean = true

@@ -5,7 +5,6 @@ import ge.becrin.pouwer.IntegrationTestBase
 import ge.becrin.pouwer.challenge.api.NonceRange
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
 import ge.becrin.pouwer.challenge.api.PayloadPlugin
-import ge.becrin.pouwer.challenge.api.PayloadSupportContext
 import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationResult
@@ -174,8 +173,6 @@ class It01Sha256PowCycleIntegrationTest : IntegrationTestBase() {
         override fun id(): String = PLUGIN_ID
 
         override fun version(): String = "test"
-
-        override fun supports(context: PayloadSupportContext): Boolean = true
 
         override fun buildPayload(request: PayloadBuildRequest): Task {
             val data = ByteArray(32)

@@ -2,7 +2,6 @@ package ge.becrin.pouwer.plugin.base
 
 import tools.jackson.databind.node.JsonNodeFactory
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
-import ge.becrin.pouwer.challenge.api.PayloadSupportContext
 import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationResult
@@ -83,28 +82,6 @@ class BasePluginControllerTest {
     }
 
     @Test
-    fun testSupportsReturnsFalseOnException() {
-        val service = TestPayloadService(supportsThrows = true)
-        val controller = TestController(service)
-
-        val response = controller.supports(PayloadSupportContext(requestedPluginId = "plugin-1"))
-
-        assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(false, response.body)
-    }
-
-    @Test
-    fun testSupportsReturnsTrueWhenServiceSupports() {
-        val service = TestPayloadService()
-        val controller = TestController(service)
-
-        val response = controller.supports(PayloadSupportContext(requestedPluginId = "plugin-1"))
-
-        assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(true, response.body)
-    }
-
-    @Test
     fun testHealthReturnsUp() {
         val service = TestPayloadService()
         val controller = TestController(service)
@@ -122,17 +99,9 @@ class BasePluginControllerTest {
         private val buildPayloadResult: Task? = null,
         private val buildPayloadThrows: Boolean = false,
         private val validateResult: ValidationResult = ValidationResult(ValidationStatus.ACCEPTED),
-        private val validateThrows: Boolean = false,
-        private val supportsThrows: Boolean = false
+        private val validateThrows: Boolean = false
     ) : PluginPayloadService {
         override val pluginId: String = "plugin-1"
-
-        override fun supports(context: PayloadSupportContext): Boolean {
-            if (supportsThrows) {
-                throw IllegalStateException("supports failed")
-            }
-            return true
-        }
 
         override fun createTask(workerId: String?, nowMillis: Long, taskTtlMillis: Long): Task {
             return buildPayloadResult ?: Task(

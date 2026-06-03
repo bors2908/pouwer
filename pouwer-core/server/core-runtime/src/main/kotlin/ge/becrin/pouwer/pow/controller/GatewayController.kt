@@ -2,7 +2,6 @@ package ge.becrin.pouwer.pow.controller
 
 import tools.jackson.databind.ObjectMapper
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
-import ge.becrin.pouwer.challenge.api.PayloadSupportContext
 import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationStatus
@@ -42,15 +41,7 @@ class GatewayController(
         } catch (_: Exception) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Plugin not found: $pluginId")
         }
-        val supportsRequest = try {
-            plugin.supports(PayloadSupportContext(requestedPluginId = pluginId, workerId = workerId))
-        } catch (e: Exception) {
-            payloadPluginRegistry.disable(pluginId, e)
-            throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Plugin $pluginId failed", e)
-        }
-        if (!supportsRequest) {
-            throw IllegalArgumentException("Plugin $pluginId does not support this request")
-        }
+
         val task = try {
             plugin.buildPayload(
                 PayloadBuildRequest(

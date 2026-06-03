@@ -1,46 +1,16 @@
 package ge.becrin.pouwer.plugin.base
 
-import tools.jackson.databind.node.JsonNodeFactory
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
-import ge.becrin.pouwer.challenge.api.PayloadSupportContext
 import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationResult
 import ge.becrin.pouwer.challenge.api.ValidationStatus
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.node.JsonNodeFactory
 import java.util.UUID
 
 class PluginPayloadServiceTest {
-
-    @Test
-    fun testSupportsAllowsNullRequest() {
-        val service = TestService("plugin-1")
-
-        val result = service.supports(PayloadSupportContext(requestedPluginId = null))
-
-        assertTrue(result)
-    }
-
-    @Test
-    fun testSupportsMatchesRequestedId() {
-        val service = TestService("plugin-1")
-
-        val result = service.supports(PayloadSupportContext(requestedPluginId = "plugin-1"))
-
-        assertTrue(result)
-    }
-
-    @Test
-    fun testSupportsRejectsDifferentId() {
-        val service = TestService("plugin-1")
-
-        val result = service.supports(PayloadSupportContext(requestedPluginId = "plugin-2"))
-
-        assertFalse(result)
-    }
 
     @Test
     fun testBuildPayloadDelegatesToCreateTask() {

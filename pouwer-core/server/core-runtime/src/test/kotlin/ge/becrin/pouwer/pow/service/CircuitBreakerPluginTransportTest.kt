@@ -3,7 +3,6 @@ package ge.becrin.pouwer.pow.service
 import tools.jackson.databind.node.JsonNodeFactory
 import ge.becrin.pouwer.challenge.api.CHALLENGE_PLUGIN_CONTRACT_VERSION
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
-import ge.becrin.pouwer.challenge.api.PayloadSupportContext
 import ge.becrin.pouwer.challenge.api.PluginMetadata
 import ge.becrin.pouwer.challenge.api.PluginStatus
 import ge.becrin.pouwer.challenge.api.ResultMessage
@@ -120,20 +119,6 @@ class CircuitBreakerPluginTransportTest {
             }
         }
 
-        assertEquals(PluginStatus.UNHEALTHY, registry.get(plugin.id)?.status)
-    }
-
-    @Test
-    fun testSupportsReturnsFalseWhenCircuitOpen() = runBlocking {
-        val plugin = testMetadata()
-        val registry = RemotePluginRegistry().also { it.register(plugin) }
-        val circuitBreakerRegistry = CircuitBreakerRegistry.ofDefaults()
-        circuitBreakerRegistry.circuitBreaker("pluginTransport").transitionToOpenState()
-        val transport = CircuitBreakerPluginTransport(RestPluginTransport(StubRestTemplate()), registry, circuitBreakerRegistry)
-
-        val result = transport.supports(plugin, PayloadSupportContext(requestedPluginId = plugin.id))
-
-        assertFalse(result)
         assertEquals(PluginStatus.UNHEALTHY, registry.get(plugin.id)?.status)
     }
 

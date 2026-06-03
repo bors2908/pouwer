@@ -14,7 +14,6 @@ class ContractsCoreRuntimeTest : UnitTestBase() {
         val plugin = object : PayloadPlugin {
             override fun id() = "test"
             override fun version() = "v"
-            override fun supports(context: PayloadSupportContext) = true
             override fun buildPayload(request: PayloadBuildRequest): Task {
                 return Task(UUID.randomUUID(), id(), request.nowMillis + 1000, JsonNodeFactory.instance.objectNode())
             }
@@ -40,9 +39,6 @@ class ContractsCoreRuntimeTest : UnitTestBase() {
 
     @Test
     fun dataClassesCoverage() {
-        val ctx = PayloadSupportContext("pid", "worker")
-        assertEquals("pid", ctx.requestedPluginId)
-
         val req = PayloadBuildRequest("worker1", 123L, 456L, "pid")
         val reqCopy = req.copy(taskTtlMillis = 999L)
         assertNotEquals(req, reqCopy)
