@@ -78,21 +78,10 @@ class StaticPluginProxyController(
 
     private fun doProxy(pluginId: String, request: HttpServletRequest): ResponseEntity<StreamingResponseBody> {
         val (statusCode, headers, body) = proxyService.proxy(pluginId, request)
-        val responseHeaders = HttpHeaders().apply {
-            putAll(headers)
-            add(COOP_HEADER, COOP_VALUE)
-            add(COEP_HEADER, COEP_VALUE)
-        }
+
         return ResponseEntity
             .status(HttpStatusCode.valueOf(statusCode))
-            .headers(responseHeaders)
+            .headers(headers)
             .body(body)
-    }
-
-    private companion object {
-        private const val COOP_HEADER = "Cross-Origin-Opener-Policy"
-        private const val COEP_HEADER = "Cross-Origin-Embedder-Policy"
-        private const val COOP_VALUE = "same-origin"
-        private const val COEP_VALUE = "require-corp"
     }
 }
