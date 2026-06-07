@@ -135,7 +135,7 @@ class It04CircuitBreakerIntegrationTest : IntegrationTestBase() {
             mapOf(
                 "id" to pluginId,
                 "version" to "1.0.0",
-                "contractVersion" to "0.2.1",
+                "contractVersion" to "0.2.2",
                 "baseUrl" to baseUrl
             )
         )
