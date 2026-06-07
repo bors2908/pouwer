@@ -1,4 +1,5 @@
 .env
+examples/crowdsec-traefik-integration/.env
 HELP.md
 .gradle
 build/
