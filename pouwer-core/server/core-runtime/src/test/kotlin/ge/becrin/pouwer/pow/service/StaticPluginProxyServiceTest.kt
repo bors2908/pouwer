@@ -40,8 +40,9 @@ class StaticPluginProxyServiceTest {
         }
 
         val service = createService(httpServer)
-        val request = MockHttpServletRequest("POST", "/static/test-plugin/assets/app.js")
+        val request = MockHttpServletRequest("POST", "/static/assets/app.js")
             .apply {
+                setParameter("pluginId", "test-plugin")
                 setContent("payload".toByteArray())
                 addHeader("X-Test-Header", "forward-me")
                 contentType = "text/plain"

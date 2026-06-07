@@ -14,7 +14,7 @@ http:
           metricsUpdateIntervalSeconds: 0
           captchaProvider: custom
           captchaCustomKey: pouwer-firewall
-          captchaCustomJsURL: http://localhost/static/monero-randomx/monero/challenge-monero.js
+          captchaCustomJsURL: http://localhost/static/monero/challenge-monero.js?pluginId=monero-randomx
           captchaCustomValidateURL: http://pouwer-server:8082/validate-custom-captcha
           captchaCustomResponse: response
           captchaHTMLFilePath: /pages/challenge.html

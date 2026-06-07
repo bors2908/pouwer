@@ -2,7 +2,7 @@
  * T7 — Static Asset Load
  *
  * Goal: measure cold vs warm cache performance for static JS/WASM assets
- *       served via /static/{pluginId}/**.
+ *       served via /static/**?pluginId={pluginId}.
  *
  * Run with:
  *   k6 run -e TARGET_HOST=http://localhost:80 -e PLUGIN_ID=pow-test-sha256 \
@@ -12,7 +12,7 @@
  *   TARGET_HOST  — base URL (default: http://localhost:80)
  *   PLUGIN_ID    — plugin whose static assets to fetch (default: pow-test-sha256)
  *   VU_COUNT     — concurrent VUs per scenario (default: 20)
- *   ASSET_PATHS  — comma-separated asset paths relative to /static/{pluginId}/
+ *   ASSET_PATHS  — comma-separated asset paths relative to /static/..?pluginId={pluginId}/
  *                  sha256 default: challenge-sha256.js
  *                  monero default: challenge-monero.js
  */
@@ -64,7 +64,7 @@ export default function () {
 
   group(`static-${cache}`, () => {
     for (const assetPath of ASSET_PATHS) {
-      const url = `${TARGET_HOST}/static/${PLUGIN_ID}/${assetPath}`;
+      const url = `${TARGET_HOST}/static/${assetPath}?pluginId=${PLUGIN_ID}`;
       const headers = { 'X-Forwarded-For': cleanIP() };
 
       if (isCold) {

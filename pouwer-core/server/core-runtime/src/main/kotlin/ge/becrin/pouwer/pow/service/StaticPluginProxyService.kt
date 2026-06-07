@@ -95,7 +95,7 @@ class StaticPluginProxyService(
     private fun buildUpstreamUri(baseUrl: String, request: HttpServletRequest, pluginId: String): URI {
         val contextPath = request.contextPath.orEmpty()
         val requestUri = request.requestURI.removePrefix(contextPath)
-        val prefix = "/static/$pluginId"
+        val prefix = "/static"
         val forwardPath = requestUri
             .removePrefix(prefix)
             .ifBlank { "/" }

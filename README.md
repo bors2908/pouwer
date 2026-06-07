@@ -193,7 +193,7 @@ Core runtime:
 | `POST` | `/core/plugins/register` | Plugin registration. |
 | `POST` | `/core/plugins/{pluginId}/heartbeat` | Plugin keepalive. |
 | `DELETE` | `/core/plugins/{pluginId}` | Plugin unregistration. |
-| `GET` | `/static/{pluginId}/...` | Proxies static assets from a registered plugin. |
+| `GET` | `/static/...?pluginId={pluginId}` | Proxies static assets from a registered plugin. |
 
 Plugin services:
 
