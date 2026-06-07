@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package ge.becrin.pouwer.plugintransport.v1;
+
+option java_multiple_files = true;
+option java_package = "ge.becrin.pouwer.plugintransport.v1";
+option java_outer_classname = "PluginTransportProto";
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+service PluginTransportStreamService {
+  rpc Connect(stream PluginEnvelope) returns (stream PluginEnvelope);
+}
+
+enum MessageType {
+  MESSAGE_TYPE_UNSPECIFIED = 0;
+  REGISTER = 1;
+  HEARTBEAT = 2;
+  REQUEST = 3;
+  RESPONSE = 4;
+  ERROR = 5;
+  UNREGISTER = 6;
+}
+
+enum OperationType {
+  OPERATION_TYPE_UNSPECIFIED = 0;
+  BUILD_PAYLOAD = 1;
+  VALIDATE_RESULT = 2;
+  HEALTH = 3;
+}
+
+message PluginEnvelope {
+  string schema_version = 1;
+  string plugin_id = 2;
+  string request_id = 3;
+  string session_id = 4;
+  MessageType message_type = 5;
+  OperationType operation_type = 6;
+  google.protobuf.Timestamp timestamp = 7;
+  map<string, string> auth_context = 8;
+  map<string, string> routing_metadata = 9;
+  google.protobuf.Struct payload = 10;
+  google.protobuf.Value value = 11;
+  ErrorDetails error = 12;
+}
+
+message ErrorDetails {
+  string code = 1;
+  string message = 2;
+  map<string, string> metadata = 3;
+}

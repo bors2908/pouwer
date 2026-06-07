@@ -16,6 +16,7 @@ dependencies {
     implementation(libs.kotlin.logging.jvm)
     implementation(libs.jackson.module.kotlin)
     implementation(libs.spring.boot.starter.validation)
+    implementation(libs.grpc.netty.shaded)
 
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(project(":pouwer-core:server:common-test"))

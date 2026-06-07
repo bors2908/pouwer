@@ -13,4 +13,11 @@ import org.springframework.web.client.RestTemplate
 class PluginBaseConfiguration {
     @Bean
     fun restTemplate(builder: RestTemplateBuilder): RestTemplate = builder.build()
+
+    @Bean
+    fun grpcPluginClient(
+        properties: PluginBaseProperties,
+        payloadPlugin: PluginPayloadService,
+        mapper: tools.jackson.databind.ObjectMapper
+    ): GrpcPluginClient = GrpcPluginClient(properties, payloadPlugin, mapper)
 }

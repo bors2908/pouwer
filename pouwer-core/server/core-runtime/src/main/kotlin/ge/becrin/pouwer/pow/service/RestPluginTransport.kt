@@ -3,6 +3,7 @@ package ge.becrin.pouwer.pow.service
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
 import ge.becrin.pouwer.challenge.api.PluginMetadata
 import ge.becrin.pouwer.challenge.api.PluginTransport
+import ge.becrin.pouwer.challenge.api.PluginValidationRequest
 import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationResult
@@ -10,11 +11,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.getForObject
 import org.springframework.web.client.postForObject
-
-data class ValidateResultRequest(
-    val task: Task,
-    val result: ResultMessage
-)
 
 class RestPluginTransport(
     private val httpClient: RestTemplate = RestTemplate()
@@ -34,7 +30,7 @@ class RestPluginTransport(
     override suspend fun validateResult(plugin: PluginMetadata, task: Task, result: ResultMessage): ValidationResult {
         return try {
             val url = "${plugin.baseUrl}/plugin/payload/validate"
-            val payload = ValidateResultRequest(task, result)
+            val payload = PluginValidationRequest(task, result)
 
             httpClient.postForObject<ValidationResult>(url, payload)
                 ?: throw RuntimeException("Null response from plugin ${plugin.id}")

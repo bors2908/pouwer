@@ -12,7 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class CircuitBreakerPluginTransport(
-    private val delegate: RestPluginTransport,
+    private val delegate: PluginTransport,
     private val registry: RemotePluginRegistry,
     private val circuitBreakerRegistry: CircuitBreakerRegistry
 ) : PluginTransport {

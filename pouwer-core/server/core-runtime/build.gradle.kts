@@ -29,6 +29,7 @@ dependencies {
     implementation(libs.resilience4j.spring.boot3)
     implementation(libs.resilience4j.circuitbreaker)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.grpc.netty.shaded)
 
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(project(":pouwer-core:server:common-test"))

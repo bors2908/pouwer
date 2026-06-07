@@ -11,11 +11,11 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
-class PayloadPluginRegistry @Autowired constructor(
+class PayloadPluginRegistry
+@Autowired constructor(
     private val pluginProvider: PayloadPluginProvider
 ) {
-    @Volatile
-    private var byId: Map<String, PayloadPlugin> = emptyMap()
+    private val plugins = PluginStateRegistry<PayloadPlugin>()
 
     constructor(plugins: List<PayloadPlugin>) : this(StaticPayloadPluginProvider(plugins))
 
@@ -24,16 +24,16 @@ class PayloadPluginRegistry @Autowired constructor(
     }
 
     fun get(pluginId: String): PayloadPlugin {
-        return byId[pluginId] ?: throw UnsupportedPluginException(pluginId, byId.keys)
+        return plugins.get(pluginId) ?: throw UnsupportedPluginException(pluginId, plugins.pluginIds())
     }
 
-    fun find(pluginId: String): PayloadPlugin? = byId[pluginId]
+    fun find(pluginId: String): PayloadPlugin? = plugins.get(pluginId)
 
-    fun pluginIds(): Set<String> = byId.keys
+    fun pluginIds(): Set<String> = plugins.pluginIds()
 
     @Synchronized
     fun refresh() {
-        byId = buildRegistry(pluginProvider.loadPlugins())
+        plugins.replaceAll(buildRegistry(pluginProvider.loadPlugins()))
     }
 
     @Scheduled(
@@ -46,11 +46,10 @@ class PayloadPluginRegistry @Autowired constructor(
 
     @Synchronized
     fun disable(pluginId: String, cause: Throwable? = null) {
-        if (!byId.containsKey(pluginId)) {
+        if (plugins.remove(pluginId) == null) {
             return
         }
         pluginProvider.disable(pluginId)
-        byId = byId - pluginId
         if (cause != null) {
             log.error(cause) { "Disabled plugin $pluginId due to runtime failure" }
         } else {

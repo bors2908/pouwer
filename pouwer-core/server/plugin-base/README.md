@@ -13,7 +13,7 @@ Use this module when writing a JVM plugin. It exposes the standard `/plugin/*` H
 | `BasePluginRegistration` | Registers the plugin with core on `ApplicationReadyEvent` and sends heartbeat on a schedule. |
 | `PluginBaseConfiguration` | Enables scheduling, binds properties, and provides `RestTemplate`. |
 | `PluginBaseProperties` | Binds `plugin.core.*` configuration. |
-| `ValidatePayloadRequest` | Request wrapper for plugin validation: stored `Task` plus submitted `ResultMessage`. |
+| `PluginValidationRequest` | Shared request wrapper for plugin validation: stored `Task` plus submitted `ResultMessage`. |
 
 ## HTTP Contract
 
@@ -22,7 +22,7 @@ If your controller maps `BasePluginController` under `/plugin`, it exposes:
 | Method | Path | Description |
 | --- | --- | --- |
 | `POST` | `/plugin/payload/build` | Receives `PayloadBuildRequest`, returns `Task`. |
-| `POST` | `/plugin/payload/validate` | Receives `ValidatePayloadRequest`, returns `ValidationResult`. |
+| `POST` | `/plugin/payload/validate` | Receives `PluginValidationRequest`, returns `ValidationResult`. |
 | `POST` | `/plugin/supports` | Receives `PayloadSupportContext`, returns boolean. |
 | `GET` | `/plugin/health` | Returns `status=UP` and the plugin ID. |
 

@@ -1,6 +1,7 @@
 package ge.becrin.pouwer.plugin.base
 
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
+import ge.becrin.pouwer.challenge.api.PluginValidationRequest
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationResult
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -23,7 +24,7 @@ abstract class BasePluginController(
     }
 
     @PostMapping("/payload/validate")
-    fun validateResult(@RequestBody payload: ValidatePayloadRequest): ResponseEntity<ValidationResult> {
+    fun validateResult(@RequestBody payload: PluginValidationRequest): ResponseEntity<ValidationResult> {
         return try {
             ResponseEntity.ok(payloadPlugin.validate(payload.task, payload.result))
         } catch (e: Exception) {

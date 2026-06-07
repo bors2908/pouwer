@@ -74,8 +74,11 @@ services:
     environment:
       PAGES_EXTRACT_PATH: /pages
       CHALLENGE_PLUGINS_PRIORITY_OVERRIDE: monero-randomx,pow-test-sha256
+      POUWER_PLUGIN_TRANSPORT_MODE: ${POUWER_PLUGIN_TRANSPORT_MODE:-rest}
+      POUWER_PLUGIN_TRANSPORT_GRPC_PORT: 9091
     ports:
       - "8082:8082"
+      - "9091:9091"
     volumes:
       - pouwer-pages-data:/pages
     networks:
@@ -97,6 +100,9 @@ services:
       STRATUM_HOST: p2pool
       PLUGIN_CORE_URL: http://pouwer-server:8082
       PLUGIN_HOST: http://pouwer-monero-plugin
+      PLUGIN_CORE_TRANSPORT: ${POUWER_PLUGIN_TRANSPORT_MODE:-rest}
+      PLUGIN_CORE_GRPC_HOST: pouwer-server
+      PLUGIN_CORE_GRPC_PORT: 9091
     ports:
       - "8083:8083"
     depends_on:
@@ -123,6 +129,9 @@ services:
       STRATUM_HOST: p2pool
       PLUGIN_CORE_URL: http://pouwer-server:8082
       PLUGIN_HOST: http://pouwer-sha256-plugin
+      PLUGIN_CORE_TRANSPORT: ${POUWER_PLUGIN_TRANSPORT_MODE:-rest}
+      PLUGIN_CORE_GRPC_HOST: pouwer-server
+      PLUGIN_CORE_GRPC_PORT: 9091
     ports:
       - "8085:8085"
     depends_on:

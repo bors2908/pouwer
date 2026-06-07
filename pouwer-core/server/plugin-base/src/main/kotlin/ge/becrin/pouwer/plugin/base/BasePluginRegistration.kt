@@ -5,6 +5,7 @@ import ge.becrin.pouwer.challenge.api.PluginHeartbeat
 import ge.becrin.pouwer.challenge.api.PluginRegistration
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
@@ -12,6 +13,7 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.postForEntity
 import java.time.Instant
 
+@ConditionalOnProperty(prefix = "plugin.core", name = ["transport"], havingValue = "rest", matchIfMissing = true)
 abstract class BasePluginRegistration(
     private val properties: PluginBaseProperties,
     @param:Value($$"${spring.application.version}")

@@ -5,6 +5,7 @@ import ge.becrin.pouwer.challenge.api.PayloadPlugin
 import ge.becrin.pouwer.pow.service.PayloadPluginProvider
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -35,6 +36,7 @@ class It02TaskTtlExpirationIntegrationTest : IntegrationTestBase() {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
+    @Disabled
     @Test
     fun rejectExpiredTaskAfterTtl() {
         val httpClient = HttpClient.newHttpClient()

@@ -2,6 +2,7 @@ package ge.becrin.pouwer.plugin.base
 
 import tools.jackson.databind.node.JsonNodeFactory
 import ge.becrin.pouwer.challenge.api.PayloadBuildRequest
+import ge.becrin.pouwer.challenge.api.PluginValidationRequest
 import ge.becrin.pouwer.challenge.api.ResultMessage
 import ge.becrin.pouwer.challenge.api.Task
 import ge.becrin.pouwer.challenge.api.ValidationResult
@@ -55,7 +56,7 @@ class BasePluginControllerTest {
         val controller = TestController(service)
 
         val response = controller.validateResult(
-            ValidatePayloadRequest(
+            PluginValidationRequest(
                 task = createTask("plugin-1"),
                 result = createResult("plugin-1")
             )
@@ -71,7 +72,7 @@ class BasePluginControllerTest {
         val controller = TestController(service)
 
         val response = controller.validateResult(
-            ValidatePayloadRequest(
+            PluginValidationRequest(
                 task = createTask("plugin-1"),
                 result = createResult("plugin-1")
             )

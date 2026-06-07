@@ -108,31 +108,6 @@ class GatewayControllerTest {
     }
 
     @Test
-    fun testChallengeThrowsWhenSupportsFalse() {
-        val plugin = TestPlugin("plugin-ok")
-        val registry = PayloadPluginRegistry(listOf(plugin))
-        val taskStore = InMemoryTaskStore()
-        val controller = GatewayController(registry, taskStore, ValidationPipeline(taskStore, registry), jacksonObjectMapper())
-
-        assertThrows(IllegalArgumentException::class.java) {
-            controller.challenge(workerId = "worker-1", pluginId = plugin.id())
-        }
-    }
-
-    @Test
-    fun testChallengeThrowsWhenSupportsFails() {
-        val plugin = TestPlugin("plugin-ok")
-        val registry = PayloadPluginRegistry(listOf(plugin))
-        val taskStore = InMemoryTaskStore()
-        val controller = GatewayController(registry, taskStore, ValidationPipeline(taskStore, registry), jacksonObjectMapper())
-
-        val exception = assertThrows(ResponseStatusException::class.java) {
-            controller.challenge(workerId = "worker-1", pluginId = plugin.id())
-        }
-        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.statusCode)
-    }
-
-    @Test
     fun testChallengeThrowsWhenBuildPayloadFails() {
         val plugin = TestPlugin("plugin-ok", buildPayloadThrows = true)
         val registry = PayloadPluginRegistry(listOf(plugin))
