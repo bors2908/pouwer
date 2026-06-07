@@ -13,10 +13,10 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-class GrpcPluginConnectionRegistryTest {
+class GrpcPluginConnectionStoreTest {
     @Test
     fun `correlates response by request id`() = runBlocking {
-        val registry = GrpcPluginConnectionRegistry(requestTimeoutMs = 1_000, heartbeatLeaseMs = 60_000)
+        val registry = GrpcPluginConnectionStore(requestTimeoutMs = 1_000, heartbeatLeaseMs = 60_000)
         val observer = RecordingObserver()
         registry.register(registerEnvelope(), observer)
 
@@ -36,7 +36,7 @@ class GrpcPluginConnectionRegistryTest {
 
     @Test
     fun `duplicate registration replaces previous stream`() {
-        val registry = GrpcPluginConnectionRegistry(requestTimeoutMs = 1_000, heartbeatLeaseMs = 60_000)
+        val registry = GrpcPluginConnectionStore(requestTimeoutMs = 1_000, heartbeatLeaseMs = 60_000)
         val first = RecordingObserver()
         val second = RecordingObserver()
 
@@ -49,7 +49,7 @@ class GrpcPluginConnectionRegistryTest {
 
     @Test
     fun `unregister removes matching session`() {
-        val registry = GrpcPluginConnectionRegistry(requestTimeoutMs = 1_000, heartbeatLeaseMs = 60_000)
+        val registry = GrpcPluginConnectionStore(requestTimeoutMs = 1_000, heartbeatLeaseMs = 60_000)
         registry.register(registerEnvelope("session-1"), RecordingObserver())
 
         registry.unregister("sha256", "session-1")

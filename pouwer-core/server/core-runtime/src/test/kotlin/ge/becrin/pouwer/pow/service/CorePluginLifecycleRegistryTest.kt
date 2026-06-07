@@ -14,12 +14,12 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class RemotePluginRegistryTest {
-    private lateinit var registry: RemotePluginRegistry
+class CorePluginLifecycleRegistryTest {
+    private lateinit var registry: CorePluginLifecycleRegistry
 
     @BeforeEach
     fun setUp() {
-        registry = RemotePluginRegistry(
+        registry = CorePluginLifecycleRegistry(
             keepaliveIntervalMs = 30_000,
             evictionThresholdMs = 60_000
         )
@@ -123,7 +123,7 @@ class RemotePluginRegistryTest {
 
     @Test
     fun testEvictStalePlugins() {
-        val registry = RemotePluginRegistry(
+        val registry = CorePluginLifecycleRegistry(
             keepaliveIntervalMs = 30_000,
             evictionThresholdMs = 1_000  // 1 second threshold for testing
         )

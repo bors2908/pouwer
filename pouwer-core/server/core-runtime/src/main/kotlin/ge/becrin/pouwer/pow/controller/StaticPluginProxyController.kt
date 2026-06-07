@@ -1,11 +1,12 @@
 package ge.becrin.pouwer.pow.controller
 
+import ge.becrin.pouwer.challenge.api.REST_VALUE
 import ge.becrin.pouwer.pow.service.PayloadPluginRegistry
-import ge.becrin.pouwer.pow.service.RemotePluginRegistry
+import ge.becrin.pouwer.pow.service.CorePluginLifecycleRegistry
 import ge.becrin.pouwer.pow.service.StaticPluginProxyService
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
@@ -17,10 +18,16 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 
 @RestController
+@ConditionalOnProperty(
+    prefix = "pouwer.plugin-transport",
+    name = ["mode"],
+    havingValue = REST_VALUE,
+    matchIfMissing = true
+)
 class StaticPluginProxyController(
     private val proxyService: StaticPluginProxyService,
     private val payloadPluginRegistry: PayloadPluginRegistry,
-    private val remotePluginRegistry: RemotePluginRegistry? = null,
+    private val remotePluginRegistry: CorePluginLifecycleRegistry? = null,
     @param:Value($$"\${challenge.plugins.priority-override:}")
     private val priorityOverrideRaw: String = ""
 ) {

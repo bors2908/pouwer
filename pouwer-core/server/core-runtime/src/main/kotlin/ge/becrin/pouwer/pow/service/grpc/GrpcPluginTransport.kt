@@ -16,7 +16,7 @@ import tools.jackson.databind.ObjectMapper
 import java.util.UUID
 
 class GrpcPluginTransport(
-    private val registry: GrpcPluginConnectionRegistry,
+    private val registry: GrpcPluginConnectionStore,
     private val mapper: ObjectMapper,
     private val schemaVersion: String
 ) : PluginTransport {

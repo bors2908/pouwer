@@ -11,7 +11,7 @@ import java.time.Clock
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
-class GrpcPluginConnectionRegistry(
+class GrpcPluginConnectionStore(
     private val requestTimeoutMs: Long,
     private val heartbeatLeaseMs: Long,
     private val clock: Clock = Clock.systemUTC()

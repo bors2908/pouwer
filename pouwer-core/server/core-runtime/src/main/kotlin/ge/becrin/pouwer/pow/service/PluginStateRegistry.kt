@@ -16,6 +16,9 @@ internal class PluginStateRegistry<T> {
     fun pluginIds(): Set<String> = byPluginId.keys.toSet()
 
     @Synchronized
+    fun values(): List<T> = byPluginId.values.toList()
+
+    @Synchronized
     fun replace(pluginId: String, state: T): T? = byPluginId.put(pluginId, state)
 
     @Synchronized

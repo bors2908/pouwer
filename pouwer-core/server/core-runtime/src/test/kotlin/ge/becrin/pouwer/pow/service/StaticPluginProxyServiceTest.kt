@@ -92,7 +92,7 @@ class StaticPluginProxyServiceTest {
 
     @Test
     fun testProxyFailsWhenPluginIsUnhealthy() {
-        val registry = RemotePluginRegistry()
+        val registry = CorePluginLifecycleRegistry()
         registry.register(
             PluginMetadata(
                 id = "test-plugin",
@@ -116,7 +116,7 @@ class StaticPluginProxyServiceTest {
 
     @Test
     fun testProxyFailsWhenUpstreamRequestThrows() {
-        val registry = RemotePluginRegistry()
+        val registry = CorePluginLifecycleRegistry()
         registry.register(
             PluginMetadata(
                 id = "test-plugin",
@@ -140,7 +140,7 @@ class StaticPluginProxyServiceTest {
 
     @Test
     fun `proxy fails when plugin is missing`() {
-        val service = StaticPluginProxyService(RemotePluginRegistry(), java.net.http.HttpClient.newHttpClient())
+        val service = StaticPluginProxyService(CorePluginLifecycleRegistry(), java.net.http.HttpClient.newHttpClient())
         val request = MockHttpServletRequest("GET", "/static/missing/app.js")
 
         val exception = assertFailsWith<ResponseStatusException> {
@@ -151,7 +151,7 @@ class StaticPluginProxyServiceTest {
     }
 
     private fun createService(httpServer: com.sun.net.httpserver.HttpServer): StaticPluginProxyService {
-        val registry = RemotePluginRegistry()
+        val registry = CorePluginLifecycleRegistry()
         registry.register(
             PluginMetadata(
                 id = "test-plugin",

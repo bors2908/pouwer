@@ -24,7 +24,7 @@ class CircuitBreakerPluginTransportTest {
     @Test
     fun testBuildPayloadReturnsDelegateResult() = runBlocking {
         val plugin = testMetadata()
-        val registry = RemotePluginRegistry().also { it.register(plugin) }
+        val registry = CorePluginLifecycleRegistry().also { it.register(plugin) }
         val circuitBreakerRegistry = CircuitBreakerRegistry.ofDefaults()
         val expectedTask = Task(
             jobId = UUID.randomUUID(),
@@ -48,7 +48,7 @@ class CircuitBreakerPluginTransportTest {
     @Test
     fun testValidateResultReturnsDelegateResult() = runBlocking {
         val plugin = testMetadata()
-        val registry = RemotePluginRegistry().also { it.register(plugin) }
+        val registry = CorePluginLifecycleRegistry().also { it.register(plugin) }
         val circuitBreakerRegistry = CircuitBreakerRegistry.ofDefaults()
         val expected = ValidationResult(ValidationStatus.ACCEPTED)
         val restTemplate = StubRestTemplate(
@@ -64,7 +64,7 @@ class CircuitBreakerPluginTransportTest {
     @Test
     fun testBuildPayloadMarksUnhealthyWhenDelegateThrows() {
         val plugin = testMetadata()
-        val registry = RemotePluginRegistry().also { it.register(plugin) }
+        val registry = CorePluginLifecycleRegistry().also { it.register(plugin) }
         val circuitBreakerRegistry = CircuitBreakerRegistry.ofDefaults()
         val transport = CircuitBreakerPluginTransport(
             RestPluginTransport(StubRestTemplate(response = RuntimeException("boom"))),
@@ -87,7 +87,7 @@ class CircuitBreakerPluginTransportTest {
     @Test
     fun testBuildPayloadMarksUnhealthyWhenCircuitOpen() {
         val plugin = testMetadata()
-        val registry = RemotePluginRegistry().also { it.register(plugin) }
+        val registry = CorePluginLifecycleRegistry().also { it.register(plugin) }
         val circuitBreakerRegistry = CircuitBreakerRegistry.ofDefaults()
         val circuitBreaker = circuitBreakerRegistry.circuitBreaker("pluginTransport")
         circuitBreaker.transitionToOpenState()
@@ -108,7 +108,7 @@ class CircuitBreakerPluginTransportTest {
     @Test
     fun testValidateResultMarksUnhealthyWhenCircuitOpen() {
         val plugin = testMetadata()
-        val registry = RemotePluginRegistry().also { it.register(plugin) }
+        val registry = CorePluginLifecycleRegistry().also { it.register(plugin) }
         val circuitBreakerRegistry = CircuitBreakerRegistry.ofDefaults()
         circuitBreakerRegistry.circuitBreaker("pluginTransport").transitionToOpenState()
         val transport = CircuitBreakerPluginTransport(RestPluginTransport(StubRestTemplate()), registry, circuitBreakerRegistry)
@@ -125,7 +125,7 @@ class CircuitBreakerPluginTransportTest {
     @Test
     fun testHealthReturnsFalseWhenCircuitOpen() = runBlocking {
         val plugin = testMetadata()
-        val registry = RemotePluginRegistry().also { it.register(plugin) }
+        val registry = CorePluginLifecycleRegistry().also { it.register(plugin) }
         val circuitBreakerRegistry = CircuitBreakerRegistry.ofDefaults()
         circuitBreakerRegistry.circuitBreaker("pluginTransport").transitionToOpenState()
         val transport = CircuitBreakerPluginTransport(RestPluginTransport(StubRestTemplate()), registry, circuitBreakerRegistry)

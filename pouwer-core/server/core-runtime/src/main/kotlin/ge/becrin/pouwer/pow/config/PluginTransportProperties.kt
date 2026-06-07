@@ -1,10 +1,11 @@
 package ge.becrin.pouwer.pow.config
 
+import ge.becrin.pouwer.challenge.api.PluginTransportMode
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "pouwer.plugin-transport")
 data class PluginTransportProperties(
-    var mode: String = "rest",
+    var mode: PluginTransportMode = PluginTransportMode.REST,
     var grpc: Grpc = Grpc()
 ) {
     data class Grpc(

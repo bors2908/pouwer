@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 
 class CircuitBreakerPluginTransport(
     private val delegate: PluginTransport,
-    private val registry: RemotePluginRegistry,
+    private val lifecycle: CorePluginLifecycle,
     private val circuitBreakerRegistry: CircuitBreakerRegistry
 ) : PluginTransport {
 
@@ -55,7 +55,7 @@ class CircuitBreakerPluginTransport(
             }
         } catch (e: Exception) {
             log.error(e) { "Circuit breaker failure for $operation on plugin ${plugin.id}" }
-            registry.markUnhealthy(plugin.id)
+            lifecycle.markUnavailable(plugin.id, e)
             throw PluginTransportException("Circuit breaker open for ${plugin.id}: ${e.message}", e)
         }
     }

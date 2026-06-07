@@ -2,8 +2,12 @@ package ge.becrin.pouwer.pow.controller
 
 import ge.becrin.pouwer.challenge.api.PluginHeartbeat
 import ge.becrin.pouwer.challenge.api.PluginRegistration
-import ge.becrin.pouwer.pow.service.RemotePluginRegistry
+import ge.becrin.pouwer.challenge.api.REST_VALUE
+import ge.becrin.pouwer.challenge.api.PluginTransportMode
+import ge.becrin.pouwer.pow.service.CorePluginLifecycle
+import ge.becrin.pouwer.pow.service.PluginConnectionSource
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -12,27 +16,22 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.time.Instant
 
 @RestController
+@ConditionalOnProperty(
+    prefix = "pouwer.plugin-transport",
+    name = ["mode"],
+    havingValue = REST_VALUE,
+    matchIfMissing = true
+)
 @RequestMapping("/core/plugins")
 class PluginManagementController(
-    private val registry: RemotePluginRegistry
+    private val lifecycle: CorePluginLifecycle
 ) {
     @PostMapping("/register")
     fun register(@RequestBody registration: PluginRegistration): ResponseEntity<Map<String, String>> {
         return try {
-            val metadata = registration.let {
-                ge.becrin.pouwer.challenge.api.PluginMetadata(
-                    id = it.id,
-                    version = it.version,
-                    contractVersion = it.contractVersion,
-                    baseUrl = it.baseUrl,
-                    lastHeartbeat = Instant.now(),
-                    registeredAt = Instant.now()
-                )
-            }
-            registry.register(metadata)
+            lifecycle.register(registration, PluginConnectionSource(PluginTransportMode.REST, baseUrl = registration.baseUrl))
             ResponseEntity.ok(
                 mapOf(
                     "status" to "registered",
@@ -52,7 +51,7 @@ class PluginManagementController(
         @RequestBody heartbeat: PluginHeartbeat
     ): ResponseEntity<Map<String, String>> {
         return try {
-            val success = registry.heartbeat(pluginId, heartbeat.timestamp)
+            val success = lifecycle.heartbeat(pluginId, heartbeat.timestamp, PluginConnectionSource(PluginTransportMode.REST))
             if (success) {
                 ResponseEntity.ok(
                     mapOf(
@@ -74,7 +73,7 @@ class PluginManagementController(
     @DeleteMapping("/{pluginId}")
     fun unregister(@PathVariable pluginId: String): ResponseEntity<Map<String, String>> {
         return try {
-            val removed = registry.unregister(pluginId)
+            val removed = lifecycle.unregister(pluginId, PluginConnectionSource(PluginTransportMode.REST))
             if (removed) {
                 ResponseEntity.ok(
                     mapOf(

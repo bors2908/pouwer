@@ -3,7 +3,7 @@ package ge.becrin.pouwer.pow.integration
 import ge.becrin.pouwer.IntegrationTestBase
 import ge.becrin.pouwer.challenge.api.PluginStatus
 import ge.becrin.pouwer.pow.service.PayloadPluginRegistry
-import ge.becrin.pouwer.pow.service.RemotePluginRegistry
+import ge.becrin.pouwer.pow.service.CorePluginLifecycleRegistry
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -48,7 +48,7 @@ class It03PluginFailureRecoveryIntegrationTest : IntegrationTestBase() {
     private lateinit var payloadPluginRegistry: PayloadPluginRegistry
 
     @Autowired
-    private lateinit var remotePluginRegistry: RemotePluginRegistry
+    private lateinit var remotePluginRegistry: CorePluginLifecycleRegistry
 
     private lateinit var flakyPlugin: MockWebServer
     private lateinit var stablePlugin: MockWebServer

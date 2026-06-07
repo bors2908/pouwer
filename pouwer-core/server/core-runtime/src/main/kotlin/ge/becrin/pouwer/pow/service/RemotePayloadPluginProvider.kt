@@ -54,11 +54,11 @@ class RemotePayloadPluginAdapter(
 }
 
 class RemotePayloadPluginProvider(
-    private val registry: RemotePluginRegistry,
+    private val lifecycle: CorePluginLifecycle,
     private val transport: PluginTransport
 ) : PayloadPluginProvider {
     override fun loadPlugins(): List<PayloadPlugin> {
-        val plugins = registry.getHealthy()
+        val plugins = lifecycle.healthyPlugins()
         return plugins.map { metadata ->
             RemotePayloadPluginAdapter(metadata, transport)
         }.also {
@@ -67,7 +67,7 @@ class RemotePayloadPluginProvider(
     }
 
     override fun disable(pluginId: String) {
-        registry.markUnhealthy(pluginId)
+        lifecycle.markUnavailable(pluginId)
         log.warn { "Disabled plugin $pluginId" }
     }
 

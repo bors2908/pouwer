@@ -15,16 +15,15 @@ import java.time.Instant
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 class RemotePayloadPluginSystemIntegrationTest {
-    private lateinit var registry: RemotePluginRegistry
+    private lateinit var registry: CorePluginLifecycleRegistry
     private lateinit var mockTransport: MockPluginTransport
     private lateinit var provider: RemotePayloadPluginProvider
 
     @BeforeEach
     fun setUp() {
-        registry = RemotePluginRegistry(
+        registry = CorePluginLifecycleRegistry(
             keepaliveIntervalMs = 30_000,
             evictionThresholdMs = 60_000
         )
@@ -84,7 +83,7 @@ class RemotePayloadPluginSystemIntegrationTest {
 
     @Test
     fun testStalePluginsAreEvicted() {
-        val registry = RemotePluginRegistry(
+        val registry = CorePluginLifecycleRegistry(
             keepaliveIntervalMs = 30_000,
             evictionThresholdMs = 500
         )
@@ -163,7 +162,7 @@ class RemotePayloadPluginSystemIntegrationTest {
 
     @Test
     fun testCircuitBreakerTriggersOnFailure() {
-        val registry = RemotePluginRegistry()
+        val registry = CorePluginLifecycleRegistry()
         val circuitBreaker = CircuitBreakerPluginTransport(
             RestPluginTransport(),
             registry,

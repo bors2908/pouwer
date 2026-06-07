@@ -24,7 +24,7 @@ data class StaticProxyResponse(
 
 @Service
 class StaticPluginProxyService(
-    private val registry: RemotePluginRegistry,
+    private val registry: CorePluginLifecycleRegistry,
     private val httpClient: HttpClient
 ) {
     fun proxy(

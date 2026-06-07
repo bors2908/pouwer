@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class PluginEvictionScheduler(
-    private val registry: RemotePluginRegistry
+    private val registry: CorePluginLifecycleRegistry
 ) {
     @Scheduled(fixedDelay = 10_000, initialDelay = 10_000)
     fun evictStalePlugins() {
