@@ -1,0 +1,178 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pouwer-server-static
+  namespace: pouwer-system
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: (Host(`localhost`) || Host(`example.com`)) && PathPrefix(`/static/`)
+      kind: Rule
+      priority: 200
+      middlewares:
+        - name: captcha-isolation-headers
+      services:
+        - name: pouwer-server
+          port: 8082
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pouwer-server-challenge
+  namespace: pouwer-system
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: (Host(`localhost`) || Host(`example.com`)) && (Path(`/challenge`) || PathPrefix(`/challenge/`))
+      kind: Rule
+      priority: 200
+      middlewares:
+        - name: challenge-rate-limit
+      services:
+        - name: pouwer-server
+          port: 8082
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: browser-app
+  namespace: pouwer-system
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: (Host(`localhost`) || Host(`example.com`)) && Path(`/`)
+      kind: Rule
+      priority: 10
+      middlewares:
+        - name: browser-page-enforcement-chain
+      services:
+        - name: browser-app
+          port: 3002
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: browser-auth
+  namespace: pouwer-system
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: (Host(`localhost`) || Host(`example.com`)) && (Path(`/login`) || Path(`/logout`))
+      kind: Rule
+      priority: 50
+      middlewares:
+        - name: browser-auth-enforcement-chain
+      services:
+        - name: browser-app
+          port: 3002
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: api-app
+  namespace: pouwer-system
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`api.example.com`)
+      kind: Rule
+      middlewares:
+        - name: api-enforcement-chain
+      services:
+        - name: api-app
+          port: 3003
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: captcha-isolation-headers
+  namespace: pouwer-system
+spec:
+  headers:
+    customResponseHeaders:
+      Cross-Origin-Opener-Policy: same-origin
+      Cross-Origin-Embedder-Policy: require-corp
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: api-rate-limit
+  namespace: pouwer-system
+spec:
+  rateLimit:
+    average: 5
+    burst: 5
+    period: 1s
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: browser-page-rate-limit
+  namespace: pouwer-system
+spec:
+  rateLimit:
+    average: 5
+    burst: 5
+    period: 1s
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: browser-auth-rate-limit
+  namespace: pouwer-system
+spec:
+  rateLimit:
+    average: 2
+    burst: 2
+    period: 10s
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: challenge-rate-limit
+  namespace: pouwer-system
+spec:
+  rateLimit:
+    average: 5
+    burst: 5
+    period: 1s
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: browser-page-enforcement-chain
+  namespace: pouwer-system
+spec:
+  chain:
+    middlewares:
+      - name: captcha-isolation-headers
+      - name: crowdsec-bouncer
+      - name: browser-page-rate-limit
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: browser-auth-enforcement-chain
+  namespace: pouwer-system
+spec:
+  chain:
+    middlewares:
+      - name: captcha-isolation-headers
+      - name: crowdsec-bouncer
+      - name: browser-auth-rate-limit
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: api-enforcement-chain
+  namespace: pouwer-system
+spec:
+  chain:
+    middlewares:
+      - name: crowdsec-bouncer
+      - name: api-rate-limit

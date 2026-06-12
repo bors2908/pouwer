@@ -1,0 +1,153 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pouwer-server
+  namespace: pouwer-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pouwer-server
+  template:
+    metadata:
+      labels:
+        app: pouwer-server
+    spec:
+      imagePullSecrets:
+      - name: nexus-creds
+      containers:
+      - name: pouwer-server
+        image: 172.21.0.1:9002/pouwer-server:0.2.2
+        ports:
+        - containerPort: 8082
+        - containerPort: 9091
+        env:
+        - name: PAGES_EXTRACT_PATH
+          value: "/pages"
+        - name: CHALLENGE_PLUGINS_PRIORITY_OVERRIDE
+          value: "monero-randomx,pow-test-sha256"
+        - name: POUWER_PLUGIN_TRANSPORT_MODE
+          value: "rest"
+        - name: POUWER_PLUGIN_TRANSPORT_GRPC_PORT
+          value: "9091"
+        volumeMounts:
+        - name: pouwer-pages
+          mountPath: /pages
+      volumes:
+      - name: pouwer-pages
+        persistentVolumeClaim:
+          claimName: pouwer-pages-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pouwer-server
+  namespace: pouwer-system
+spec:
+  selector:
+    app: pouwer-server
+  ports:
+  - name: http
+    port: 8082
+  - name: grpc
+    port: 9091
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pouwer-monero-plugin
+  namespace: pouwer-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pouwer-monero-plugin
+  template:
+    metadata:
+      labels:
+        app: pouwer-monero-plugin
+    spec:
+      imagePullSecrets:
+      - name: nexus-creds
+      containers:
+      - name: pouwer-monero-plugin
+        image: 172.21.0.1:9002/pouwer-monero-plugin:0.2.2
+        ports:
+        - containerPort: 8083
+        env:
+        - name: SERVER_PORT
+          value: "8083"
+        - name: STRATUM_HOST
+          value: "p2pool"
+        - name: PLUGIN_CORE_URL
+          value: "http://pouwer-server:8082"
+        - name: PLUGIN_HOST
+          value: "http://pouwer-monero-plugin"
+        - name: PLUGIN_CORE_TRANSPORT
+          value: "rest"
+        - name: PLUGIN_CORE_GRPC_HOST
+          value: "pouwer-server"
+        - name: PLUGIN_CORE_GRPC_PORT
+          value: "9091"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pouwer-monero-plugin
+  namespace: pouwer-system
+spec:
+  selector:
+    app: pouwer-monero-plugin
+  ports:
+  - name: http
+    port: 8083
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pouwer-sha256-plugin
+  namespace: pouwer-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pouwer-sha256-plugin
+  template:
+    metadata:
+      labels:
+        app: pouwer-sha256-plugin
+    spec:
+      imagePullSecrets:
+      - name: nexus-creds
+      containers:
+      - name: pouwer-sha256-plugin
+        image: 172.21.0.1:9002/pouwer-sha256-plugin:0.2.2
+        ports:
+        - containerPort: 8085
+        env:
+        - name: SERVER_PORT
+          value: "8085"
+        - name: STRATUM_HOST
+          value: "p2pool"
+        - name: PLUGIN_CORE_URL
+          value: "http://pouwer-server:8082"
+        - name: PLUGIN_HOST
+          value: "http://pouwer-sha256-plugin"
+        - name: PLUGIN_CORE_TRANSPORT
+          value: "rest"
+        - name: PLUGIN_CORE_GRPC_HOST
+          value: "pouwer-server"
+        - name: PLUGIN_CORE_GRPC_PORT
+          value: "9091"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pouwer-sha256-plugin
+  namespace: pouwer-system
+spec:
+  selector:
+    app: pouwer-sha256-plugin
+  ports:
+  - name: http
+    port: 8085

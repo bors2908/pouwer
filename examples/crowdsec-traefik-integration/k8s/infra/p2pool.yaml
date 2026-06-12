@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: p2pool
+  namespace: pouwer-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: p2pool
+  template:
+    metadata:
+      labels:
+        app: p2pool
+    spec:
+      containers:
+      - name: p2pool
+        image: ghcr.io/sethforprivacy/p2pool:v4.15
+        ports:
+        - containerPort: 3333
+        - containerPort: 37888
+        args:
+        - --host
+        - "monero-node"
+        - --rpc-port
+        - "18089"
+        - --zmq-port
+        - "18088"
+        - --wallet
+        - "46uVWiE1d4kWJM3aAoCpHVgDCm5higshGVJBb4ZNpTYARp8rLcCdcA1J8QgRfFWTzmJ8QgRfFWTzmJ8QgRfFWTzmCag5CXT"
+        - --stratum
+        - "0.0.0.0:3333"
+        - --p2p
+        - "0.0.0.0:37888"
+        securityContext:
+          privileged: true # For hugepages
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: p2pool
+  namespace: pouwer-system
+spec:
+  selector:
+    app: p2pool
+  ports:
+  - name: stratum
+    port: 3333
+  - name: p2p
+    port: 37888

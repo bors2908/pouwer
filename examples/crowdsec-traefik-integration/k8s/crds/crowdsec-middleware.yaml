@@ -1,0 +1,30 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: crowdsec-bouncer
+  namespace: pouwer-system
+spec:
+  plugin:
+    bouncer:
+      enabled: true
+      logLevel: INFO
+      updateIntervalSeconds: 60
+      defaultDecisionSeconds: 60
+      httpTimeoutSeconds: 10
+      crowdsecMode: live
+      crowdsecLapiKey: ""  # Injected via env; see note below
+      crowdsecLapiKeyFile: ""
+      crowdsecLapiHost: "crowdsec-service.pouwer-system.svc.cluster.local:8080"
+      crowdsecLapiScheme: http
+      forwardedHeadersTrustedIPs:
+        - "10.0.0.0/8"
+      # Pouwer Integration
+      captchaProvider: custom
+      captchaCustomKey: pouwer-firewall
+      captchaCustomJsURL: "http://localhost/static/monero/challenge-monero.js?pluginId=monero-randomx"
+      captchaCustomValidateURL: "http://pouwer-server.pouwer-system.svc.cluster.local:8082/validate-custom-captcha"
+      captchaCustomResponse: response
+      captchaHTMLFilePath: "/pages/challenge.html"
+      banHTMLFilePath: "/pages/ban.html"
+      captchaGracePeriodSeconds: 60
+      remediationHeadersCustomName: X-Crowdsec-Remediation

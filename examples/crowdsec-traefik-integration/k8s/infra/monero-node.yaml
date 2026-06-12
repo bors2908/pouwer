@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monero-node
+  namespace: pouwer-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: monero-node
+  template:
+    metadata:
+      labels:
+        app: monero-node
+    spec:
+      containers:
+      - name: monero-node
+        image: ghcr.io/sethforprivacy/simple-monerod:v0.18.4.6
+        ports:
+        - containerPort: 18089 # RPC
+        - containerPort: 18088 # ZMQ
+        args:
+        - --rpc-restricted-bind-ip=0.0.0.0
+        - --rpc-restricted-bind-port=18089
+        - --zmq-pub=tcp://0.0.0.0:18088
+        - --no-igd
+        - --enable-dns-blocklist
+        - --prune-blockchain
+        - --confirm-external-bind
+        securityContext:
+          runAsUser: 0 # Temporary fix for volume permissions
+        volumeMounts:
+        - name: monero-data
+          mountPath: /home/monero/.bitmonero
+      volumes:
+      - name: monero-data
+        hostPath:
+          path: /tmp/pouwer-data # Mirrors docker-compose mount
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: monero-node
+  namespace: pouwer-system
+spec:
+  selector:
+    app: monero-node
+  ports:
+  - name: rpc
+    port: 18089
+  - name: zmq
+    port: 18088

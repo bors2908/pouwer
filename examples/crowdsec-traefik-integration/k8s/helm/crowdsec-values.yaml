@@ -1,0 +1,44 @@
+container_runtime: containerd
+
+agent:
+  # DaemonSet reads logs from node paths using kubernetes source
+  acquisition:
+    - namespace: pouwer-system
+      podName: traefik-*
+      program: traefik
+
+  # Custom acquis.yaml to use kubernetes source as recommended in migration plan
+  config:
+    acquis.yaml: |
+      source: kubernetes
+      labels:
+        type: traefik
+      namespace: pouwer-system
+      pod_name_prefix: traefik-
+
+  env:
+    - name: COLLECTIONS
+      value: "crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/linux"
+    - name: PARSERS
+      value: "crowdsecurity/docker-logs crowdsecurity/cri-logs crowdsecurity/traefik-logs"
+
+lapi:
+  env:
+    - name: ENROLL_KEY
+      value: ""
+    - name: ENROLL_INSTANCE_NAME
+      value: "pouwer-dev-local"
+
+  persistentVolume:
+    data:
+      enabled: true
+      storageClassName: standard
+      size: 1Gi
+    config:
+      enabled: true
+      storageClassName: standard
+      size: 100Mi
+
+  serviceAccount:
+    create: false
+    name: crowdsec-agent

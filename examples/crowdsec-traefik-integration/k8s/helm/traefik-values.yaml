@@ -1,0 +1,54 @@
+deployment:
+  replicas: 1
+  additionalVolumes:
+    - name: pouwer-pages
+      persistentVolumeClaim:
+        claimName: pouwer-pages-pvc
+  additionalVolumeMounts:
+    - name: pouwer-pages
+      mountPath: /pages
+      readOnly: true
+
+service:
+  type: NodePort
+  nodePorts:
+    http: 30080
+    https: 30443
+
+ports:
+  web:
+    nodePort: 30080
+  websecure:
+    nodePort: 30443
+
+ingressRoute:
+  dashboard:
+    enabled: true
+    entryPoints: ["traefik"]
+
+experimental:
+  plugins:
+    bouncer:
+      moduleName: "github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
+      version: "v1.6.0"
+
+additionalArguments:
+  - "--experimental.plugins.bouncer.moduleName=github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
+  - "--experimental.plugins.bouncer.version=v1.6.0"
+
+logs:
+  access:
+    enabled: true
+    format: json
+
+rbac:
+  enabled: true
+
+serviceAccount:
+  name: traefik
+
+# persistence:
+#   enabled: true
+#   storageClass: local-path
+#   size: 128Mi
+
