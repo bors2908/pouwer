@@ -87,7 +87,6 @@ http:
       entryPoints:
         - web
       middlewares:
-        - captcha-isolation-headers
         - challenge-rate-limit
       service: pouwer-server
       priority: 200
