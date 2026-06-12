@@ -1,7 +1,7 @@
 services:
-  monero-testnet:
+  monero-node:
     image: ghcr.io/sethforprivacy/simple-monerod:v0.18.4.6
-    container_name: monero-testnet
+    container_name: monero-node
     restart: unless-stopped
     networks:
       - monero-net
@@ -10,10 +10,11 @@ services:
       - "18088:18088" # ZMQ
     volumes:
       - type: bind
-        source: D:/docker/monero-testnet-data
+        source: D:/docker/monero-mainnet-data
+        #source: D:/docker/monero-testnet-data
         target: /home/monero/.bitmonero
     command:
-      - --testnet
+      # - --testnet
       - --rpc-restricted-bind-ip=0.0.0.0
       - --rpc-restricted-bind-port=18089
       - --zmq-pub=tcp://0.0.0.0:18088
@@ -34,7 +35,7 @@ services:
       retries: 12
       start_period: 60s
     depends_on:
-      monero-testnet:
+      monero-node:
         condition: service_started
     networks:
       - monero-net
@@ -46,20 +47,24 @@ services:
       - /dev/hugepages:/dev/hugepages:rw
     command:
       - --host
-      - "monero-testnet"
+      - "monero-node"
       - --rpc-port
       - "18089"
       - --zmq-port
       - "18088"
       - --wallet
-      - "9wDZ4yA7aqiNQfnFrKsKQPM4jHyYRcdHdP5d5FDGa12YDs7QBFPwXgyZuk9WnCfAdvAKRWk4psFsYXb55xYGHgxmF6cxpUj"
+      # Testnet random address
+      # - "9wDZ4yA7aqiNQfnFrKsKQPM4jHyYRcdHdP5d5FDGa12YDs7QBFPwXgyZuk9WnCfAdvAKRWk4psFsYXb55xYGHgxmF6cxpUj"
+      # Mainnet inaccessible burn address to destroy mined monero (https://monero.stackexchange.com/questions/10780/how-does-one-burn-and-provide-a-proof-of-burn-in-monero)
+      - "46uVWiE1d4kWJM3aAoCpHVgDCm5higshGVJBb4ZNpTYARp8rLcCdcA1J8QgRfFWTzmJ8QgRfFWTzmJ8QgRfFWTzmCag5CXT"
       - --stratum
       - "0.0.0.0:3333"
       - --p2p
       - "0.0.0.0:37888"
       - --loglevel
       - "4"
-      - --mini
+      - --nano
+      #- --mini
 
   pouwer-server:
     image: localhost:9002/pouwer-server:0.2.2
@@ -210,11 +215,10 @@ services:
 
 networks:
   monero-net:
-    name: monero-testnet_default
+    name: monero-node_default
   app-net:
 
 volumes:
-  monero-testnet-data:
   p2pool-data:
   wallet-data:
   pouwer-pages-data:
