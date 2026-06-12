@@ -266,6 +266,32 @@ subjects:
 kubectl apply -f rbac/traefik.yaml
 ```
 
+### 3.4 Shared Storage for Pouwer Pages
+
+The challenge and ban pages are shared between the Pouwer server (which generates them) and Traefik (which serves them during remediation).
+
+```yaml
+# storage/pouwer-pages-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pouwer-pages-pvc
+  namespace: pouwer-system
+spec:
+  accessModes:
+    - ReadWriteMany # Required since both Pouwer and Traefik mount it
+  resources:
+    requests:
+      storage: 128Mi
+  storageClassName: local-path
+```
+
+> **Note**: `local-path` on `kind` supports `ReadWriteOnce` best. For `ReadWriteMany` in a multi-node local setup, you might need an NFS provisioner, but for a single-node `kind` control-plane, `local-path` often suffices for testing.
+
+```bash
+kubectl apply -f storage/pouwer-pages-pvc.yaml
+```
+
 ---
 
 ## 4. Secrets
@@ -375,11 +401,11 @@ experimental:
   plugins:
     bouncer:
       moduleName: "github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
-      version: "v1.3.5"
+      version: "v1.6.0"
 
 additionalArguments:
   - "--experimental.plugins.bouncer.moduleName=github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
-  - "--experimental.plugins.bouncer.version=v1.3.5"
+  - "--experimental.plugins.bouncer.version=v1.6.0"
 
 # Access logs (CrowdSec agent reads these)
 logs:
@@ -399,6 +425,17 @@ persistence:
   enabled: true
   storageClass: local-path
   size: 128Mi
+
+# Challenge/Ban Pages Volume (Pouwer Integration)
+extraVolumes:
+  - name: pouwer-pages
+    persistentVolumeClaim:
+      claimName: pouwer-pages-pvc
+
+extraVolumeMounts:
+  - name: pouwer-pages
+    mountPath: /pages
+    readOnly: true
 ```
 
 ```bash
@@ -430,6 +467,8 @@ agent:
   env:
     - name: COLLECTIONS
       value: "crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/linux"
+    - name: PARSERS
+      value: "crowdsecurity/docker-logs crowdsecurity/cri-logs crowdsecurity/traefik-logs"
 
 lapi:
   env:
@@ -505,13 +544,23 @@ spec:
       updateIntervalSeconds: 60
       defaultDecisionSeconds: 60
       httpTimeoutSeconds: 10
-      crowdsecMode: stream
+      crowdsecMode: live
       crowdsecLapiKey: ""  # Injected via env; see note below
       crowdsecLapiKeyFile: ""
       crowdsecLapiHost: "crowdsec-service.pouwer-system.svc.cluster.local:8080"
       crowdsecLapiScheme: http
       forwardedHeadersTrustedIPs:
         - "10.0.0.0/8"
+      # Pouwer Integration
+      captchaProvider: custom
+      captchaCustomKey: pouwer-firewall
+      captchaCustomJsURL: "http://localhost/static/monero/challenge-monero.js?pluginId=monero-randomx"
+      captchaCustomValidateURL: "http://pouwer-server.pouwer-system.svc.cluster.local:8082/validate-custom-captcha"
+      captchaCustomResponse: response
+      captchaHTMLFilePath: "/pages/challenge.html"
+      banHTMLFilePath: "/pages/ban.html"
+      captchaGracePeriodSeconds: 60
+      remediationHeadersCustomName: X-Crowdsec-Remediation
 ```
 
 ```bash
@@ -545,6 +594,9 @@ Run these checks before handing off to the application deployment track.
 ```bash
 # 1. All nodes Ready
 kubectl get nodes
+
+# 1a. PVC for Pouwer pages Bound
+kubectl get pvc -n pouwer-system pouwer-pages-pvc
 
 # 2. All infra pods Running (no CrashLoopBackOff)
 kubectl get pods -n pouwer-system
@@ -604,6 +656,8 @@ k8s/
 ├── rbac/
 │   ├── crowdsec-agent.yaml
 │   └── traefik.yaml
+├── storage/
+│   └── pouwer-pages-pvc.yaml
 ├── crds/
 │   └── crowdsec-middleware.yaml
 └── helm/
