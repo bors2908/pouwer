@@ -17,7 +17,7 @@ spec:
       - name: nexus-creds
       containers:
       - name: browser-app
-        image: 172.21.0.1:9002/browser-app:latest # Placeholder for built image
+        image: 172.21.0.1:9002/browser-app:0.1.0
         ports:
         - containerPort: 3002
 ---
@@ -52,7 +52,7 @@ spec:
       - name: nexus-creds
       containers:
       - name: api-app
-        image: 172.21.0.1:9002/api-app:latest # Placeholder for built image
+        image: 172.21.0.1:9002/api-app:0.1.0
         ports:
         - containerPort: 3003
 ---
