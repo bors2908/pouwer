@@ -3,11 +3,12 @@ deployment:
   additionalVolumes:
     - name: pouwer-pages
       persistentVolumeClaim:
-        claimName: pouwer-pages-pvc
-  additionalVolumeMounts:
-    - name: pouwer-pages
-      mountPath: /pages
-      readOnly: true
+        claimName: pouwer-pages-pvc-traefik
+
+additionalVolumeMounts:
+  - name: pouwer-pages
+    mountPath: /pages
+    readOnly: true
 
 service:
   type: NodePort

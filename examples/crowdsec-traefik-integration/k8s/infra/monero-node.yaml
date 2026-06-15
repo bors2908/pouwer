@@ -27,6 +27,7 @@ spec:
         - --enable-dns-blocklist
         - --prune-blockchain
         - --confirm-external-bind
+        - --data-dir=/home/monero/.bitmonero
         securityContext:
           runAsUser: 0 # Temporary fix for volume permissions
         volumeMounts:
@@ -35,7 +36,7 @@ spec:
       volumes:
       - name: monero-data
         hostPath:
-          path: /tmp/pouwer-data # Mirrors docker-compose mount
+          path: /mnt/monero-data # Maps to D:/docker/monero-mainnet-data via kind extraMounts
 ---
 apiVersion: v1
 kind: Service

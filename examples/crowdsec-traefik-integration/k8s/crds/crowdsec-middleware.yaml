@@ -12,8 +12,8 @@ spec:
       defaultDecisionSeconds: 60
       httpTimeoutSeconds: 10
       crowdsecMode: live
-      crowdsecLapiKey: ""  # Injected via env; see note below
-      crowdsecLapiKeyFile: ""
+      crowdsecLapiPath: /
+      crowdsecLapiKey: replace-with-long-random-key
       crowdsecLapiHost: "crowdsec-service.pouwer-system.svc.cluster.local:8080"
       crowdsecLapiScheme: http
       forwardedHeadersTrustedIPs:

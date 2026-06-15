@@ -20,10 +20,17 @@ nodes:
 
   - role: worker
     extraMounts:
-      - hostPath: /tmp/pouwer-data
-        containerPath: /data
+      - hostPath: D:/docker/monero-mainnet-data
+        containerPath: /mnt/monero-data
+      - hostPath: D:/docker/pouwer-pages
+        containerPath: /mnt/pouwer-pages
 
   - role: worker
+    extraMounts:
+      - hostPath: D:/docker/monero-mainnet-data
+        containerPath: /mnt/monero-data
+      - hostPath: D:/docker/pouwer-pages
+        containerPath: /mnt/pouwer-pages
 
 containerdConfigPatches:
   - |-

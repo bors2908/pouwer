@@ -15,7 +15,6 @@ plugins {
 }
 
 val dockerRepoName: String = providers.gradleProperty("repo.url.docker.hosted").get()
-val pagesDir: File = rootProject.file("pouwer-core/browser/widget-traefik/pages")
 
 dependencies {
     implementation(project(":pouwer-core:server:common"))
@@ -38,29 +37,6 @@ dependencies {
 
 npmBundleSource {
     sourceDir.set(rootProject.file("pouwer-core/browser"))
-}
-
-val copyPages: TaskProvider<Copy> = tasks.register<Copy>("copyPages") {
-    from(pagesDir) {
-        include("ban.html", "challenge.html")
-    }
-    into(layout.buildDirectory.dir("resources/main/static"))
-}
-
-tasks.processResources {
-    finalizedBy(copyPages)
-}
-
-tasks.named("resolveMainClassName") {
-    dependsOn(copyPages)
-}
-
-tasks.named("jar", Jar::class.java) {
-    dependsOn(copyPages)
-}
-
-tasks.named("shadowJar", Jar::class.java) {
-    dependsOn(copyPages)
 }
 
 jib {

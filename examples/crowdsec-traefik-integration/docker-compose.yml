@@ -77,15 +77,12 @@ services:
       retries: 12
       start_period: 30s
     environment:
-      PAGES_EXTRACT_PATH: /pages
       CHALLENGE_PLUGINS_PRIORITY_OVERRIDE: monero-randomx,pow-test-sha256
       POUWER_PLUGIN_TRANSPORT_MODE: ${POUWER_PLUGIN_TRANSPORT_MODE:-rest}
       POUWER_PLUGIN_TRANSPORT_GRPC_PORT: 9091
     ports:
       - "8082:8082"
       - "9091:9091"
-    volumes:
-      - pouwer-pages-data:/pages
     networks:
       - monero-net
       - app-net
@@ -180,8 +177,8 @@ services:
     depends_on:
       crowdsec:
         condition: service_started
-      pouwer-server:
-        condition: service_healthy
+      pouwer-pages:
+        condition: service_completed_successfully
     ports:
       - "80:80"
       - "8081:8080"
@@ -212,6 +209,15 @@ services:
     restart: unless-stopped
     networks:
       - app-net
+
+  pouwer-pages:
+    image: localhost:9002/pouwer-pages:0.2.2
+    container_name: pouwer-pages
+    restart: "no"
+    environment:
+      PAGES_DESTINATION: /pages
+    volumes:
+      - pouwer-pages-data:/pages
 
 networks:
   monero-net:

@@ -12,6 +12,7 @@ include("pouwer-core:server:model")
 include("pouwer-core:server:core-api")
 include("pouwer-core:server:plugin-base")
 include("pouwer-core:server:core-runtime")
+include("pouwer-core:server:pages-bundle")
 include("pouwer-core:server:common-test")
 
 include("pouwer-sha256-plugin:server")

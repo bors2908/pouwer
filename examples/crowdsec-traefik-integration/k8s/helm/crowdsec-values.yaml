@@ -21,6 +21,8 @@ agent:
       value: "crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/linux"
     - name: PARSERS
       value: "crowdsecurity/docker-logs crowdsecurity/cri-logs crowdsecurity/traefik-logs"
+    - name: BOUNCER_KEY_TRAEFIK
+      value: replace-with-long-random-key
 
 lapi:
   env:
