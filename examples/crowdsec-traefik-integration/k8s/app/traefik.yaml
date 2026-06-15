@@ -10,7 +10,7 @@ spec:
         - name: nexus-creds
       containers:
         - name: populate
-          image: 172.21.0.1:9002/pouwer-pages:0.2.2
+          image: 172.21.0.1:9002/pouwer-pages:0.2.3
           env:
             - name: PAGES_DESTINATION
               value: "/pages"

@@ -67,7 +67,7 @@ services:
       #- --mini
 
   pouwer-server:
-    image: localhost:9002/pouwer-server:0.2.2
+    image: localhost:9002/pouwer-server:0.2.3
     container_name: pouwer-server
     restart: unless-stopped
     healthcheck:
@@ -88,7 +88,7 @@ services:
       - app-net
 
   pouwer-monero-plugin:
-    image: localhost:9002/pouwer-monero-plugin:0.2.2
+    image: localhost:9002/pouwer-monero-plugin:0.2.3
     container_name: pouwer-monero-plugin
     restart: unless-stopped
     healthcheck:
@@ -117,7 +117,7 @@ services:
       - app-net
 
   pouwer-sha256-plugin:
-    image: localhost:9002/pouwer-sha256-plugin:0.2.2
+    image: localhost:9002/pouwer-sha256-plugin:0.2.3
     container_name: pouwer-sha256-plugin
     restart: unless-stopped
     healthcheck:
@@ -211,7 +211,7 @@ services:
       - app-net
 
   pouwer-pages:
-    image: localhost:9002/pouwer-pages:0.2.2
+    image: localhost:9002/pouwer-pages:0.2.3
     container_name: pouwer-pages
     restart: "no"
     environment:

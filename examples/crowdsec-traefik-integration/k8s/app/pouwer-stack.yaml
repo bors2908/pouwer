@@ -17,7 +17,7 @@ spec:
       - name: nexus-creds
       containers:
       - name: pouwer-server
-        image: 172.21.0.1:9002/pouwer-server:0.2.2
+        image: 172.21.0.1:9002/pouwer-server:0.2.3
         ports:
         - containerPort: 8082
         - containerPort: 9091
@@ -74,7 +74,7 @@ spec:
       - name: nexus-creds
       containers:
       - name: pouwer-monero-plugin
-        image: 172.21.0.1:9002/pouwer-monero-plugin:0.2.2
+        image: 172.21.0.1:9002/pouwer-monero-plugin:0.2.3
         ports:
         - containerPort: 8083
         env:
@@ -136,7 +136,7 @@ spec:
       - name: nexus-creds
       containers:
       - name: pouwer-sha256-plugin
-        image: 172.21.0.1:9002/pouwer-sha256-plugin:0.2.2
+        image: 172.21.0.1:9002/pouwer-sha256-plugin:0.2.3
         ports:
         - containerPort: 8085
         env:
