@@ -1,0 +1,7 @@
+ingress:
+  webHosts:
+    - localhost
+    - 192.168.17.177
+    - example.com
+  apiHosts:
+    - api.example.com

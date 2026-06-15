@@ -42,6 +42,7 @@ helm repo update
 
 helm install traefik traefik/traefik -n traefik --values examples/crowdsec-traefik-integration/k8s/helm/traefik-values.yaml
 helm install crowdsec crowdsec/crowdsec -n crowdsec --values examples/crowdsec-traefik-integration/k8s/helm/crowdsec-values.yaml
+helm install pouwer-ingress ./examples/crowdsec-traefik-integration/k8s/helm/ingress -n pouwer-system
 
 kubectl apply -f examples/crowdsec-traefik-integration/k8s/crds/crowdsec-middleware.yaml
 
@@ -51,4 +52,3 @@ kubectl apply -f examples/crowdsec-traefik-integration/k8s/infra/p2pool.yaml -n 
 kubectl apply -f examples/crowdsec-traefik-integration/k8s/app/traefik.yaml -n traefik
 kubectl apply -f examples/crowdsec-traefik-integration/k8s/app/pouwer-stack.yaml -n pouwer-system
 kubectl apply -f examples/crowdsec-traefik-integration/k8s/app/example-apps.yaml -n pouwer-system
-kubectl apply -f examples/crowdsec-traefik-integration/k8s/app/ingress.yaml -n pouwer-system

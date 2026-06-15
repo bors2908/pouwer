@@ -7,7 +7,9 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: (Host(`localhost`) || Host(`example.com`)) && PathPrefix(`/static/`)
+    - match: >-
+        ({{ include "pouwer.hostOrRule" .Values.ingress.webHosts }})
+        && PathPrefix(`/static/`)
       kind: Rule
       priority: 200
       middlewares:
@@ -25,7 +27,9 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: (Host(`localhost`) || Host(`example.com`)) && (Path(`/challenge`) || PathPrefix(`/challenge/`))
+    - match: >-
+        ({{ include "pouwer.hostOrRule" .Values.ingress.webHosts }})
+        && (Path(`/challenge`) || PathPrefix(`/challenge/`))
       kind: Rule
       priority: 200
       middlewares:
@@ -43,7 +47,9 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: (Host(`localhost`) || Host(`example.com`)) && Path(`/`)
+    - match: >-
+        ({{ include "pouwer.hostOrRule" .Values.ingress.webHosts }})
+        && Path(`/`)
       kind: Rule
       priority: 10
       middlewares:
@@ -61,7 +67,9 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: (Host(`localhost`) || Host(`example.com`)) && (Path(`/login`) || Path(`/logout`))
+    - match: >-
+        ({{ include "pouwer.hostOrRule" .Values.ingress.webHosts }})
+        && (Path(`/login`) || Path(`/logout`))
       kind: Rule
       priority: 50
       middlewares:
@@ -79,7 +87,8 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: Host(`api.example.com`)
+    - match: >-
+        {{ include "pouwer.hostOrRule" .Values.ingress.apiHosts }}
       kind: Rule
       middlewares:
         - name: api-enforcement-chain
