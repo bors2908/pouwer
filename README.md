@@ -98,10 +98,10 @@ Jib image names:
 
 | Module | Image | Exposed Port |
 | --- | --- | --- |
-| `:pouwer-core:server:core-runtime` | `localhost:9002/pouwer-server:0.2.3` | `8082` |
-| `:pouwer-sha256-plugin:server` | `localhost:9002/pouwer-sha256-plugin:0.2.3` | `8085` |
-| `:pouwer-monero-plugin:server` | `localhost:9002/pouwer-monero-plugin:0.2.3` | `8083` |
-| `:pouwer-bitcoin-plugin:server` | `localhost:9002/pouwer-bitcoin-plugin:0.2.3` | `8084` |
+| `:pouwer-core:server:core-runtime` | `localhost:9002/pouwer-server:0.2.4` | `8082` |
+| `:pouwer-sha256-plugin:server` | `localhost:9002/pouwer-sha256-plugin:0.2.4` | `8085` |
+| `:pouwer-monero-plugin:server` | `localhost:9002/pouwer-monero-plugin:0.2.4` | `8083` |
+| `:pouwer-bitcoin-plugin:server` | `localhost:9002/pouwer-bitcoin-plugin:0.2.4` | `8084` |
 
 ## Docker Compose Examples
 

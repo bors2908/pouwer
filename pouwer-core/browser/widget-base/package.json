@@ -1,6 +1,6 @@
 {
   "name": "@pouwer/widget-base",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -15,7 +15,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@pouwer/core-contracts": "0.2.3",
-    "@pouwer/worker-runtime": "0.2.3"
+    "@pouwer/core-contracts": "0.2.4",
+    "@pouwer/worker-runtime": "0.2.4"
   }
 }

@@ -129,7 +129,7 @@ class It03PluginFailureRecoveryIntegrationTest : IntegrationTestBase() {
             mapOf(
                 "id" to pluginId,
                 "version" to "1.0.0",
-                "contractVersion" to "0.2.3",
+                "contractVersion" to "0.2.4",
                 "baseUrl" to baseUrl
             )
         )
