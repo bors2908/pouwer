@@ -5,7 +5,7 @@ metadata:
   namespace: pouwer-system
 spec:
   entryPoints:
-    - web
+    - websecure
   routes:
     - match: >-
         ({{ include "pouwer.hostOrRule" .Values.ingress.webHosts }})
@@ -25,7 +25,7 @@ metadata:
   namespace: pouwer-system
 spec:
   entryPoints:
-    - web
+    - websecure
   routes:
     - match: >-
         ({{ include "pouwer.hostOrRule" .Values.ingress.webHosts }})
@@ -45,7 +45,7 @@ metadata:
   namespace: pouwer-system
 spec:
   entryPoints:
-    - web
+    - websecure
   routes:
     - match: >-
         ({{ include "pouwer.hostOrRule" .Values.ingress.webHosts }})
@@ -65,7 +65,7 @@ metadata:
   namespace: pouwer-system
 spec:
   entryPoints:
-    - web
+    - websecure
   routes:
     - match: >-
         ({{ include "pouwer.hostOrRule" .Values.ingress.webHosts }})
@@ -85,7 +85,7 @@ metadata:
   namespace: pouwer-system
 spec:
   entryPoints:
-    - web
+    - websecure
   routes:
     - match: >-
         {{ include "pouwer.hostOrRule" .Values.ingress.apiHosts }}

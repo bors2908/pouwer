@@ -55,4 +55,5 @@ secrets/
 /logs/
 /examples/crowdsec-traefik-integration/crowdsec/data
 /examples/crowdsec-traefik-integration/logs/
+/examples/crowdsec-traefik-integration/k8s/certs/
 /load-tests/results/

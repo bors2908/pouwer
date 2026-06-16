@@ -13,6 +13,23 @@ if (-not $props.ContainsKey("nexusUser") -or -not $props.ContainsKey("nexusPass"
     throw "nexusUser or nexusPass not found in $gradleProps"
 }
 
+function Get-OpenSslPath {
+    $cmd = Get-Command openssl -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
+
+    $candidates = @(
+        "C:\Program Files\Git\usr\bin\openssl.exe",
+        "C:\Program Files (x86)\Git\usr\bin\openssl.exe"
+    )
+    foreach ($path in $candidates) {
+        if (Test-Path $path) { return $path }
+    }
+
+    throw "openssl not found. Install Git for Windows or add openssl to PATH."
+}
+
+$openssl = Get-OpenSslPath
+
 kind create cluster --config examples/crowdsec-traefik-integration/k8s/kind-cluster.yaml --name pouwer-dev
 
 kubectl create namespace crowdsec
@@ -35,6 +52,47 @@ kubectl apply -f examples/crowdsec-traefik-integration/k8s/rbac/crowdsec-agent.y
 kubectl apply -f examples/crowdsec-traefik-integration/k8s/rbac/traefik.yaml -n traefik
 
 kubectl apply -f examples/crowdsec-traefik-integration/k8s/storage/pouwer-pages-pvc.yaml -n traefik
+
+$certDir = "examples/crowdsec-traefik-integration/k8s/certs"
+New-Item -ItemType Directory -Force -Path $certDir | Out-Null
+
+$opensslConfig = @"
+[req]
+default_bits = 2048
+prompt = no
+default_md = sha256
+distinguished_name = dn
+x509_extensions = san
+
+[dn]
+CN = pouwer-dev.local
+
+[san]
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = localhost
+DNS.2 = example.com
+DNS.3 = api.example.com
+IP.1 = 127.0.0.1
+IP.2 = 192.168.17.177
+"@
+
+$opensslConfigPath = Join-Path $certDir "openssl.cnf"
+$tlsKeyPath = Join-Path $certDir "tls.key"
+$tlsCertPath = Join-Path $certDir "tls.crt"
+$opensslConfig | Set-Content -Path $opensslConfigPath -Encoding ascii
+
+& $openssl req -x509 -nodes -days 3650 -newkey rsa:2048 `
+  -keyout $tlsKeyPath `
+  -out $tlsCertPath `
+  -config $opensslConfigPath
+
+kubectl create secret tls pouwer-dev-tls `
+  --cert=$tlsCertPath `
+  --key=$tlsKeyPath `
+  -n traefik `
+  --dry-run=client -o yaml | kubectl apply -f -
 
 helm repo add traefik https://traefik.github.io/charts
 helm repo add crowdsec https://crowdsec-project.github.io/helm-charts

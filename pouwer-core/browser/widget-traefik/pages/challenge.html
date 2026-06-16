@@ -107,9 +107,8 @@
         class="{{ .FrontendKey }}"
         data-sitekey="{{ .SiteKey }}"
         data-callback="captchaCallback"
-        data-challenge-url="http://localhost/challenge"
         data-response-field="response"
-    ></div><!--TODO Make URL Dynamic -->
+    ></div>
 
     <form id="captcha-form" method="POST" action="" novalidate>
         <input type="hidden" id="captcha-response" name="response" value="" />
@@ -123,6 +122,11 @@
 
 <script>
     (function loadCaptchaBundle() {
+        const captcha = document.getElementById("captcha");
+        if (captcha) {
+            captcha.dataset.challengeUrl = new URL("/challenge", window.location.origin).href;
+        }
+
         const script = document.createElement("script");
         script.type = "module";
         script.src = "{{ .FrontendJS }}";

@@ -19,7 +19,7 @@ spec:
       # Pouwer Integration
       captchaProvider: custom
       captchaCustomKey: pouwer-firewall
-      captchaCustomJsURL: "http://localhost/static/monero/challenge-monero.js?pluginId=monero-randomx"
+      captchaCustomJsURL: "https://localhost/static/monero/challenge-monero.js?pluginId=monero-randomx"
       captchaCustomValidateURL: "http://pouwer-server.pouwer-system.svc.cluster.local:8082/validate-custom-captcha"
       captchaCustomResponse: response
       captchaHTMLFilePath: "/pages/challenge.html"
