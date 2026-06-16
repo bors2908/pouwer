@@ -28,6 +28,9 @@ async function solveRandomX(task: RandomXTask, runtime: WorkerRuntimeApi<RandomX
     };
     const taskPayload = task.payload;
     const startTime = nowMs();
+    const PROGRESS_INTERVAL_MS = 500;
+    const minerStats = new Map<string, WorkerPong["stats"]>();
+    let lastProgressTime = startTime;
 
     const callbacks: MinerCallbacks = {
         on_cache_initialising: () => {
@@ -36,14 +39,11 @@ async function solveRandomX(task: RandomXTask, runtime: WorkerRuntimeApi<RandomX
         on_cache_initialised: (duration_ms: number) => {
             console.log(`Cache Initialised in ${duration_ms}ms`);
         },
-        on_worker_ready: (event: WorkerEventWorkerReady) => {
-            console.log(`Worker ${event.miner_id} ready`);
+        on_worker_ready: (_event: WorkerEventWorkerReady) => {
         },
-        on_job_started: (event: WorkerEventJobStarted) => {
-            console.log(`Job ${event.job_id} started on worker ${event.miner_id}`);
+        on_job_started: (_event: WorkerEventJobStarted) => {
         },
-        on_job_disposed: (event: WorkerEventJobDisposed) => {
-            console.log(`Job disposed on worker ${event.miner_id}`);
+        on_job_disposed: (_event: WorkerEventJobDisposed) => {
         },
         on_nonce_space_exhausted: (_event: WorkerEventNonceSpaceExhausted) => {
             runtime.reportStopped("Exhausted");
@@ -73,14 +73,26 @@ async function solveRandomX(task: RandomXTask, runtime: WorkerRuntimeApi<RandomX
             if (!runtime.isRunning()) {
                 return;
             }
-            const elapsedMs = nowMs() - startTime;
 
-            console.log(`Pong: ${event.stats.hashes_total} hashes in ${elapsedMs}ms`);
+            minerStats.set(event.miner_id, event.stats);
+
+            const now = nowMs();
+            if (now - lastProgressTime < PROGRESS_INTERVAL_MS) {
+                return;
+            }
+            lastProgressTime = now;
+
+            let hashesTotal = 0;
+            let hashesPerSec = 0;
+            for (const stats of minerStats.values()) {
+                hashesTotal += stats.hashes_total;
+                hashesPerSec += stats.hashes_per_second;
+            }
 
             runtime.reportProgress({
-                attempts: event.stats.hashes_total,
-                elapsedMs,
-                hashesPerSec: event.stats.hashes_per_second * 12,
+                attempts: hashesTotal,
+                elapsedMs: now - startTime,
+                hashesPerSec: Math.floor(hashesPerSec),
             });
         },
     };
