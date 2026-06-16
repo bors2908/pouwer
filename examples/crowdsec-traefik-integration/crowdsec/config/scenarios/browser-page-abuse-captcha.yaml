@@ -4,7 +4,7 @@ description: Escalate browser clients that repeatedly hit the page refresh rate 
 filter: |
   evt.Meta.log_type == "http_access-log" &&
   evt.Meta.http_status == "429" &&
-  evt.Meta.traefik_router_name contains "browser@"
+  (evt.Meta.traefik_router_name contains "browser@" || evt.Meta.traefik_router_name contains "browser-app-")
 groupby: evt.Meta.source_ip
 capacity: 2
 leakspeed: 30s

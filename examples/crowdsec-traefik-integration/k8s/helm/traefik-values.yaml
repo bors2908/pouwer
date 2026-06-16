@@ -37,10 +37,14 @@ additionalArguments:
   - "--experimental.plugins.bouncer.moduleName=github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
   - "--experimental.plugins.bouncer.version=v1.6.0"
 
-logs:
-  access:
-    enabled: true
-    format: json
+log:
+  level: DEBUG
+  format: json
+  filePath: ""
+
+accessLog:
+  enabled: true
+  format: json
 
 rbac:
   enabled: true

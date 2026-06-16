@@ -8,16 +8,14 @@ spec:
     bouncer:
       enabled: true
       logLevel: INFO
-      updateIntervalSeconds: 60
-      defaultDecisionSeconds: 60
+      updateIntervalSeconds: 30
+      defaultDecisionSeconds: 1
       httpTimeoutSeconds: 10
       crowdsecMode: live
       crowdsecLapiPath: /
       crowdsecLapiKey: replace-with-long-random-key
-      crowdsecLapiHost: "crowdsec-service.pouwer-system.svc.cluster.local:8080"
+      crowdsecLapiHost: crowdsec-service.crowdsec.svc.cluster.local:8080
       crowdsecLapiScheme: http
-      forwardedHeadersTrustedIPs:
-        - "10.0.0.0/8"
       # Pouwer Integration
       captchaProvider: custom
       captchaCustomKey: pouwer-firewall

@@ -1,31 +1,111 @@
 container_runtime: containerd
 
+config:
+  profiles.yaml: |
+    name: local-browser-abuse-captcha
+    debug: false
+    filters:
+      - Alert.Remediation == true && Alert.GetScope() == "Ip" && Alert.GetScenario() contains "local/traefik-browser-"
+    decisions:
+      - type: captcha
+        duration: 1m
+    on_success: break
+    ---
+    name: local-api-abuse-ban
+    debug: false
+    filters:
+      - Alert.Remediation == true && Alert.GetScope() == "Ip" && Alert.GetScenario() contains "local/traefik-api-too-many-429"
+    decisions:
+      - type: ban
+        duration: 30m
+    on_success: break
+    ---
+    name: local-default-http-ban
+    debug: false
+    filters:
+      - Alert.Remediation == true && Alert.GetScope() == "Ip"
+    decisions:
+      - type: ban
+        duration: 4h
+
+  parsers:
+    s02-enrich:
+      whitelists.yaml: |
+        name: crowdsecurity/whitelists
+        description: "Local dev override: whitelist loopback and load-test clean-lane IPs"
+        whitelist:
+          reason: "loopback and load-test clean lane (RFC 5737 TEST-NET-1)"
+          ip:
+            - "::1"
+          cidr:
+            - "127.0.0.0/8"
+            - "192.0.2.0/24"
+
+  scenarios:
+    browser-page-abuse-captcha.yaml: |
+      type: leaky
+      name: local/traefik-browser-page-too-many-429
+      description: Escalate browser clients that repeatedly hit the page refresh rate limit
+      filter: |
+        evt.Meta.log_type == "http_access-log" &&
+        evt.Meta.http_status == "429" &&
+        (evt.Meta.traefik_router_name contains "browser@" || evt.Meta.traefik_router_name contains "browser-app-")
+      groupby: evt.Meta.source_ip
+      capacity: 2
+      leakspeed: 30s
+      blackhole: 2m
+      labels:
+        service: browser
+        behavior: browser-page-too-many-429
+        remediation: true
+    browser-auth-abuse-captcha.yaml: |
+      type: trigger
+      name: local/traefik-browser-auth-too-many-429
+      description: Escalate browser clients that trip the login/logout rate limit
+      filter: |
+        evt.Meta.log_type == "http_access-log" &&
+        evt.Meta.http_status == "429" &&
+        (evt.Meta.traefik_router_name contains "browser-auth@" || evt.Meta.traefik_router_name contains "browser-auth-")
+      groupby: evt.Meta.source_ip
+      blackhole: 2m
+      labels:
+        service: browser
+        behavior: browser-auth-too-many-429
+        remediation: true
+    api-auth-abuse.yaml: |
+      type: leaky
+      name: local/traefik-api-too-many-429
+      description: Escalate API clients that repeatedly hit Traefik 429 responses
+      filter: |
+        evt.Meta.log_type == "http_access-log" &&
+        evt.Meta.http_status == "429" &&
+        (evt.Meta.traefik_router_name contains "api@" || evt.Meta.traefik_router_name contains "api-app-")
+      groupby: evt.Meta.source_ip
+      capacity: 3
+      leakspeed: 1m
+      blackhole: 2m
+      labels:
+        service: api
+        behavior: api-too-many-429
+        remediation: true
+
 agent:
-  # DaemonSet reads logs from node paths using kubernetes source
+  # DaemonSet reads Traefik container logs from the node where the pod runs.
   acquisition:
-    - namespace: pouwer-system
+    - namespace: traefik
       podName: traefik-*
       program: traefik
 
-  # Custom acquis.yaml to use kubernetes source as recommended in migration plan
-  config:
-    acquis.yaml: |
-      source: kubernetes
-      labels:
-        type: traefik
-      namespace: pouwer-system
-      pod_name_prefix: traefik-
-
   env:
     - name: COLLECTIONS
-      value: "crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/linux"
+      value: "crowdsecurity/traefik"
     - name: PARSERS
       value: "crowdsecurity/docker-logs crowdsecurity/cri-logs crowdsecurity/traefik-logs"
-    - name: BOUNCER_KEY_TRAEFIK
-      value: replace-with-long-random-key
 
 lapi:
   env:
+    - name: BOUNCER_KEY_TRAEFIK
+      value: replace-with-long-random-key
     - name: ENROLL_KEY
       value: ""
     - name: ENROLL_INSTANCE_NAME

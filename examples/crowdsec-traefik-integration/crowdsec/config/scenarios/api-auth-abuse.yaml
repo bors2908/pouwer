@@ -4,7 +4,7 @@ description: Escalate API clients that repeatedly hit Traefik 429 responses
 filter: |
   evt.Meta.log_type == "http_access-log" &&
   evt.Meta.http_status == "429" &&
-  evt.Meta.traefik_router_name contains "api@"
+  (evt.Meta.traefik_router_name contains "api@" || evt.Meta.traefik_router_name contains "api-app-")
 groupby: evt.Meta.source_ip
 capacity: 3
 leakspeed: 1m
