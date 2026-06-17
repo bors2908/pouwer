@@ -22,85 +22,224 @@
             width: min(420px, calc(100% - 2rem));
             background: #ffffff;
             border-radius: 14px;
-            padding: 1.5rem;
+            padding: 1.25rem;
             box-shadow: 0 10px 30px rgba(24, 39, 75, 0.12);
         }
         h2 {
-            margin: 0 0 1rem;
-            font-size: 1.35rem;
+            margin: 0 0 0.75rem;
+            font-size: 1.25rem;
+        }
+        .captcha-widget {
+            border: 1px solid #d4dae6;
+            border-radius: 8px;
+            background: linear-gradient(180deg, #fbfcff, #f6f8fc);
+            padding: 0.7rem 0.75rem;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+        .captcha-row {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+        .indicator {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            border: 2px solid #b8c0cf;
+            border-radius: 3px;
+            background: #ffffff;
+            position: relative;
+            box-shadow: inset 0 1px 2px rgba(24, 39, 75, 0.06);
+        }
+        .indicator[data-state="working"] {
+            border-color: transparent;
+            background: transparent;
+            box-shadow: none;
+        }
+        .indicator[data-state="working"]::after {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            border: 2px solid #e3e8f2;
+            border-top-color: #365cff;
+            border-radius: 50%;
+            animation: indicator-spin 0.75s linear infinite;
+        }
+        .indicator[data-state="success"] {
+            border-color: #1f9d63;
+            background: #1f9d63;
+            box-shadow: none;
+        }
+        .indicator[data-state="success"]::after {
+            content: "";
+            position: absolute;
+            left: 7px;
+            top: 3px;
+            width: 5px;
+            height: 10px;
+            border: solid #ffffff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        .indicator[data-state="error"] {
+            border-color: #d14343;
+            background: #d14343;
+            box-shadow: none;
+        }
+        .indicator[data-state="error"]::before,
+        .indicator[data-state="error"]::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 12px;
+            height: 2px;
+            margin: -1px 0 0 -6px;
+            background: #ffffff;
+            border-radius: 1px;
+        }
+        .indicator[data-state="error"]::before {
+            transform: rotate(45deg);
+        }
+        .indicator[data-state="error"]::after {
+            transform: rotate(-45deg);
+        }
+        @keyframes indicator-spin {
+            to { transform: rotate(360deg); }
+        }
+        .captcha-body {
+            flex: 1;
+            min-width: 0;
+        }
+        .captcha-line {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .captcha-label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #2f3b57;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .stats-toggle {
+            flex-shrink: 0;
+            width: auto;
+            min-width: 0;
+            padding: 0.08rem 0.32rem;
+            margin: 0;
+            border: 1px solid rgba(98, 112, 138, 0.2);
+            border-radius: 4px;
+            font-size: 0.62rem;
+            line-height: 1.2;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            color: #62708a;
+            background: rgba(98, 112, 138, 0.1);
+            opacity: 0.75;
+            cursor: pointer;
+            transition: opacity 0.15s ease, background 0.15s ease;
+        }
+        .stats-toggle:hover {
+            opacity: 1;
+            background: rgba(98, 112, 138, 0.16);
+        }
+        .stats-toggle[aria-expanded="true"] {
+            opacity: 1;
+            background: rgba(54, 92, 255, 0.12);
+            border-color: rgba(54, 92, 255, 0.25);
+            color: #365cff;
+        }
+        .stats-panel {
+            margin-top: 0.3rem;
+            font-size: 0.72rem;
+            line-height: 1.35;
+            color: #62708a;
+        }
+        .stats-panel div + div {
+            margin-top: 0.1rem;
+        }
+        .captcha-action {
+            flex-shrink: 0;
+            width: auto;
+            min-width: 5.5rem;
+            padding: 0.42rem 0.7rem;
+            margin: 0;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #ffffff;
+            background: linear-gradient(135deg, #365cff, #2f6fff);
+            cursor: pointer;
+            transition: transform 0.05s ease-in-out, opacity 0.15s ease;
+        }
+        .captcha-action:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+        .captcha-action:disabled {
+            background: #bfc8d8;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .captcha-action.is-cancel:not(:disabled) {
+            background: #6b768b;
+        }
+        .result-section {
+            margin-top: 0.65rem;
+        }
+        .result-section #result {
+            padding: 0.5rem 0.6rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            background: #f8faff;
+            border: 1px solid #e3e8f2;
+            word-break: break-word;
         }
         .legal {
-            margin: 0.9rem 0 1rem;
-            padding: 0.85rem 0.95rem;
+            margin: 0.75rem 0 0;
+            padding: 0.75rem 0.85rem;
             border: 1px solid #d9dfec;
             background: linear-gradient(180deg, #f9fbff, #f4f7ff);
             border-radius: 10px;
-            font-size: 0.83rem;
+            font-size: 0.8rem;
             line-height: 1.45;
             color: #44526e;
         }
         .legal strong {
             color: #202a40;
         }
-        .stats {
-            margin: 1rem 0;
-            font-size: 0.9rem;
-            color: #62708a;
-        }
-        .stats div {
-            margin-bottom: 0.25rem;
-        }
-        #status {
-            font-weight: 700;
-            color: #2f3b57;
-        }
-        #result {
-            margin-top: 0.9rem;
-            padding: 0.55rem;
-            border-radius: 8px;
-            font-size: 0.82rem;
-            background: #f8faff;
-            min-height: 1rem;
-            word-break: break-word;
-        }
-        button {
-            width: 100%;
-            padding: 0.65rem;
-            margin-top: 0.5rem;
-            cursor: pointer;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #ffffff;
-            background: linear-gradient(135deg, #365cff, #2f6fff);
-            transition: transform 0.05s ease-in-out;
-        }
-        button:active {
-            transform: translateY(1px);
-        }
-        button:disabled {
-            background: #bfc8d8;
-            cursor: not-allowed;
-            transform: none;
-        }
-        button#btnCancel {
-            background: #6b768b;
+        #captcha {
+            display: none;
         }
     </style>
 </head>
 <body>
 <div class="card">
     <h2>Pouwer</h2>
-    <div class="stats">
-        <div id="status">Status: Ready</div>
-        <div id="attempts">Attempts: 0</div>
-        <div id="hps">Hashes/sec: 0</div>
+
+    <div class="captcha-widget">
+        <div class="captcha-row">
+            <div id="captcha-indicator" class="indicator" data-state="idle" role="img" aria-label="Challenge status"></div>
+            <div class="captcha-body">
+                <div class="captcha-line">
+                    <span id="status" class="captcha-label">Ready</span>
+                    <button type="button" id="btnStats" class="stats-toggle" aria-expanded="false" title="Show statistics">⋯</button>
+                </div>
+                <div id="stats-panel" class="stats-panel" hidden>
+                    <div id="attempts">Attempts: 0</div>
+                    <div id="hps">Hashes/sec: 0</div>
+                </div>
+            </div>
+            <button id="btnStart" type="button" class="captcha-action">Solve Challenge</button>
+        </div>
     </div>
 
-    <div id="result"></div>
-    <button id="btnStart" type="button">Solve Challenge</button>
-    <button id="btnCancel" type="button" disabled>Cancel</button>
+    <div id="result-section" class="result-section" hidden>
+        <div id="result"></div>
+    </div>
 
     <div
         id="captcha"

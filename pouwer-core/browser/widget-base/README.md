@@ -11,11 +11,14 @@ The default UI code expects these element IDs:
 | ID | Purpose |
 | --- | --- |
 | `captcha` | Root container. May define `data-challenge-url`. |
+| `captcha-indicator` | Visual state indicator (`idle`, `working`, `success`, `error`). |
 | `status` | Current phase/status text. |
+| `btnStats` | Toggle for the collapsible stats panel. |
+| `stats-panel` | Container for progress stats. |
 | `hps` | Hashes-per-second display. |
 | `attempts` | Attempt counter display. |
-| `btnStart` | Start button. |
-| `btnCancel` | Cancel button. |
+| `btnStart` | Start/cancel action button. |
+| `result-section` | Wrapper shown only when a result is present. |
 | `result` | Result/error display. |
 
 The challenge URL defaults to `/challenge`. If `data-challenge-url` is present on `#captcha`, that value is used instead.
