@@ -203,7 +203,7 @@ class It05PriorityBasedPluginDistributionIntegrationTest : IntegrationTestBase()
             mapOf(
                 "id" to pluginId,
                 "version" to "1.0.0",
-                "contractVersion" to "0.2.4",
+                "contractVersion" to "0.2.5",
                 "baseUrl" to baseUrl
             )
         )

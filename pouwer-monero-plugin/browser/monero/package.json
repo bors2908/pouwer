@@ -1,6 +1,6 @@
 {
   "name": "@pouwer/bundle-monero",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@pouwer/widget-traefik": "0.2.4",
-    "@pouwer/worker-monero": "0.2.4"
+    "@pouwer/widget-traefik": "0.2.5",
+    "@pouwer/worker-monero": "0.2.5"
   }
 }
