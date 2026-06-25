@@ -107,6 +107,9 @@ kubectl apply -f examples/crowdsec-traefik-integration/k8s/crds/crowdsec-middlew
 kubectl apply -f examples/crowdsec-traefik-integration/k8s/infra/monero-node.yaml -n pouwer-system
 kubectl apply -f examples/crowdsec-traefik-integration/k8s/infra/p2pool.yaml -n pouwer-system
 
+kubectl apply -f examples/crowdsec-traefik-integration/k8s/infra/redis.yaml -n pouwer-system
+kubectl wait --for=condition=available deployment/redis -n pouwer-system --timeout=120s
+
 kubectl apply -f examples/crowdsec-traefik-integration/k8s/app/traefik.yaml -n traefik
 kubectl apply -f examples/crowdsec-traefik-integration/k8s/app/pouwer-stack.yaml -n pouwer-system
 kubectl apply -f examples/crowdsec-traefik-integration/k8s/app/example-apps.yaml -n pouwer-system

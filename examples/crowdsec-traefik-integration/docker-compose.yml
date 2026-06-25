@@ -66,6 +66,26 @@ services:
       - --nano
       #- --mini
 
+  redis:
+    image: redis:7-alpine
+    container_name: pouwer-redis
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --maxmemory 128mb
+      - --maxmemory-policy volatile-lru
+      - --save ""
+      - --appendonly no
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - app-net
+    # ports: ["6379:6379"]  # optional, for host-side debugging
+
   pouwer-server:
     image: localhost:9002/pouwer-server:0.2.5
     container_name: pouwer-server
@@ -80,6 +100,13 @@ services:
       CHALLENGE_PLUGINS_PRIORITY_OVERRIDE: monero-randomx,pow-test-sha256
       POUWER_PLUGIN_TRANSPORT_MODE: ${POUWER_PLUGIN_TRANSPORT_MODE:-rest}
       POUWER_PLUGIN_TRANSPORT_GRPC_PORT: 9091
+      POUWER_TASK_STORE_TYPE: redis
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      MANAGEMENT_HEALTH_REDIS_ENABLED: "true"
+    depends_on:
+      redis:
+        condition: service_healthy
     ports:
       - "8082:8082"
       - "9091:9091"

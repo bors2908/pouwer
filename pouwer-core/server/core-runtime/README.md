@@ -56,12 +56,21 @@ Important defaults from `application.yml`:
 | `challenge.task.ttl-ms` | `60000` | Task lifetime in milliseconds. |
 | `challenge.plugins.priority-override` | `monero-randomx,pow-test-sha256,bitcoin-rpc-sha256` | Preferred order for resolving static assets when no plugin is explicit. |
 | `pages.extract.path` | empty | Optional page extraction path used by the integration stack. |
+| `pouwer.task-store.type` | `in-memory` | Task store backend: `in-memory` (single node) or `redis` (shared, horizontally scalable). |
+| `pouwer.task-store.redis.key-prefix` | `pouwer:task:` | Redis key prefix for task entries (use a unique value on a shared Redis). |
 
 The plugin transport circuit breaker is configured through `resilience4j.circuitbreaker.instances.pluginTransport`.
 
+### Task store backends
+
+- `in-memory` (default): tasks live only in the heap of a single JVM node (`InMemoryTaskStore`). Suitable for single-node deployments.
+- `redis`: tasks are stored in a shared Redis (`CachingRedisTaskStore`) with a per-node Caffeine L1 cache, enabling cross-node challenge/validate when core runs with multiple replicas. Requires Redis and standard `spring.data.redis.*` properties (`host`, `port`, `password`, ...). When `type=redis`, Redis is mandatory and core fails closed if it is unavailable.
+
+Relaxed-binding environment variables: `POUWER_TASK_STORE_TYPE`, `POUWER_TASK_STORE_REDIS_KEY_PREFIX`, `SPRING_DATA_REDIS_HOST`, `SPRING_DATA_REDIS_PORT`.
+
 ## Technical Notes
 
-- Task storage is in-memory (`InMemoryTaskStore`). Restarting core loses outstanding challenges.
+- Task storage defaults to in-memory (`InMemoryTaskStore`); restarting core loses outstanding challenges. For multi-node deployments set `pouwer.task-store.type=redis` to use the shared Redis-backed `CachingRedisTaskStore` (Redis source of truth + per-node Caffeine L1).
 - Plugin discovery is remote and heartbeat-based. `RemotePluginRegistry` stores registered plugins, marks failed plugins unhealthy, and evicts stale entries.
 - Core adapts remote plugins to the local `PayloadPlugin` interface through `RemotePayloadPluginAdapter`. This keeps the validation pipeline independent of transport details.
 - Plugin calls use `RestPluginTransport` behind `CircuitBreakerPluginTransport`. Transport failures mark the plugin unhealthy.

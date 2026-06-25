@@ -4,7 +4,7 @@ metadata:
   name: pouwer-server
   namespace: pouwer-system
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: pouwer-server
@@ -28,6 +28,14 @@ spec:
           value: "rest"
         - name: POUWER_PLUGIN_TRANSPORT_GRPC_PORT
           value: "9091"
+        - name: POUWER_TASK_STORE_TYPE
+          value: "redis"
+        - name: SPRING_DATA_REDIS_HOST
+          value: "redis"
+        - name: SPRING_DATA_REDIS_PORT
+          value: "6379"
+        - name: MANAGEMENT_HEALTH_REDIS_ENABLED
+          value: "true"
         livenessProbe:
           httpGet:
             path: /actuator/health

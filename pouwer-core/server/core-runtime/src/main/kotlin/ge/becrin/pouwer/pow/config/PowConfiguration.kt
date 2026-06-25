@@ -10,13 +10,11 @@ import ge.becrin.pouwer.pow.service.CorePluginLifecycleRegistry
 import ge.becrin.pouwer.pow.service.PayloadPluginProvider
 import ge.becrin.pouwer.pow.service.RemotePayloadPluginProvider
 import ge.becrin.pouwer.pow.service.RestPluginTransport
-import ge.becrin.pouwer.pow.service.TaskStore
 import ge.becrin.pouwer.pow.service.grpc.CoreGrpcPluginStreamService
 import ge.becrin.pouwer.pow.service.grpc.GrpcPluginConnectionStore
 import ge.becrin.pouwer.pow.service.grpc.GrpcPluginEnvelopeValidator
 import ge.becrin.pouwer.pow.service.grpc.GrpcPluginServerLifecycle
 import ge.becrin.pouwer.pow.service.grpc.GrpcPluginTransport
-import ge.becrin.pouwer.pow.service.store.InMemoryTaskStore
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.grpc.Server
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
@@ -33,11 +31,8 @@ import tools.jackson.databind.ObjectMapper
 
 @Configuration
 @EnableScheduling
-@EnableConfigurationProperties(PluginTransportProperties::class)
+@EnableConfigurationProperties(PluginTransportProperties::class, TaskStoreProperties::class)
 open class PowConfiguration {
-    @Bean
-    open fun taskStore(): TaskStore = InMemoryTaskStore()
-
     @Bean
     open fun corePluginLifecycleRegistry(): CorePluginLifecycleRegistry = CorePluginLifecycleRegistry()
 
